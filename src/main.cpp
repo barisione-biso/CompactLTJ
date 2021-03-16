@@ -23,7 +23,7 @@ int main()
 
     cout<<"hola"<<endl;
     CompactTrie ct = CompactTrie(B,S);
-    ct.access_S(2);
+    // ct.access_S(2);
     // u_int it = 3;
     // rank_support_v<1> b_rank1(&B); 
     // rank_support_v<0> b_rank0(&B);
