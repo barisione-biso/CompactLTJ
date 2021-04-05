@@ -2,7 +2,8 @@
 #include <sdsl/vectors.hpp>
 #include <sdsl/rank_support.hpp>
 #include <sdsl/select_support.hpp>
-#include "compact_trie.hpp" 
+#include "compact_trie_iterator.hpp" 
+// #include "wavelet_tree.hpp"
 
 using namespace std;
 using namespace sdsl;
@@ -10,11 +11,17 @@ using namespace sdsl;
 typedef unsigned int u_int;
 int main()
 {
-    bit_vector B = {1,1,0,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0};   
+    //bit vector dfuds
+    // bit_vector B = {1,1,0,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0};   
     //              0 1 2 3 4 5 6 7 8 9
-    vector<u_int> S = {0, 0, 1, 3, 3, 4, 5, 4, 5, 6, 8, 9, 2, 5, 2};
+    // vector<u_int> S = {0, 0, 1, 3, 3, 4, 5, 4, 5, 6, 8, 9, 2, 5, 2};
+    bit_vector B = {1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0};
+    //string dfuds
+    // string s = "1 3 3 4 5 4 5 6 8 9 2 5 2";
+    string s = "1 3 3 4 5 5 4 5 6 8 9 2 2";
 
-    CompactTrie ct = CompactTrie(B,S);
+    CompactTrieIterator cti = CompactTrieIterator(B, s);
+    // CompactTrie ct = CompactTrie(B,S);
 
     string instr;
 
@@ -22,16 +29,16 @@ int main()
         cin>>instr;
 
         try{
-            if(instr=="open")ct.open();
-            if(instr=="next")ct.next();
-            if(instr=="end")cout<<ct.atEnd()<<endl;
-            if(instr=="key")cout<<ct.key()<<endl;
-            if(instr=="show")ct.showValues();
-            if(instr=="up")ct.up();
+            if(instr=="open")cti.open();
+            if(instr=="next")cti.next();
+            if(instr=="end")cout<<cti.atEnd()<<endl;
+            if(instr=="key")cout<<cti.key()<<endl;
+            // if(instr=="show")ct.showValues();
+            if(instr=="up")cti.up();
             if(instr=="seek"){
                 int x;
                 cin>>x;
-                ct.seek(x);
+                cti.seek(x);
             }
             if(instr=="close")break;
         }

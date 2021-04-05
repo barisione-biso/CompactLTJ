@@ -5,11 +5,14 @@
 #include <vector>
 #include <iostream>
 #include <sdsl/bp_support.hpp>
+#include <sdsl/wavelet_trees.hpp>
 
 using namespace std;
 using namespace sdsl;
 
 typedef unsigned int u_int;
+
+
  
 class CompactTrie{
 
@@ -26,6 +29,7 @@ class CompactTrie{
         select_support_mcl<0> b_sel0;
         select_support_mcl<1> b_sel1;
         bp_support_gg<> bp;
+
 
         u_int accessS(int it){
             return S[b_rank1(it+1)-1];
@@ -79,11 +83,14 @@ class CompactTrie{
             return succ0(p) - p;
         }
 
+        //For the wavelet tree
+        wt_int<> wt;
+
     public:
 
-        CompactTrie(bit_vector b, vector<u_int> s){
+        CompactTrie(bit_vector b, string s){
             B = b;
-            S = s;
+            // construct_im(wt, s, 'd');
             at_root = true;
             it_nodes = 3;
             it_keys = 1;
