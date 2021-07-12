@@ -36,3 +36,9 @@
 
 #build
 build/
+
+#DS Store
+.DS_Store
+
+#data
+data/

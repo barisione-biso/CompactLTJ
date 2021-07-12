@@ -10,10 +10,14 @@ using namespace std;
 using namespace sdsl;
 
 typedef unsigned int u_int;
-int main()
+int main(int argc, char** argv)
 {  
+    if(argc <= 1){
+        cout<<"No extra command line argument passed other that program name"<<endl;
+        return 0;
+    }  
     string file_name;
-    cin >> file_name;
+    file_name = argv[1];
 
     TableIndexer ti = TableIndexer();
 
