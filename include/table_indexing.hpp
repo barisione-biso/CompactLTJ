@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "regular_trie.hpp"
 
 using namespace std;
 
@@ -43,6 +44,29 @@ class TableIndexer{
     TableIndexer(){
         cout<<"Table Indexer creado"<<endl;
     } 
+
+    void createRegularTrie(){
+        Trie* root = new Trie();
+        Trie* node;
+
+        /*
+        For the moment we asume that the Trie that we are creating is the one that
+        comes with the order from the table but in the future we will recibe the order
+        or something equivalent to index all orders necessary
+        */
+
+        u_int64_t filas = table.size();
+        u_int64_t columnas = table[0].size();
+
+        //Agregamos columna por columna 
+        for(int j=0; j<table[0].size(); j++){
+            node = root;
+            for(int i=0; i<table.size(); i++){
+                node->insert(table[j][i]);
+                // Falta tomar el nodo que da y a ese agregarle el que sigue
+            }
+        }
+    }
     
     /*
         Recives a file with the table that needs no be indexed.
@@ -81,7 +105,10 @@ class TableIndexer{
             }
         }
         cout<<"Saved Table"<<endl;
+        createRegularTrie();
     }
+
+    
 };
 
 #endif
