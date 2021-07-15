@@ -5,6 +5,7 @@
 #include "compact_trie_iterator.hpp" 
 #include "table_indexing.hpp"
 // #include "wavelet_tree.hpp"
+#include <vector>
 
 using namespace std;
 using namespace sdsl;
@@ -27,11 +28,11 @@ int main(int argc, char** argv)
     // //bit vector dfuds
     // // bit_vector B = {1,1,0,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0};   
     // //              0 1 2 3 4 5 6 7 8 9
-    // // vector<u_int> S = {0, 0, 1, 3, 3, 4, 5, 4, 5, 6, 8, 9, 2, 5, 2};
-    // bit_vector B = {1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0};
+    // // vector<u_int> S = {0, 0, 1, 3, 3, 4, 5, 4, 5, 6, 8, 9, 2, 5, 2}; 
+    // bit_vector B = {1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0}; //louds
     // //string dfuds
     // // string s = "1 3 3 4 5 4 5 6 8 9 2 5 2";
-    // string s = "1 3 3 4 5 5 4 5 6 8 9 2 2";
+    // string s = "1 3 3 4 5 5 4 5 6 8 9 2 2"; //louds
 
     // CompactTrieIterator cti = CompactTrieIterator(B, s);
     // // CompactTrie ct = CompactTrie(B,S);

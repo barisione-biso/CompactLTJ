@@ -2,43 +2,69 @@
 #define REGULAR_TRIE_H
 
 #include <iostream>
-// #include <unordered_set>
-#include <unordered_map>
+#include <map> 
 
 using namespace std;
 
 class Trie{
     private:
-        unordered_map<u_int64_t, Trie*> children;
-        unordered_map<u_int64_t, Trie*>::iterator it;
-        // unordered_set<u_int64_t> tags;
-        // unordered_set<Trie*> children;
-        // unordered_set<u_int64_t>::const_iterator it;
-        // unordered_set<Trie*>::const_iterator node_it;
-
+        map<u_int64_t, Trie*> children;
+        map<u_int64_t, Trie*>::iterator it;
+        bool has_children;
     public:
-
+    
         Trie(){
-            cout<<"creando el Trie"<<endl;
+            has_children = false;
         }
 
         Trie* insert(u_int64_t);
+        void traverse();
+        bool hasChildren();
 };
 
 /*
-    Creates a new node in the trie if the tags wasn't already in the trie
+    Creates a new node in the trie if the tag wasn't already in the trie
 */
 Trie* Trie::insert(u_int64_t tag){
+    has_children = true;
     it = children.find(tag);
     Trie* node;
     if(it == children.end()){
-        node = new Trie;
+        node = new Trie();
         children[tag] = node;
     }
     else{
         node = children[tag];
     }
     return node;
+}
+
+/*
+    Traverses trie in preorder printer tags of children on each node
+*/
+void Trie::traverse(){
+    if(has_children){
+        it = children.begin();
+        while(it!=children.end()){
+            cout<< it->first <<" ";
+            it++;
+        }
+        cout<<endl;
+
+        it = children.begin();
+        
+        while(it != children.end()){
+            it->second->traverse();
+            it++;
+        }
+    }
+}
+
+/*
+    Returns true if the node has children
+*/
+bool Trie::hasChildren(){
+    return has_children;
 }
 
 #endif

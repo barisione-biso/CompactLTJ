@@ -16,6 +16,7 @@ class TableIndexer{
     vector<string> orders;
     uint64_t dim = 0;
     bool all_orders = false;
+    Trie* root;
 
     /*
     Parses string (line) by a single char (delimiter)
@@ -43,10 +44,13 @@ class TableIndexer{
 
     TableIndexer(){
         cout<<"Table Indexer creado"<<endl;
-    } 
+    }
 
+    /*
+        Creates a traditional trie with the table contents
+    */
     void createRegularTrie(){
-        Trie* root = new Trie();
+        root = new Trie();
         Trie* node;
 
         /*
@@ -55,17 +59,13 @@ class TableIndexer{
         or something equivalent to index all orders necessary
         */
 
-        u_int64_t filas = table.size();
-        u_int64_t columnas = table[0].size();
-
-        //Agregamos columna por columna 
         for(int j=0; j<table[0].size(); j++){
             node = root;
             for(int i=0; i<table.size(); i++){
-                node->insert(table[j][i]);
-                // Falta tomar el nodo que da y a ese agregarle el que sigue
+                node = node->insert(table[i][j]);
             }
         }
+        root->traverse();
     }
     
     /*
@@ -81,7 +81,6 @@ class TableIndexer{
         bool first_line = true;
         bool second_line = false;
         u_int64_t value;
-        u_int64_t num = 0;
 
         while(reader.is_open() && getline(reader, line)){
             if(first_line && line.substr(0,4) == "dim:"){
@@ -96,15 +95,13 @@ class TableIndexer{
                 second_line = false;
             }
             else if(dim!=0 && (all_orders || orders.size()!=0)){
-                num = 0;
-                do{
-                    reader>>value;
-                    table[num].push_back(value);
-                    num++;
-                } while(num<dim);
+                vector<string> line_values = parse(line, ' ');
+
+                for(int i=0; i<dim; i++){
+                    table[i].push_back(stoi(line_values[i]));
+                }
             }
         }
-        cout<<"Saved Table"<<endl;
         createRegularTrie();
     }
 
