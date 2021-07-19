@@ -25,6 +25,7 @@ int main(int argc, char** argv)
     ti.indexTable(file_name);
 
 
+
     // //bit vector dfuds
     // // bit_vector B = {1,1,0,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0};   
     // //              0 1 2 3 4 5 6 7 8 9

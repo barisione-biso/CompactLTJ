@@ -92,6 +92,8 @@ class CompactTrieIterator{
 
     public:
 
+        CompactTrieIterator(){};
+
         CompactTrieIterator(bit_vector b, string s){
             B = b;
             it = 2;

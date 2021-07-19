@@ -8,8 +8,8 @@ using namespace std;
 
 class Trie{
     private:
-        map<u_int64_t, Trie*> children;
-        map<u_int64_t, Trie*>::iterator it;
+        map<uint64_t, Trie*> children;
+        map<uint64_t, Trie*>::iterator it;
         bool has_children;
     public:
     
@@ -17,15 +17,17 @@ class Trie{
             has_children = false;
         }
 
-        Trie* insert(u_int64_t);
+        Trie* insert(uint64_t);
         void traverse();
         bool hasChildren();
+        uint64_t childrenCount();
+        map<uint64_t, Trie*> getChildren();
 };
 
 /*
     Creates a new node in the trie if the tag wasn't already in the trie
 */
-Trie* Trie::insert(u_int64_t tag){
+Trie* Trie::insert(uint64_t tag){
     has_children = true;
     it = children.find(tag);
     Trie* node;
@@ -67,4 +69,17 @@ bool Trie::hasChildren(){
     return has_children;
 }
 
+/*
+    Returns the amount of children of the node
+*/
+uint64_t Trie::childrenCount(){
+    return children.size();
+}
+
+/*
+    Returns a map with de children of the node and their associated tags
+*/
+map<uint64_t, Trie*> Trie::getChildren(){
+    return children;
+}
 #endif

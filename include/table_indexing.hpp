@@ -5,9 +5,13 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <queue>
+#include <map>
 #include "regular_trie.hpp"
 
+
 using namespace std;
+
 
 class TableIndexer{
     private:
@@ -17,6 +21,10 @@ class TableIndexer{
     uint64_t dim = 0;
     bool all_orders = false;
     Trie* root;
+    bit_vector B;
+    string S;
+    CompactTrieIterator compactTrie;
+    
 
     /*
     Parses string (line) by a single char (delimiter)
@@ -40,6 +48,28 @@ class TableIndexer{
         return results;
     }
 
+    /*
+        Turns uint64_t vector in to bitvector B 
+    */
+    void toBitvector(vector<uint64_t> &b){
+        B = bit_vector(b.size(), 0);
+
+        for(int i=0; i<b.size(); i++){
+            B[i]=b[i];
+        }
+    }
+
+    /*
+        Turns uint64_t vector in to string S
+    */
+    void toSequence(vector<uint64_t> &s){
+        ostringstream stream;
+        for(int i=0; i<s.size(); i++){
+            stream<<s[i]<<" ";
+        }
+
+        S = stream.str();
+    }
     public:
 
     TableIndexer(){
@@ -65,8 +95,40 @@ class TableIndexer{
                 node = node->insert(table[i][j]);
             }
         }
-        root->traverse();
     }
+
+    /*
+        Turns Trie into a bitvector B and a sequence S
+    */
+    void toCompactForm(){
+        vector<uint64_t> b;
+        vector<uint64_t> s;
+        map<uint64_t, Trie*> node_children;
+        queue<Trie*> q;
+        Trie* node;
+
+        q.push(root);
+        b.push_back(1);
+        b.push_back(0);
+
+        while(!q.empty()){
+            node = q.front();
+            q.pop();
+            if(node->hasChildren()){
+                node_children = node->getChildren();
+                for(const auto &child: node_children){
+                    s.push_back(child.first);
+                    b.push_back(1);
+                    q.push(child.second);
+                }   
+            }
+            b.push_back(0);
+        }
+
+        toBitvector(b);
+        toSequence(s);
+    }
+
     
     /*
         Recives a file with the table that needs no be indexed.
@@ -103,8 +165,9 @@ class TableIndexer{
             }
         }
         createRegularTrie();
+        toCompactForm();
+        compactTrie = CompactTrieIterator(B, S);
     }
-
     
 };
 
