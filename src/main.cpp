@@ -24,6 +24,8 @@ int main(int argc, char** argv)
 
     ti.indexTable(file_name);
 
+    // CompactTrieIterator cti = CompactTrieIterator();
+    // cti.load_from_file();
 
 
     // //bit vector dfuds

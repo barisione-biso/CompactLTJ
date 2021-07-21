@@ -4,20 +4,21 @@
 #include <sdsl/vectors.hpp>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <sdsl/wavelet_trees.hpp>
 
 using namespace std;
 using namespace sdsl;
 
-typedef unsigned int u_int;
-
 class CompactTrieIterator{
     private:
         bool at_end;
         bool at_root;
-        u_int it;
-        u_int parent_it;
-        u_int pos_in_parent;
+        uint64_t it;
+        uint64_t parent_it;
+        uint64_t pos_in_parent;
+        string file_name;
         //Louds representation to save tree structure
         bit_vector B;
 
@@ -34,8 +35,8 @@ class CompactTrieIterator{
             recives index in bit vector
             returns index of next 0
         */
-        u_int succ0(u_int it){
-            u_int cant_0 = b_rank0(it);
+        uint64_t succ0(uint64_t it){
+            uint64_t cant_0 = b_rank0(it);
             return b_sel0(cant_0 + 1);
         }
         
@@ -43,8 +44,8 @@ class CompactTrieIterator{
             recives index in bit vector
             returns index of previous 0
         */
-        u_int prev0(u_int it){
-            u_int cant_0 = b_rank0(it);
+        uint64_t prev0(uint64_t it){
+            uint64_t cant_0 = b_rank0(it);
             return b_sel0(cant_0);
         }
 
@@ -52,7 +53,7 @@ class CompactTrieIterator{
             recives index of current node and the child that is required
             returns index of the nth child of current node
         */
-        u_int child(u_int it, u_int n){
+        uint64_t child(uint64_t it, uint64_t n){
             return b_sel0(b_rank1(it+n)) + 1;
         }
 
@@ -60,7 +61,7 @@ class CompactTrieIterator{
             recives index of node whos children we want to count
             returns how many children said node has
         */
-        u_int childrenCount(u_int it){
+        uint64_t childrenCount(uint64_t it){
             return succ0(it) - it;
         }
 
@@ -68,7 +69,7 @@ class CompactTrieIterator{
             recives node index
             returns index of position in parent
         */
-        u_int getPosInParent(u_int it){
+        uint64_t getPosInParent(uint64_t it){
             return b_sel1(b_rank0(it));
         }
 
@@ -76,8 +77,8 @@ class CompactTrieIterator{
             recives index of node
             return which child of its parent it is
         */
-        u_int childRank(u_int it){
-            u_int pos = getPosInParent(it);
+        uint64_t childRank(uint64_t it){
+            uint64_t pos = getPosInParent(it);
             return pos - prev0(pos);
         }
 
@@ -85,14 +86,24 @@ class CompactTrieIterator{
             recives index of node
             returns index of parent node
         */  
-        u_int parent(u_int it){
-            u_int pos = getPosInParent(it);
+        uint64_t parent(uint64_t it){
+            uint64_t pos = getPosInParent(it);
             return prev0(pos) + 1;
         }
 
+        /*
+            Initializes rank and select support for B
+        */
+       void initializeSupport(){
+            util::init_support(b_rank1,&B);
+            util::init_support(b_rank0,&B);
+            util::init_support(b_sel1,&B);
+            util::init_support(b_sel0,&B);
+       }
+
     public:
 
-        CompactTrieIterator(){};
+        CompactTrieIterator(){file_name = "order1.txt";};
 
         CompactTrieIterator(bit_vector b, string s){
             B = b;
@@ -100,13 +111,11 @@ class CompactTrieIterator{
             construct_im(wt, s, 'd');
             at_root = true;
             at_end = false;
-            util::init_support(b_rank1,&B);
-            util::init_support(b_rank0,&B);
-            util::init_support(b_sel1,&B);
-            util::init_support(b_sel0,&B);
+            file_name = "order1.txt";
+            initializeSupport();
         }
 
-        u_int key(){
+        uint64_t key(){
             if(at_end){
                 throw "Iterator is atEnd";
             }
@@ -146,7 +155,7 @@ class CompactTrieIterator{
                 throw "Iterator is atEnd";
             }
 
-            u_int parent_child_count = childrenCount(parent_it);
+            uint64_t parent_child_count = childrenCount(parent_it);
             if(parent_child_count == pos_in_parent){
                 at_end = true;
             }
@@ -172,7 +181,7 @@ class CompactTrieIterator{
             }
         }
 
-        void seek(u_int seek_key){
+        void seek(uint64_t seek_key){
             if(at_root){
                 throw "At root, cant seek";
             }
@@ -180,10 +189,10 @@ class CompactTrieIterator{
                 throw "At end, cant seek";
             }
 
-            u_int parent_child_count = childrenCount(parent_it);
+            uint64_t parent_child_count = childrenCount(parent_it);
 
-            u_int i = b_rank0(it)-2;
-            u_int f = b_rank0(child(parent_it, parent_child_count))-2;
+            uint64_t i = b_rank0(it)-2;
+            uint64_t f = b_rank0(child(parent_it, parent_child_count))-2;
             
             bool found = false;
             for(i=i; i<=f; i++){
@@ -198,6 +207,48 @@ class CompactTrieIterator{
             if(!found){
                 at_end = true;
             }
+        }
+
+        void store_to_file(){
+            ofstream stream("../data/order1.txt");
+            stream<<B.size()<<'\n';
+            if(stream.is_open()){
+                for(uint64_t i=0; i<B.size(); i++){
+                    stream<<B[i]<<" ";
+                }
+                stream<<'\n';
+                for(uint64_t i=0; i<wt.size(); i++){
+                    stream<<wt[i]<<" ";
+                }
+            }
+            else{
+                cout<<"Not open"<<endl;
+            }
+            stream.close();
+        }
+
+        void load_from_file(){
+            ifstream stream("../data/order1.txt");
+            uint64_t B_size;
+            string s;
+            uint64_t val;
+            at_root = true;
+            at_end = false;
+            it = 2;
+
+            if(stream.is_open()){
+                stream>>B_size;
+                B = bit_vector(B_size);
+                for(uint64_t i=0; i<B_size; i++){
+                    stream>>val;
+                    B[i] = val;
+                }
+                stream.ignore(numeric_limits<streamsize>::max(),'\n');
+                getline(stream, s);
+            }
+            
+            construct_im(wt, s, 'd');
+            initializeSupport();
         }
 };
 

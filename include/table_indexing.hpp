@@ -164,9 +164,11 @@ class TableIndexer{
                 }
             }
         }
+        reader.close();
         createRegularTrie();
         toCompactForm();
         compactTrie = CompactTrieIterator(B, S);
+        compactTrie.store_to_file();
     }
     
 };
