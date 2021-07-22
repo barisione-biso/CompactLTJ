@@ -221,9 +221,6 @@ class CompactTrieIterator{
                     stream<<wt[i]<<" ";
                 }
             }
-            else{
-                cout<<"Not open"<<endl;
-            }
             stream.close();
         }
 

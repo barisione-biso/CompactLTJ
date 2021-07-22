@@ -13,16 +13,25 @@ using namespace sdsl;
 typedef unsigned int u_int;
 int main(int argc, char** argv)
 {  
-    if(argc <= 1){
-        cout<<"No extra command line argument passed other that program name"<<endl;
-        return 0;
-    }  
-    string file_name;
-    file_name = argv[1];
+    try
+    {
+        if(argc <= 1){
+            cout<<"No extra command line argument passed other that program name"<<endl;
+            return 0;
+        }  
+        string file_name;
+        file_name = argv[1];
 
-    TableIndexer ti = TableIndexer();
+        TableIndexer ti = TableIndexer();
 
-    ti.indexTable(file_name);
+        ti.indexNewTable(file_name);
+        }
+    catch(const char* msg)
+    {
+        cerr<<msg<<endl;
+    }
+    
+    
 
     // CompactTrieIterator cti = CompactTrieIterator();
     // cti.load_from_file();

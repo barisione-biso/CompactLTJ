@@ -7,25 +7,23 @@
 #include <vector>
 #include <queue>
 #include <map>
+#include <algorithm>
 #include "regular_trie.hpp"
 
-
 using namespace std;
-
 
 class TableIndexer{
     private:
 
     vector<vector<uint64_t> > table;
     vector<string> orders;
-    uint64_t dim = 0;
-    bool all_orders = false;
+    uint64_t dim;
+    bool all_orders;
     Trie* root;
     bit_vector B;
     string S;
-    CompactTrieIterator compactTrie;
+    vector<CompactTrieIterator> compactTries;
     
-
     /*
     Parses string (line) by a single char (delimiter)
     Returns vector with all the parts of the parsed string 
@@ -64,35 +62,23 @@ class TableIndexer{
     */
     void toSequence(vector<uint64_t> &s){
         ostringstream stream;
-        for(int i=0; i<s.size(); i++){
-            stream<<s[i]<<" ";
+
+        for(auto &val: s){
+            stream<<val<<" ";
         }
-
         S = stream.str();
-    }
-    public:
-
-    TableIndexer(){
-        cout<<"Table Indexer creado"<<endl;
     }
 
     /*
-        Creates a traditional trie with the table contents
+        Creates a traditional trie with the table contents following the order in index
     */
-    void createRegularTrie(){
-        root = new Trie();
+    void createRegularTrie(map<u_int64_t, u_int64_t> index){
         Trie* node;
-
-        /*
-        For the moment we asume that the Trie that we are creating is the one that
-        comes with the order from the table but in the future we will recibe the order
-        or something equivalent to index all orders necessary
-        */
 
         for(int j=0; j<table[0].size(); j++){
             node = root;
             for(int i=0; i<table.size(); i++){
-                node = node->insert(table[i][j]);
+                node = node->insert(table[index[i]][j]);
             }
         }
     }
@@ -129,13 +115,42 @@ class TableIndexer{
         toSequence(s);
     }
 
-    
     /*
-        Recives a file with the table that needs no be indexed.
+        Creates indexes for all the orders necessary 
+    */
+    void createIndexes(){
+        for(auto &value: orders){
+            vector<string> order = parse(value, ' ');
+            map<u_int64_t, u_int64_t> index;
+            for(int j=0; j<order.size(); j++){
+                index[j] = stoi(order[j]);
+            }
+            root = new Trie();
+            createRegularTrie(index);
+            toCompactForm();
+            compactTries.push_back(CompactTrieIterator(B, S));
+            delete root;
+        }
+    }
+
+    void clearData(){
+        table.clear();
+        orders.clear();
+        dim = 0;
+        all_orders = false;
+        compactTries.clear();
+    }
+    public:
+
+    TableIndexer(){}
+
+    /*
+        Recives a file with the table that needs to be indexed.
         First line of the file indicates the dimensions of the table
         Second line of the file indicates which orders need to be indexed.
     */
-    void indexTable(string file_name){
+    void indexNewTable(string file_name){
+        clearData();
         if(file_name.substr(file_name.size()-4, 4) != ".txt") throw "File for indexing must have .txt extension";
         
         ifstream reader(file_name);
@@ -163,14 +178,35 @@ class TableIndexer{
                     table[i].push_back(stoi(line_values[i]));
                 }
             }
+            else{
+                throw "File doesn't follow format:\n\
+                 * First line should indicate dimension of the table -> dim:n \n\
+                 * Second line should indicate which orders need to be indexed -> orders: 0 1 2, 1 2 0 \n\
+                 * If all the orders need to be indexed then use -> orders: \n\
+                 * The rest of the file should have the table, all the lines should have the same amount \n\
+                 of values and it should be equal to dim. ";
+            }
         }
         reader.close();
-        createRegularTrie();
-        toCompactForm();
-        compactTrie = CompactTrieIterator(B, S);
-        compactTrie.store_to_file();
-    }
-    
+
+        if(all_orders){
+            vector<uint64_t> rows(dim);
+            ostringstream stream;
+            for(int i=0; i<dim; i++){
+                rows[i] = i;
+            }
+
+            do{
+                stream.str("");
+                for(auto &value: rows){
+                    stream<<value<<" ";
+                }
+                orders.push_back(stream.str());
+            }while(next_permutation(rows.begin(), rows.end()));
+        }
+        createIndexes();
+        // compactTrie.store_to_file();
+    } 
 };
 
 #endif
