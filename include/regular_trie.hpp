@@ -17,6 +17,12 @@ class Trie{
             has_children = false;
         }
 
+        ~Trie(){
+            for(auto &child: children){
+                delete child.second;
+            }
+        }
+
         Trie* insert(uint64_t);
         void traverse();
         bool hasChildren();

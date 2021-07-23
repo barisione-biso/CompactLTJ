@@ -1,11 +1,11 @@
 #ifndef COMPACT_TRIE_ITERATOR_H
 #define COMPACT_TRIE_ITERATOR_H
 
-#include <sdsl/vectors.hpp>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sdsl/vectors.hpp>
 #include <sdsl/wavelet_trees.hpp>
 
 using namespace std;
@@ -21,19 +21,17 @@ class CompactTrieIterator{
         string file_name;
         //Louds representation to save tree structure
         bit_vector B;
-
         //Wavelet tree to save tree keys
         wt_int<> wt;
 
-        //Chequear que efectivamente se necesitan todos o solo los de 0s
         rank_support_v<1> b_rank1; //ocupado
         rank_support_v<0> b_rank0; //ocupado
         select_support_mcl<0> b_sel0; //ocupado
         select_support_mcl<1> b_sel1; //ocupado
 
         /*
-            recives index in bit vector
-            returns index of next 0
+            Recives index in bit vector
+            Returns index of next 0
         */
         uint64_t succ0(uint64_t it){
             uint64_t cant_0 = b_rank0(it);
@@ -41,8 +39,8 @@ class CompactTrieIterator{
         }
         
         /*
-            recives index in bit vector
-            returns index of previous 0
+            Recives index in bit vector
+            Returns index of previous 0
         */
         uint64_t prev0(uint64_t it){
             uint64_t cant_0 = b_rank0(it);
@@ -50,32 +48,32 @@ class CompactTrieIterator{
         }
 
         /*
-            recives index of current node and the child that is required
-            returns index of the nth child of current node
+            Recives index of current node and the child that is required
+            Returns index of the nth child of current node
         */
         uint64_t child(uint64_t it, uint64_t n){
             return b_sel0(b_rank1(it+n)) + 1;
         }
 
         /*
-            recives index of node whos children we want to count
-            returns how many children said node has
+            Recives index of node whos children we want to count
+            Returns how many children said node has
         */
         uint64_t childrenCount(uint64_t it){
             return succ0(it) - it;
         }
 
         /*
-            recives node index
-            returns index of position in parent
+            Recives node index
+            Returns index of position in parent
         */
         uint64_t getPosInParent(uint64_t it){
             return b_sel1(b_rank0(it));
         }
 
         /*
-            recives index of node
-            return which child of its parent it is
+            Recives index of node
+            Return which child of its parent it is
         */
         uint64_t childRank(uint64_t it){
             uint64_t pos = getPosInParent(it);
@@ -83,8 +81,8 @@ class CompactTrieIterator{
         }
 
         /*
-            recives index of node
-            returns index of parent node
+            Recives index of node
+            Returns index of parent node
         */  
         uint64_t parent(uint64_t it){
             uint64_t pos = getPosInParent(it);
@@ -103,8 +101,14 @@ class CompactTrieIterator{
 
     public:
 
+        /*
+            Constructor for initializing from file 
+        */
         CompactTrieIterator(){file_name = "order1.txt";};
 
+        /*
+            Constructor for initializing from table
+        */
         CompactTrieIterator(bit_vector b, string s){
             B = b;
             it = 2;
@@ -115,6 +119,9 @@ class CompactTrieIterator{
             initializeSupport();
         }
 
+        /*
+            Returns the key of the current position of the iterator
+        */
         uint64_t key(){
             if(at_end){
                 throw "Iterator is atEnd";
@@ -127,10 +134,16 @@ class CompactTrieIterator{
             }
         }
 
+        /*
+            Returns true if the iterator is past the last child of a node
+        */
         bool atEnd(){
             return at_end;
         }
 
+        /*
+            Moves the iterator to the first key on the next level
+        */
         void open(){
 
             if(at_root){
@@ -147,6 +160,9 @@ class CompactTrieIterator{
             }
         }
 
+        /*
+            Moves the iterator to the next key
+        */
         void next(){
             if(at_root){
                 throw "At root, doesn't have next";
@@ -164,7 +180,10 @@ class CompactTrieIterator{
                 it = child(parent_it, pos_in_parent);
             }
         }
-
+        
+        /*
+            Moves the iterator to the parent of the current node
+        */
         void up(){
             if(at_root){
                 throw "At root, cant go up";
@@ -181,6 +200,10 @@ class CompactTrieIterator{
             }
         }
 
+        /*
+            Moves the iterator to the closes position that is equal or bigger than seek key
+            If not possible then it moves the iterator to the end
+        */
         void seek(uint64_t seek_key){
             if(at_root){
                 throw "At root, cant seek";
@@ -190,7 +213,6 @@ class CompactTrieIterator{
             }
 
             uint64_t parent_child_count = childrenCount(parent_it);
-
             uint64_t i = b_rank0(it)-2;
             uint64_t f = b_rank0(child(parent_it, parent_child_count))-2;
             
@@ -209,10 +231,13 @@ class CompactTrieIterator{
             }
         }
 
+        /*
+            Stores Compact Trie Iterator to file saving the size of B, B and S.
+        */
         void store_to_file(){
             ofstream stream("../data/order1.txt");
-            stream<<B.size()<<'\n';
             if(stream.is_open()){
+                stream<<B.size()<<'\n';
                 for(uint64_t i=0; i<B.size(); i++){
                     stream<<B[i]<<" ";
                 }
@@ -224,6 +249,9 @@ class CompactTrieIterator{
             stream.close();
         }
 
+        /*
+            Loads Compact Trie from file restoring B and the Wavelet Tree
+        */
         void load_from_file(){
             ifstream stream("../data/order1.txt");
             uint64_t B_size;
