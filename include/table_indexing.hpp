@@ -9,6 +9,7 @@
 #include <map>
 #include <algorithm>
 #include "regular_trie.hpp"
+// #include "iterator"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ class TableIndexer{
     Trie* root;
     bit_vector B;
     string S;
-    vector<CompactTrieIterator> compactTries;
+    vector<Iterator *> compactTries;
     
     /*
     Parses string (line) by a single char (delimiter)
@@ -128,7 +129,7 @@ class TableIndexer{
             root = new Trie();
             createRegularTrie(index);
             toCompactForm();
-            compactTries.push_back(CompactTrieIterator(B, S));
+            compactTries.push_back(new CompactTrieIterator(B, S));
             delete root;
         }
     }
@@ -138,6 +139,9 @@ class TableIndexer{
         orders.clear();
         dim = 0;
         all_orders = false;
+        for(auto p : compactTries){
+            delete p;
+        }
         compactTries.clear();
     }
     public:

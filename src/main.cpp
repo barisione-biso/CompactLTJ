@@ -25,6 +25,7 @@ int main(int argc, char** argv)
         TableIndexer ti = TableIndexer();
 
         ti.indexNewTable(file_name);
+        cout<<"Table Indexed"<<endl;
         }
     catch(const char* msg)
     {
