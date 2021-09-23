@@ -9,9 +9,16 @@
 #include <map>
 #include <algorithm>
 #include "regular_trie.hpp"
-// #include "iterator"
+
+#include <sdsl/vectors.hpp>
+#include "iterator.hpp"
+#include "compact_trie_iterator.hpp"
+#include "index.hpp"
 
 using namespace std;
+
+
+using namespace sdsl;
 
 class TableIndexer{
     private:
@@ -153,7 +160,7 @@ class TableIndexer{
         First line of the file indicates the dimensions of the table
         Second line of the file indicates which orders need to be indexed.
     */
-    void indexNewTable(string file_name){
+    Index indexNewTable(string file_name){
         clearData();
         if(file_name.substr(file_name.size()-4, 4) != ".txt") throw "File for indexing must have .txt extension";
         
@@ -210,6 +217,8 @@ class TableIndexer{
         }
         createIndexes();
         // compactTrie.store_to_file();
+        Index ind(orders, compactTries, file_name);
+        return ind;
     } 
 };
 

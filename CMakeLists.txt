@@ -33,7 +33,9 @@ include_directories(
 
 # add the executable
 add_executable(main src/main.cpp)
+add_executable(build_index src/build_index.cpp)
 
 # 3rd party libs
 add_subdirectory(./libs/sdsl-lite)
 target_link_libraries( main sdsl divsufsort divsufsort64)
+target_link_libraries( build_index sdsl divsufsort divsufsort64)
