@@ -19,7 +19,7 @@ class CompactTrieIterator: public Iterator{
         uint64_t it;
         uint64_t parent_it;
         uint64_t pos_in_parent;
-        string file_name;
+        // string file_name;
         //Louds representation to save tree structure
         bit_vector B;
         //Wavelet tree to save tree keys
@@ -105,7 +105,7 @@ class CompactTrieIterator: public Iterator{
         /*
             Constructor for initializing from file 
         */
-        CompactTrieIterator(){file_name = "order1.txt";};
+        CompactTrieIterator(){/*file_name = "order1.txt";*/};
 
         /*
             Constructor for initializing from table
@@ -116,7 +116,7 @@ class CompactTrieIterator: public Iterator{
             construct_im(wt, s, 'd');
             at_root = true;
             at_end = false;
-            file_name = "order1.txt";
+            // file_name = "order1.txt";
             initializeSupport();
         }
 
@@ -240,8 +240,8 @@ class CompactTrieIterator: public Iterator{
         /*
             Stores Compact Trie Iterator to file saving the size of B, B and S.
         */
-        void store_to_file(){
-            ofstream stream("../data/order1.txt");
+        void storeToFile(string file_name){
+            ofstream stream(file_name);
             if(stream.is_open()){
                 stream<<B.size()<<'\n';
                 for(uint64_t i=0; i<B.size(); i++){

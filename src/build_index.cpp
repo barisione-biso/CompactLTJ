@@ -18,7 +18,7 @@ int main(int argc, char **argv){
             Se podrían indexar varias tablas al mismo tiempo
             todos los archivos que acompañen a ./build_index
         */
-
+        cout<<file_name<<endl;
         TableIndexer ti = TableIndexer();
         ti.indexNewTable(file_name);
         Index ind = ti.indexNewTable(file_name);
