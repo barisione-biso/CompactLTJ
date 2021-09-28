@@ -16,6 +16,7 @@ class Iterator{
         virtual void seek(uint64_t seekKey) = 0;
         virtual void next() = 0;
         virtual void storeToFile(string file_name) = 0;
+        virtual void loadFromFile(string file_name) = 0;
         bool operator < (Iterator& it) {
             return (key() < it.key());
         }

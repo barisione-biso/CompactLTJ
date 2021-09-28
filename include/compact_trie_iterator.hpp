@@ -105,7 +105,9 @@ class CompactTrieIterator: public Iterator{
         /*
             Constructor for initializing from file 
         */
-        CompactTrieIterator(){/*file_name = "order1.txt";*/};
+        CompactTrieIterator(string file_name){
+            loadFromFile(file_name);
+        };
 
         /*
             Constructor for initializing from table
@@ -258,8 +260,8 @@ class CompactTrieIterator: public Iterator{
         /*
             Loads Compact Trie from file restoring B and the Wavelet Tree
         */
-        void load_from_file(){
-            ifstream stream("../data/order1.txt");
+        void loadFromFile(string file_name){
+            ifstream stream(file_name);
             uint64_t B_size;
             string s;
             uint64_t val;
@@ -277,6 +279,7 @@ class CompactTrieIterator: public Iterator{
                 stream.ignore(numeric_limits<streamsize>::max(),'\n');
                 getline(stream, s);
             }
+            stream.close();
             
             construct_im(wt, s, 'd');
             initializeSupport();

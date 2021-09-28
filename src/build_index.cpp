@@ -20,9 +20,9 @@ int main(int argc, char **argv){
         */
         cout<<file_name<<endl;
         TableIndexer ti = TableIndexer();
-        ti.indexNewTable(file_name);
+        // ti.indexNewTable(file_name);
         Index ind = ti.indexNewTable(file_name);
-        ind.save();
+        // ind.save();
     }
     catch(const char *msg){
         cerr<<msg<<endl;

@@ -14,9 +14,9 @@
 #include "iterator.hpp"
 #include "compact_trie_iterator.hpp"
 #include "index.hpp"
+#include "utils.hpp"
 
 using namespace std;
-
 
 using namespace sdsl;
 
@@ -31,28 +31,6 @@ class TableIndexer{
     bit_vector B;
     string S;
     vector<Iterator *> compactTries;
-    
-    /*
-    Parses string (line) by a single char (delimiter)
-    Returns vector with all the parts of the parsed string 
-    */
-    vector<string> parse(string line, char delimiter){
-        uint64_t first = 0;
-        vector<string> results;
-
-        for(int i=0; i<line.size(); i++){
-            if(line[i] == delimiter && first!=i){
-                results.push_back(line.substr(first, i-first));
-                first = i+1;
-            }
-        }
-
-        if(first !=line.size()){
-            results.push_back(line.substr(first, line.size()-first));
-        }
-
-        return results;
-    }
 
     /*
         Turns uint64_t vector in to bitvector B 
@@ -162,8 +140,10 @@ class TableIndexer{
     */
     Index indexNewTable(string file_name){
         clearData();
-        if(file_name.substr(file_name.size()-4, 4) != ".txt") throw "File for indexing must have .txt extension";
-        
+        if(file_name.substr(file_name.size()-4, 4) != ".txt") {
+            Index ind(file_name);
+            return ind;
+        }
         ifstream reader(file_name);
         string line;
         bool first_line = true;
