@@ -20,7 +20,7 @@ class Iterator{
         bool operator < (Iterator& it) {
             return (key() < it.key());
         }
-        
+        // Faltan los operadores no lineales
 
 };
 

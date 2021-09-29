@@ -11,8 +11,6 @@ int main(int argc, char **argv){
             cout<<"No extra command line argument given other that program name"<<endl;
             return 0;
         }
-        
-
         /*
             Aqui llamar a table indexer que luego retornará un index
             Se podrían indexar varias tablas al mismo tiempo

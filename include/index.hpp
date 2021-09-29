@@ -73,11 +73,20 @@ class Index{
                     throw "Info file from " + folder + " index doesn't have the appropiate format";
                 }
             }
+            else{
+                throw "Path to folder is not valid, after the folder name there should be a /";
+            }
             stream.close();
 
             for(int i=0; i<orders.size(); i++){
                 iterators.push_back(new CurrentIterator(folder+"order"+to_string(i)+".txt"));
             }
+        }
+        /*
+            Returns a pointer to the i-th iterator
+        */
+        Iterator* getIterator(u_int64_t i){
+            return iterators[i];
         }
 };
 
