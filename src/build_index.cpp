@@ -11,17 +11,23 @@ int main(int argc, char **argv){
             cout<<"No extra command line argument given other that program name"<<endl;
             return 0;
         }
-        string file_name = argv[1];
+        
 
         /*
             Aqui llamar a table indexer que luego retornará un index
             Se podrían indexar varias tablas al mismo tiempo
             todos los archivos que acompañen a ./build_index
         */
-        cout<<file_name<<endl;
-        TableIndexer ti = TableIndexer();
+
+       TableIndexer ti = TableIndexer();
+
+       for(int i=1; i<argc; i++){
+           string file_name = argv[i];
+           Index ind = ti.indexNewTable(file_name);
+       }
+        
         // ti.indexNewTable(file_name);
-        Index ind = ti.indexNewTable(file_name);
+        
         // ind.save();
     }
     catch(const char *msg){

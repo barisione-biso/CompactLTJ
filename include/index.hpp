@@ -5,6 +5,7 @@
 #include "iterator.hpp"
 #include <filesystem>
 #include "utils.hpp"
+#include "config.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -75,7 +76,7 @@ class Index{
             stream.close();
 
             for(int i=0; i<orders.size(); i++){
-                iterators.push_back(new CompactTrieIterator(folder+"order"+to_string(i)+".txt"));
+                iterators.push_back(new CurrentIterator(folder+"order"+to_string(i)+".txt"));
             }
         }
 };

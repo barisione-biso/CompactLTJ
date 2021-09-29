@@ -12,9 +12,9 @@
 
 #include <sdsl/vectors.hpp>
 #include "iterator.hpp"
-#include "compact_trie_iterator.hpp"
 #include "index.hpp"
 #include "utils.hpp"
+#include "config.hpp"
 
 using namespace std;
 
@@ -114,7 +114,7 @@ class TableIndexer{
             root = new Trie();
             createRegularTrie(index);
             toCompactForm();
-            compactTries.push_back(new CompactTrieIterator(B, S));
+            compactTries.push_back(new CurrentIterator(B, S));
             delete root;
         }
     }
@@ -198,6 +198,7 @@ class TableIndexer{
         createIndexes();
         // compactTrie.store_to_file();
         Index ind(orders, compactTries, file_name);
+        ind.save();
         return ind;
     } 
 };
