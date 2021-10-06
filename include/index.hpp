@@ -74,7 +74,7 @@ class Index{
                 }
             }
             else{
-                throw "Path to folder is not valid, after the folder name there should be a /";
+                throw "Path to folder is not valid, check that after the folder name there is a /";
             }
             stream.close();
 
