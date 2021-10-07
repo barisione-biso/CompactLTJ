@@ -2,6 +2,7 @@
 #define INDEX_H
 
 #include <iostream>
+#include <string>
 #include "iterator.hpp"
 #include <filesystem>
 #include "utils.hpp"
@@ -12,12 +13,14 @@ namespace fs = std::filesystem;
 
 class Index{
     private:
+        u_int64_t dim;
         vector<string> orders;
         vector<Iterator*> iterators;
         string folder = "../data/";
 
     public:
-        Index(vector<string> ord, vector<Iterator*> its, string file_name){
+        Index(u_int64_t d, vector<string> ord, vector<Iterator*> its, string file_name){
+            dim = d;
             orders = ord;
             iterators = its;
             /* The folder where the index file will be saved will be in the data folder 
@@ -40,6 +43,7 @@ class Index{
 
             ofstream stream(folder+"info.txt");
             if(stream.is_open()){
+                stream<<"dim: "<<dim<<'\n';
                 stream<<"orders: ";
                 for(auto order: orders){
                     stream<<order;
@@ -66,8 +70,12 @@ class Index{
             ifstream stream(folder + "info.txt");
             if(stream.is_open()){
                 getline(stream, line);
-                if(line.substr(0, 7) == "orders:"){
-                    orders = parse(line.substr(7), ',');
+                if(line.substr(0,4) == "dim:"){
+                    dim = stoi(line.substr(4));
+                    getline(stream, line);
+                    if(line.substr(0, 7) == "orders:"){
+                        orders = parse(line.substr(7), ',');
+                    }
                 }
                 else{
                     throw "Info file from " + folder + " index doesn't have the appropiate format";
@@ -88,6 +96,13 @@ class Index{
         Iterator* getIterator(u_int64_t i){
             return iterators[i];
         }
+
+        /*
+            Returns dimension of the table that is stored in the index
+        */
+       u_int64_t getDim(){
+           return dim;
+       }
 };
 
 #endif

@@ -22,6 +22,7 @@ class LTJ{
         uint64_t k;
         uint64_t key;
         u_int64_t depth;
+        u_int64_t dim;
         void chooseIterators(){
             /*
                 debe elegir que iterador de cada indice ocupar
@@ -42,6 +43,8 @@ class LTJ{
     public:
         LTJ(vector<Index*> ind){
             indexes = ind;
+            /*De momento se asume que todas las tablas tienen la misma dimensión*/
+            dim = indexes[0]->getDim();
             chooseIterators();
             k = iterators.size();
             depth = 0;
@@ -139,14 +142,14 @@ class LTJ{
             Implements the triejoin algorithm finding the join results
         */
         void triejoin(){
-            vector<u_int64_t> v(3);
+            vector<u_int64_t> v(dim);
             u_int64_t i = 0;
             triejoin_open();
 
             while(true){
                 if(!at_end){ 
                     v[i] = key;
-                    if(depth < 3){
+                    if(depth < dim){
                         i++;
                         triejoin_open();
                     }
@@ -179,17 +182,6 @@ class LTJ{
         u_int64_t get_key(){
             return key;
         }
-
-    
-
-    
-
-
-
-
-
-
-
 };
 
 #endif

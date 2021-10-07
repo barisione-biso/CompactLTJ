@@ -197,7 +197,7 @@ class TableIndexer{
         }
         createIndexes();
         // compactTrie.store_to_file();
-        Index ind(orders, compactTries, file_name);
+        Index ind(dim ,orders, compactTries, file_name);
         ind.save();
         return ind;
     } 
