@@ -7,7 +7,6 @@
 
 #include "index.hpp"
 #include "iterator.hpp"
- 
 
 using namespace std;
 
@@ -16,6 +15,7 @@ class LTJ{
     private:
         vector<Iterator*> iterators;
         vector<Index*> indexes;
+        vector<Tuple*> query;
         bool at_end = false;
         uint64_t p = 0;
         uint64_t xp,x;
@@ -41,8 +41,9 @@ class LTJ{
         }
 
     public:
-        LTJ(vector<Index*> ind){
+        LTJ(vector<Index*> &ind, vector<Tuple*> &q){
             indexes = ind;
+            query = q;
             /*De momento se asume que todas las tablas tienen la misma dimensión*/
             dim = indexes[0]->getDim();
             chooseIterators();
@@ -53,6 +54,17 @@ class LTJ{
         /*
             Prepares the iterators and finds first result
         */
+        // void leapfrog_init(){
+        //     // cout<<"leapfrog_init"<<endl;
+        //     for(auto it:iterators){
+        //         if(it->atEnd()) at_end = true;
+        //     }
+        //     if(!at_end){
+        //         sort(iterators.begin(), iterators.end());
+        //         leapfrog_search();
+        //     }   
+        // }
+
         void leapfrog_init(){
             // cout<<"leapfrog_init"<<endl;
             for(auto it:iterators){
@@ -60,7 +72,6 @@ class LTJ{
             }
             if(!at_end){
                 sort(iterators.begin(), iterators.end());
-                leapfrog_search();
             }   
         }
 
@@ -127,7 +138,7 @@ class LTJ{
         }
 
         /*
-            Finds the first element of all iterators that is greater that seekKey
+            Finds the first element of all iterators that is greater or equal that seekKey
         */
         void leapfrog_seek(uint64_t seekKey){
             iterators[p]->seek(seekKey);
@@ -141,36 +152,101 @@ class LTJ{
         /*
             Implements the triejoin algorithm finding the join results
         */
+        // void triejoin(){
+        //     //Solo consideramos primer tuple
+        //     Tuple* tupla = query[0];
+        //     vector<u_int64_t> v(dim);
+        //     u_int64_t i = 0;
+        //     if(tupla->get_term(depth)->isVariable()){
+        //         cout<<"es variable"<<endl;
+        //     }
+        //     else{
+        //         cout<<"es cte"<<endl;
+        //     }
+        //     triejoin_open();
+        //     leapfrog_search();
+
+        //     while(true){
+        //         if(!at_end){ 
+        //             v[i] = key;
+        //             if(depth < dim){
+        //                 i++;
+        //                 triejoin_open();
+        //                 leapfrog_search();
+        //             }
+        //             else{
+        //                 cout<<"Ans: ";
+        //                 for(int j=0; j<v.size(); j++){
+        //                     cout<<v[j]<<" ";
+        //                 }
+        //                 cout<<endl;
+        //                 leapfrog_next();
+        //             }
+        //         }
+        //         else{
+        //             if(depth==1)break;
+        //             i--;
+        //             triejoin_up();
+        //             leapfrog_next();  
+        //         }
+        //     }
+        // }
+
         void triejoin(){
+            //Solo consideramos primer tuple
+            Tuple* tupla = query[0];
             vector<u_int64_t> v(dim);
             u_int64_t i = 0;
+            bool is_variable;
             triejoin_open();
+            is_variable = tupla->get_term(depth-1)->isVariable();
+
+            if(is_variable){
+                leapfrog_search();
+            }
+            else{
+                leapfrog_seek(tupla->get_term(depth-1)->getConstant());
+            }
 
             while(true){
+                
                 if(!at_end){ 
                     v[i] = key;
-                    if(depth < dim){
+                    if(!is_variable && key!=tupla->get_term(depth-1)->getConstant()){
+                        leapfrog_next();  
+                    }
+                    else if(depth < dim){
                         i++;
                         triejoin_open();
+                        is_variable = tupla->get_term(depth-1)->isVariable();
+                        leapfrog_search();
                     }
                     else{
-                        cout<<"Ans: ";
+                        cout<<"ANS: ";
                         for(int j=0; j<v.size(); j++){
                             cout<<v[j]<<" ";
                         }
                         cout<<endl;
-                        leapfrog_next();
+                        if(is_variable){
+                            leapfrog_next();
+                        }
+                        else{
+                            if(depth==1)break;
+                            triejoin_up();
+                            is_variable = tupla->get_term(depth-1)->isVariable();
+                            leapfrog_next();
+                        }
                     }
                 }
                 else{
                     if(depth==1)break;
                     i--;
                     triejoin_up();
+                    is_variable = tupla->get_term(depth-1)->isVariable();
                     leapfrog_next();  
                 }
             }
         }
-
         //Probando
 
         void keys(){

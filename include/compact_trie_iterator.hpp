@@ -220,8 +220,11 @@ class CompactTrieIterator: public Iterator{
                 throw "At end, cant seek";
             }
 
+            // Nos indica cuantos hijos tiene el padre de el it actual ->O(1)
             uint64_t parent_child_count = childrenCount(parent_it);
+            // Nos indica cuantos 0s hay hasta it - 2, es decir la posición en el string de el char correspondiente a la posición del it -> O(1)
             uint64_t i = b_rank0(it)-2;
+            // Nos indica la posición en el string de el char correspondiente a la posición del ultimo hijo del padre del it. -> O(1)
             uint64_t f = b_rank0(child(parent_it, parent_child_count))-2;
             
             bool found = false;
