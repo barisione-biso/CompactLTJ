@@ -17,12 +17,12 @@ int main(int argc, char **argv){
             todos los archivos que acompañen a ./build_index
         */
 
-       TableIndexer ti = TableIndexer();
+        TableIndexer ti = TableIndexer();
 
-       for(int i=1; i<argc; i++){
-           string file_name = argv[i];
-           Index ind = ti.indexNewTable(file_name);
-       }
+        for(int i=1; i<argc; i++){
+            string file_name = argv[i];
+            Index ind = ti.indexNewTable(file_name);
+        }
         
         // ti.indexNewTable(file_name);
         

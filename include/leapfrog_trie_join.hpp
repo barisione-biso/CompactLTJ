@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <map>
 
 #include "index.hpp"
 #include "iterator.hpp"
@@ -192,16 +193,38 @@ class LTJ{
         //     }
         // }
 
+        void printAnswer(vector<u_int64_t> &v){
+            cout<<"ANS: ";
+            for(int j=0; j<v.size(); j++){
+                cout<<v[j]<<" ";
+            }
+            cout<<endl;
+        }
+        
+        void goUpAndSearch(bool &is_variable, map<string, uint64_t> &current_depth, map<string, 
+            uint64_t> &current_values, string &variable, Tuple* tupla){
+            if(is_variable && current_depth[variable]==depth)current_values.erase(variable);
+            triejoin_up();
+            is_variable = tupla->get_term(depth-1)->isVariable();
+            if(is_variable) variable = tupla->get_term(depth-1)->getVariable();
+            if(is_variable && current_depth[variable]==depth)current_values.erase(variable);
+            leapfrog_next();  
+        }
+
         void triejoin(){
             //Solo consideramos primer tuple
             Tuple* tupla = query[0];
             vector<u_int64_t> v(dim);
+            map<string, uint64_t> current_values;
+            map<string, uint64_t> current_depth;
             u_int64_t i = 0;
             bool is_variable;
+            string variable;
             triejoin_open();
             is_variable = tupla->get_term(depth-1)->isVariable();
 
             if(is_variable){
+                variable = tupla->get_term(depth-1)->getVariable();
                 leapfrog_search();
             }
             else{
@@ -215,35 +238,46 @@ class LTJ{
                     if(!is_variable && key!=tupla->get_term(depth-1)->getConstant()){
                         leapfrog_next();  
                     }
+                    else if(is_variable && current_values.find(variable)!=current_values.end() && key!=current_values[variable]){
+                        if(depth==1)break;
+                        i--;
+                        goUpAndSearch(is_variable, current_depth, current_values, variable, tupla);
+                    }
                     else if(depth < dim){
+                        if(current_values.find(variable)==current_values.end()){
+                            current_values[variable] = v[i];
+                            current_depth[variable] = depth;
+                        }
                         i++;
                         triejoin_open();
                         is_variable = tupla->get_term(depth-1)->isVariable();
-                        leapfrog_search();
+                        if(is_variable){
+                            variable = tupla->get_term(depth-1)->getVariable();
+                            if(current_values.find(variable)!=current_values.end()){
+                                leapfrog_seek(current_values[variable]);
+                            }
+                            else leapfrog_search();
+                        }
+                        else{
+                            leapfrog_seek(tupla->get_term(depth-1)->getConstant());
+                        }
                     }
                     else{
-                        cout<<"ANS: ";
-                        for(int j=0; j<v.size(); j++){
-                            cout<<v[j]<<" ";
-                        }
-                        cout<<endl;
+                        printAnswer(v);
                         if(is_variable){
                             leapfrog_next();
                         }
                         else{
                             if(depth==1)break;
-                            triejoin_up();
-                            is_variable = tupla->get_term(depth-1)->isVariable();
-                            leapfrog_next();
+                            i--;
+                            goUpAndSearch(is_variable, current_depth, current_values, variable, tupla);
                         }
                     }
                 }
                 else{
                     if(depth==1)break;
                     i--;
-                    triejoin_up();
-                    is_variable = tupla->get_term(depth-1)->isVariable();
-                    leapfrog_next();  
+                    goUpAndSearch(is_variable, current_depth, current_values, variable, tupla); 
                 }
             }
         }

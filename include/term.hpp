@@ -54,6 +54,14 @@ class Term {
         uint64_t getConstant(){
             return constant;
         }
+        
+        /*
+            Returns the variable name of the current term 
+            Before calling it, it should be checked that the term is a variable
+        */
+        string getVariable(){
+            return varname;
+        }
 };
 
 
