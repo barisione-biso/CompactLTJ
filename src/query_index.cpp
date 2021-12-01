@@ -21,10 +21,11 @@ int main(int argc, char* argv[]){
         Index index2 = ti.indexNewTable(argv[3]);
 
         vector<Index*> indexes = {&index1, &index2};
-
+        uint64_t query_number = 1;
         if(have_queries){
-            for(string query_string : queries){   
-
+            for(string query_string : queries){  
+                cout<<"Query "<<query_number<<":"<<endl;
+                query_number++; 
                 vector<Term*> terms_created;
                 vector<Tuple*> query;
 

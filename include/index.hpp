@@ -100,9 +100,18 @@ class Index{
         /*
             Returns dimension of the table that is stored in the index
         */
-       u_int64_t getDim(){
-           return dim;
-       }
+        u_int64_t getDim(){
+            return dim;
+        }
+
+        /*
+            Resets iterators to their begining state
+        */    
+        void resetIterators(){
+            for(auto it: iterators){
+                it->backToStart();
+            }
+        }
 };
 
 #endif

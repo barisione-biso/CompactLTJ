@@ -32,5 +32,16 @@ class Tuple {
         Term* get_term(uint64_t i){
             return terms[i];
         }
+
+        /*
+            Prints values asociated to the current tuple    
+        */
+        void printTuple(){
+            for(auto t: terms){
+                t->getValues();
+                cout<<" ";
+            }
+            cout<<endl;
+        }
 };
 #endif

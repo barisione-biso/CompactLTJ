@@ -156,7 +156,6 @@ class CompactTrieIterator: public Iterator{
 
             if(at_root){
                 at_root = false;
-                
             }
             if(at_end){
                 throw "Iterator is atEnd";
@@ -286,6 +285,20 @@ class CompactTrieIterator: public Iterator{
             
             construct_im(wt, s, 'd');
             initializeSupport();
+        }
+        /*
+            Returns the iterator to the start of the data
+        */
+        void backToStart(){
+            //Confirmar que esto no causa problemas
+            it = 2;
+            at_end = false;
+            at_root = true;
+        }
+
+        // Temporal 
+        void getIteratorPos(){
+            cout<<"it esta en: "<<it<<endl;
         }
 };
 

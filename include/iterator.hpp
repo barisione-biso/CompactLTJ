@@ -19,11 +19,12 @@ class Iterator{
         virtual void up() = 0;
         virtual void storeToFile(string file_name) = 0;
         virtual void loadFromFile(string file_name) = 0;
+        virtual void backToStart() = 0;
         bool operator < (Iterator& it) {
             return (key() < it.key());
         }
-        // Faltan los operadores no lineales
-
+        //Temporal
+        virtual void getIteratorPos() = 0;
 };
 
 #endif
