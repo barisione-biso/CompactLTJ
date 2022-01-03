@@ -82,9 +82,9 @@ bool is_number(string & s)
 
 /*
     Returns a tuple consisting of the Terms that are found in s. 
-    Also adds the new terms to the terms vector
+    Also adds the new variables to the variables mapping
 */
-Tuple* get_tuple(string &s, vector<Term*> & terms){
+Tuple* get_tuple(string &s, map<string, uint64_t> & variable_index_mapping, uint64_t &i){
     vector<string> terms_string = parse(trim(s, ' '), ' ');
     vector<Term*> new_terms;
     u_int64_t value;
@@ -102,7 +102,11 @@ Tuple* get_tuple(string &s, vector<Term*> & terms){
     }
 
     for(auto term: new_terms){
-        terms.push_back(term);
+        if(term->isVariable() && variable_index_mapping.find(term->getVariable())==variable_index_mapping.end()){
+            variable_index_mapping[term->getVariable()] = i;
+            i++;
+        }
+        // terms.push_back(term);
     }
     return new Tuple(new_terms);
 }

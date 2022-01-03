@@ -15,9 +15,15 @@ using namespace std;
 class LTJ{
     
     private:
+        //BORRAR
+        bool debug = false;
+        //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
         vector<Tuple*> query;
+        map<string, set<uint64_t>> instances; 
+        map<uint64_t, set<string>> variables_per_depth;
+        map<string, uint64_t> variable_index_mapping;
         bool at_end = false;
         uint64_t p = 0;
         uint64_t xp,x;
@@ -46,13 +52,14 @@ class LTJ{
             Resets all indexes to their start configuration
         */
         void resetIndexes(){
+            at_end = false;
             for(auto i: indexes){
                 i->resetIterators();
             }
         }
 
     public:
-        LTJ(vector<Index*> &ind, vector<Tuple*> &q){
+        LTJ(vector<Index*> &ind, vector<Tuple*> &q, map<string, uint64_t> &variables_to_index){
             indexes = ind;
             query = q;
             /*De momento se asume que todas las tablas tienen la misma dimensión*/
@@ -60,6 +67,7 @@ class LTJ{
             chooseIterators();
             k = iterators.size();
             depth = 0;
+            variable_index_mapping = variable_to_index;
             resetIndexes();
         }
 
@@ -93,10 +101,13 @@ class LTJ{
         void leapfrog_search(){
             // cout<<"leapfrog_search"<<endl;
             xp = iterators[modulo(int(p)-1,k)]->key();
+            if(debug)cout<<"xp es "<<xp<<endl;
             while(true){
                 x = iterators[p]->key();
+                if(debug)cout<<"x es "<<x<<endl;
                 if(x==xp){
                     key = x;
+                    if(debug)cout<<"se encontró key "<<key<<endl;
                     return;
                 }
                 else{
@@ -153,10 +164,15 @@ class LTJ{
             Finds the first element of all iterators that is greater or equal that seekKey
         */
         void leapfrog_seek(uint64_t seekKey){
+            if(debug)cout<<"Iterators en p es "<<iterators[p]->key()<<endl;
+            if(debug)cout<<"La seek key es "<<seekKey<<endl;
             iterators[p]->seek(seekKey);
+            if(debug)cout<<"Iterators en p paso a ser "<<iterators[p]->key()<<endl;
+            if(debug)iterators[p]->atEnd() ? cout<<"Esta en end"<<endl : cout<<"No esta en end"<<endl;
             if(iterators[p]->atEnd()) at_end = true;
             else{
                 p = modulo(p+1,k);
+                if(debug)cout<<"Se llama a leapfrog_search"<<endl;
                 leapfrog_search();
             }
         }
@@ -220,16 +236,20 @@ class LTJ{
             if(is_variable && current_depth[variable]==depth)current_values.erase(variable);
             triejoin_up();
             is_variable = tupla->get_term(depth-1)->isVariable();
-            if(is_variable) variable = tupla->get_term(depth-1)->getVariable();
+            if(is_variable) {variable = tupla->get_term(depth-1)->getVariable();
+            if(debug)cout<<"(3)At depth "<<depth<<" variable "<<variable<<endl;
+            variables_per_depth[depth].insert(variable);}
             if(is_variable && current_depth[variable]==depth)current_values.erase(variable);        
             leapfrog_next();  
         }
 
         void triejoin(){
-            map<string, set<uint64_t>> instances; 
             Tuple* tupla;
             for(int j=0; j<query.size(); j++){
+                if(debug)cout<<"at end es "<<at_end<<endl; 
                 Tuple* tupla = query[j];
+                //Se printea tupla
+                tupla->printTuple();
                 vector<uint64_t> v(dim);
                 map<string, uint64_t> current_values;
                 map<string, uint64_t> current_depth;
@@ -237,15 +257,26 @@ class LTJ{
                 u_int64_t i = 0;
                 bool is_variable;
                 string variable;
+                // Se hace open de la raiz
+                if(debug)cout<<"Se hace open de la raiz"<<endl;
                 triejoin_open();
+                //Se revisa si el término de la consulta es variable
+                
                 is_variable = tupla->get_term(depth-1)->isVariable();
-
+                if(debug)is_variable ? cout<<"El termino es variable"<<endl : cout<<"El termino no es variable"<<endl;
+                
                 if(is_variable){
                     variable = tupla->get_term(depth-1)->getVariable();
+                    cout<<"(1)At depth "<<depth<<" variable "<<variable<<endl;
+                    variables_per_depth[depth].insert(variable);
                     //Chequear si la variable ya tiene instancias asociadas y hacer seek de dichas instancias.
                     if(instances[variable].size()!=0){
+                        if(debug)cout<<"La variable ya tiene instancias asociadas, se hace seek"<<endl;
                         var_instances_it[depth] = instances[variable].begin();
+                        if(debug)cout<<"La primera instancia encontrada "<<*var_instances_it[depth]<<endl;
+                        if(debug)cout<<"pre_seek at end es "<<at_end<<endl;
                         leapfrog_seek(*var_instances_it[depth]);
+                        if(debug)cout<<"at end es "<<at_end<<endl;
                     }
                     else{
                         leapfrog_search();
@@ -256,7 +287,7 @@ class LTJ{
                 }
 
                 while(true){
-                    
+
                     if(!at_end){ 
                         v[i] = key;
                         if(!is_variable && key!=tupla->get_term(depth-1)->getConstant()){
@@ -268,7 +299,10 @@ class LTJ{
                             goUpAndSearch(is_variable, current_depth, current_values, variable, tupla);
                         }
                         else if(depth < dim){
+                            // Si la variable actual no tenía un valor asociado 
+                            // (para cuando se repite una variable por la query)
                             if(current_values.find(variable)==current_values.end()){
+                                // Se guarda en current values el par variable key encontrado
                                 current_values[variable] = v[i];
                                 current_depth[variable] = depth;
                             }
@@ -277,6 +311,8 @@ class LTJ{
                             is_variable = tupla->get_term(depth-1)->isVariable();
                             if(is_variable){
                                 variable = tupla->get_term(depth-1)->getVariable();
+                                cout<<"(2)At depth "<<depth<<" variable "<<variable<<endl;
+                                variables_per_depth[depth].insert(variable);
                                 if(current_values.find(variable)!=current_values.end()){
                                     leapfrog_seek(current_values[variable]);
                                 }
@@ -299,6 +335,7 @@ class LTJ{
                         }
                     }
                     else{
+                        cout<<"Iterador at end"<<endl;
                         if(depth==1)break;
                         i--;
                         goUpAndSearch(is_variable, current_depth, current_values, variable, tupla); 
@@ -307,13 +344,20 @@ class LTJ{
                 resetIndexes();
                 depth = 0;
             }
-            // for(auto p: instances){
-            //     cout<<p.first<<": ";
-            //     for(auto el: p.second){
-            //         cout<<el<<" ";
-            //     }
-            //     cout<<endl;
-            // }
+        }
+
+
+        void evaluate(){
+            cout<<"In evaluate"<<endl;
+            for(auto p: variables_per_depth){
+                cout<<p.first<<": ";
+                for(auto v: p.second){
+                    cout<<v<<" ";
+                }
+                cout<<endl;
+            }
+
+            
         }
         //Probando
 

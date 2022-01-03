@@ -36,8 +36,8 @@ class Term {
             Prints the values asociated with this term
         */
         void getValues(){
-            if(is_variable)cout<<varname<<endl;
-            else cout<<constant<<endl;
+            if(is_variable)cout<<varname;
+            else cout<<constant;
         }
 
         /*

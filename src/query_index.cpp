@@ -27,16 +27,21 @@ int main(int argc, char* argv[]){
                 cout<<"Query "<<query_number<<":"<<endl;
                 query_number++; 
                 vector<Term*> terms_created;
+                map<string, uint64_t> variable_index_mapping;
                 vector<Tuple*> query;
 
                 vector<string> tokens_query = parse(query_string, '.');
-
+                
+                uint64_t i = 0;
                 for(string token : tokens_query){
-                    query.push_back(get_tuple(token, terms_created));
+                    query.push_back(get_tuple(token, variable_index_mapping, i));
                 }
 
-                LTJ ltj(indexes, query);
+                //En vez de tener terms created, en variable_mapping vamos a guardar las variables y los indices
+
+                LTJ ltj(indexes, query, variable_index_mapping);
                 ltj.triejoin();
+                ltj.evaluate();
             }
         }  
     }
