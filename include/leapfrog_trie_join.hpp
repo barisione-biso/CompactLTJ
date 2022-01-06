@@ -67,7 +67,7 @@ class LTJ{
             chooseIterators();
             k = iterators.size();
             depth = 0;
-            variable_index_mapping = variable_to_index;
+            variable_index_mapping = variables_to_index;
             resetIndexes();
         }
 
@@ -345,7 +345,6 @@ class LTJ{
                 depth = 0;
             }
         }
-
 
         void evaluate(){
             cout<<"In evaluate"<<endl;

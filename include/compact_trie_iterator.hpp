@@ -7,7 +7,9 @@
 #include <string>
 #include <sdsl/vectors.hpp>
 #include <sdsl/wavelet_trees.hpp>
+#include <sdsl/wm_int.hpp>
 #include "iterator.hpp"
+#include "utils.hpp"
 
 using namespace std;
 using namespace sdsl;
@@ -23,7 +25,7 @@ class CompactTrieIterator: public Iterator{
         //Louds representation to save tree structure
         bit_vector B;
         //Wavelet tree to save tree keys
-        wt_int<> wt;
+        wm_int<> wt;
 
         rank_support_v<1> b_rank1; //ocupado
         rank_support_v<0> b_rank0; //ocupado
@@ -100,6 +102,21 @@ class CompactTrieIterator: public Iterator{
             util::init_support(b_sel0,&B);
        }
 
+       // Evaluar si después es mejor recibir los tags como ints
+       int_vector<> turn_into_int_vector(string s){
+           //Parsear string por espacios
+           vector<string> values = parse(s, ' ');
+           //// Crear int_vector para resultados int_vector<> O(n+1);
+           int_vector<> tags(values.size());
+           
+           //convertir cada termino parseado en un entero y guardarlo en el vector
+           int i = 0;
+           for(auto v: values){
+               tags[i++] = stoi(v);
+           }
+           return tags;
+       }
+
     public:
 
         /*
@@ -115,7 +132,9 @@ class CompactTrieIterator: public Iterator{
         CompactTrieIterator(bit_vector b, string s){
             B = b;
             it = 2;
-            construct_im(wt, s, 'd');
+            // pasarle a contruct_im wt y el string pasado a int_vector
+            construct_im(wt, turn_into_int_vector(s));
+            // m(wt, s, 'd');
             at_root = true;
             at_end = false;
             // file_name = "order1.txt";
