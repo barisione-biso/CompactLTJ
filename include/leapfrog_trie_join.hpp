@@ -31,6 +31,14 @@ class LTJ{
         uint64_t key;
         u_int64_t depth;
         u_int64_t dim;
+
+        // Cosas para triejoin_tentativo
+        vector<map<string, set<uint64_t>>> instances_per_query;
+
+
+
+
+
         void chooseIterators(){
             /*
                 debe elegir que iterador de cada indice ocupar
@@ -69,6 +77,9 @@ class LTJ{
             depth = 0;
             variable_index_mapping = variables_to_index;
             resetIndexes();
+
+            //para triejoin_tentativo
+            instances_per_query.resize(query.size());
         }
 
         /*
@@ -293,6 +304,7 @@ class LTJ{
                         if(!is_variable && key!=tupla->get_term(depth-1)->getConstant()){
                             leapfrog_next();  
                         }
+                        // Caso v1 v1
                         else if(is_variable && current_values.find(variable)!=current_values.end() && key!=current_values[variable]){
                             if(depth==1)break;
                             i--;
@@ -357,6 +369,77 @@ class LTJ{
             }
 
             
+        }
+
+        void trijoin_tentativo(){
+            // Aquí se irán guardando los resultados que se encuentren para cada tupla 
+            vector<vector<uint64_t>> answers_per_tuple(vector<uint64_t>(query.size(), vector<uint64_t> (dim)));
+            map<string, uint64_t> variable_mapping;
+            triejoin_open();
+            // Aquí se guardan los i-esimos terms de cada query, en un principio, el primer term de cada query
+            vector<Term*> query_terms;
+
+            while(true){
+                // Guardamos en query_terms los valores de los terms al depth en el que estamos
+                for(auto tuple : query){
+                    query_terms.push_back(tuple->get_term(depth-1));
+                }
+
+                // Iteramos por query_terms usando tuple_id como identificador de a que tupla pertenece el temino que estamos mirando
+                for(auto tuple_id=0; tuple_id<query_terms.size(); tuple_id++){
+                    Term* term = query_terms[tuple_id];
+                    is_variable = term->isVariable();
+                    // Si es variable vamos a buscar el primer valor que esté en todas las tablas a este depth 
+                    if(is_variable){
+                        variable = term->getVariable();
+                        
+                        leapfrog_search();
+                        //si estamos mas allá del primer término de la tupla verificar que dicha variable no tenga unvalor asignado ya en su misma tupla
+                        //si ya tiene un valor asignado hacer seek
+                        //si estamos mas allá del primer término de la tupla verificar que dicha variable no tenga un valor asignado en las otras tuplas
+
+                    }
+                    else{
+                        leapfrog_seek(term->getConstant());
+                    }
+
+                    if(!at_end){
+                        answers_per_tuple[tuple_id][depth-1] = key;
+                        if(is_variable)variable_mapping[variable] = key;
+                        if(depth < dim && is_variable){
+                            instances_per_query[tuple_id][varible].insert(key)
+                        }
+                    }
+                }
+            }
+            
+
+            // Si la variable actual no tenía un valor asociado 
+                            // (para cuando se repite una variable por la query)
+                            if(current_values.find(variable)==current_values.end()){
+                                // Se guarda en current values el par variable key encontrado
+                                current_values[variable] = v[i];
+                                current_depth[variable] = depth;
+                            }
+                            i++;
+                            triejoin_open();
+                            is_variable = tupla->get_term(depth-1)->isVariable();
+                            if(is_variable){
+                                variable = tupla->get_term(depth-1)->getVariable();
+                                cout<<"(2)At depth "<<depth<<" variable "<<variable<<endl;
+                                variables_per_depth[depth].insert(variable);
+                                if(current_values.find(variable)!=current_values.end()){
+                                    leapfrog_seek(current_values[variable]);
+                                }
+                                else leapfrog_search();
+                            }
+                            else{
+                                leapfrog_seek(tupla->get_term(depth-1)->getConstant());
+                            }
+
+            while(true){
+                
+            }
         }
         //Probando
 
