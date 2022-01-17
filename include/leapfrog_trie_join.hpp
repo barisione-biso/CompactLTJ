@@ -370,7 +370,7 @@ class LTJ{
 
             
         }
-
+        /*
         void trijoin_tentativo(){
             // Aquí se irán guardando los resultados que se encuentren para cada tupla 
             vector<vector<uint64_t>> answers_per_tuple(vector<uint64_t>(query.size(), vector<uint64_t> (dim)));
@@ -441,6 +441,7 @@ class LTJ{
                 
             }
         }
+        */
         //Probando
 
         void keys(){
