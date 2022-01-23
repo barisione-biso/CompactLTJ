@@ -4,6 +4,7 @@
 #include <sdsl/select_support.hpp>
 #include "compact_trie_iterator.hpp" 
 #include "table_indexing.hpp"
+#include "compact_trie.hpp"
 // #include "wavelet_tree.hpp"
 #include <vector>
 
@@ -13,64 +14,35 @@ using namespace sdsl;
 typedef unsigned int u_int;
 int main(int argc, char** argv)
 {  
-    try
-    {
-        if(argc <= 1){
-            cout<<"No extra command line argument passed other that program name"<<endl;
-            return 0;
-        }  
-        string file_name;
-        file_name = argv[1];
+    bit_vector B = {1,0,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0};
+    string s = "1 3 1 2 3 2 3 5 7 4 6 7 2 2 3 6";
 
-        TableIndexer ti = TableIndexer();
+    CompactTrie* ct = new CompactTrie(B, s);
+    CompactTrieIterator cti = CompactTrieIterator(ct); //0
+    CompactTrieIterator cti2 = CompactTrieIterator(ct); //1
+    string instr;
+    bool op;
 
-        ti.indexNewTable(file_name);
-        cout<<"Table Indexed"<<endl;
+    while(true){
+        cin>>instr>>op;
+
+        try{
+            if(instr=="open") op? cti2.open() : cti.open();
+            if(instr=="next")op? cti2.next() : cti.next();
+            if(instr=="end")op? cout<<cti2.atEnd()<<endl : cout<<cti.atEnd()<<endl;
+            if(instr=="key")op? cout<<cti2.key()<<endl : cout<<cti.key()<<endl;
+            // if(instr=="show")ct.showValues();
+            if(instr=="up")op? cti2.up() : cti.up();
+            if(instr=="seek"){
+                int x;
+                cin>>x;
+                op? cti2.seek(x) : cti.seek(x);
+            }
+            if(instr=="close")break;
         }
-    catch(const char* msg)
-    {
-        cerr<<msg<<endl;
+        catch(const char* msg){
+            cerr<<msg<<endl;
+        }
     }
     
-    
-
-    // CompactTrieIterator cti = CompactTrieIterator();
-    // cti.load_from_file();
-
-
-    // //bit vector dfuds
-    // // bit_vector B = {1,1,0,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0};   
-    // //              0 1 2 3 4 5 6 7 8 9
-    // // vector<u_int> S = {0, 0, 1, 3, 3, 4, 5, 4, 5, 6, 8, 9, 2, 5, 2}; 
-    // bit_vector B = {1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0}; //louds
-    // //string dfuds
-    // // string s = "1 3 3 4 5 4 5 6 8 9 2 5 2";
-    // string s = "1 3 3 4 5 5 4 5 6 8 9 2 2"; //louds
-
-    // CompactTrieIterator cti = CompactTrieIterator(B, s);
-    // // CompactTrie ct = CompactTrie(B,S);
-
-    // string instr;
-
-    // while(true){
-    //     cin>>instr;
-
-    //     try{
-    //         if(instr=="open")cti.open();
-    //         if(instr=="next")cti.next();
-    //         if(instr=="end")cout<<cti.atEnd()<<endl;
-    //         if(instr=="key")cout<<cti.key()<<endl;
-    //         // if(instr=="show")ct.showValues();
-    //         if(instr=="up")cti.up();
-    //         if(instr=="seek"){
-    //             int x;
-    //             cin>>x;
-    //             cti.seek(x);
-    //         }
-    //         if(instr=="close")break;
-    //     }
-    //     catch(const char* msg){
-    //         cerr<<msg<<endl;
-    //     }
-    // }
 }

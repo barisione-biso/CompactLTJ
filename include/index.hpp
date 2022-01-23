@@ -7,6 +7,7 @@
 #include <filesystem>
 #include "utils.hpp"
 #include "config.hpp"
+#include "compact_trie.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -57,7 +58,8 @@ class Index{
 
             u_int64_t i = 0;
             for(auto it: iterators){
-                it->storeToFile(folder+"order"+to_string(i)+".txt");
+                it->getCompactTrie()->storeToFile(folder+"order"+to_string(i)+".txt");
+                // it->storeToFile(folder+"order"+to_string(i)+".txt");
                 i++;
             }
         }
@@ -87,7 +89,8 @@ class Index{
             stream.close();
 
             for(int i=0; i<orders.size(); i++){
-                iterators.push_back(new CurrentIterator(folder+"order"+to_string(i)+".txt"));
+                CompactTrie *ct = new CompactTrie(folder+"order"+to_string(i)+".txt");
+                iterators.push_back(new CurrentIterator(ct));
             }
         }
         /*

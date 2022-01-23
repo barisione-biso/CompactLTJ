@@ -18,11 +18,6 @@ class CompactTrie{
         bit_vector B;
         wm_int<> wt;
 
-        rank_support_v<1> b_rank1;
-        rank_support_v<0> b_rank0;
-        select_support_mcl<0> b_sel0;
-        select_support_mcl<1> b_sel1;
-
         /*
             Initializes rank and select support for B
         */
@@ -50,15 +45,27 @@ class CompactTrie{
 
     public:
 
-        CompactTrieIterator(string file_name){
-            loadFromFile(file_name);
-        };
+        //Rank & Support arrays
+        rank_support_v<1> b_rank1;
+        rank_support_v<0> b_rank0;
+        select_support_mcl<0> b_sel0;
+        select_support_mcl<1> b_sel1;
 
+        /*
+            Constuctor from LOUDS representation (b) and tags for trie representations (s)
+        */
         CompactTrie(bit_vector b, string s){
             B = b;
             construct_im(wt, turn_into_int_vector(s));
             initializeSupport();
         }
+
+        /*
+            Constructor from file with representation
+        */
+        CompactTrie(string file_name){
+            loadFromFile(file_name);
+        };
 
         /*
             Destructor
@@ -124,6 +131,21 @@ class CompactTrie{
             uint64_t pos = getPosInParent(it);
             return prev0(pos) + 1;
         }
+
+        /*
+            Returns key that corresponds to given node(it)
+        */
+        uint64_t key_at(uint64_t it){
+            return wt[b_rank0(it)-2];
+        }
+
+        /*
+            Returns i-th element of the original sequence s 
+        */
+        uint64_t get_wt_at(uint64_t i){
+            return wt[i];
+        }
+
         
         /*
             Stores Compact Trie Iterator to file saving the size of B, B and S.

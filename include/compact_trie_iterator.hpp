@@ -10,6 +10,7 @@
 #include <sdsl/wm_int.hpp>
 #include "iterator.hpp"
 #include "utils.hpp"
+#include "compact_trie.hpp"
 
 using namespace std;
 using namespace sdsl;
@@ -21,124 +22,18 @@ class CompactTrieIterator: public Iterator{
         uint64_t it;
         uint64_t parent_it;
         uint64_t pos_in_parent;
-        // string file_name;
-        //Louds representation to save tree structure
-        bit_vector B;
-        //Wavelet tree to save tree keys
-        wm_int<> wt;
-
-        rank_support_v<1> b_rank1; //ocupado
-        rank_support_v<0> b_rank0; //ocupado
-        select_support_mcl<0> b_sel0; //ocupado
-        select_support_mcl<1> b_sel1; //ocupado
-
-        /*
-            Recives index in bit vector
-            Returns index of next 0
-        */
-        uint64_t succ0(uint64_t it){
-            uint64_t cant_0 = b_rank0(it);
-            return b_sel0(cant_0 + 1);
-        }
-        
-        /*
-            Recives index in bit vector
-            Returns index of previous 0
-        */
-        uint64_t prev0(uint64_t it){
-            uint64_t cant_0 = b_rank0(it);
-            return b_sel0(cant_0);
-        }
-
-        /*
-            Recives index of current node and the child that is required
-            Returns index of the nth child of current node
-        */
-        uint64_t child(uint64_t it, uint64_t n){
-            return b_sel0(b_rank1(it+n)) + 1;
-        }
-
-        /*
-            Recives index of node whos children we want to count
-            Returns how many children said node has
-        */
-        uint64_t childrenCount(uint64_t it){
-            return succ0(it) - it;
-        }
-
-        /*
-            Recives node index
-            Returns index of position in parent
-        */
-        uint64_t getPosInParent(uint64_t it){
-            return b_sel1(b_rank0(it));
-        }
-
-        /*
-            Recives index of node
-            Return which child of its parent it is
-        */
-        uint64_t childRank(uint64_t it){
-            uint64_t pos = getPosInParent(it);
-            return pos - prev0(pos);
-        }
-
-        /*
-            Recives index of node
-            Returns index of parent node
-        */  
-        uint64_t parent(uint64_t it){
-            uint64_t pos = getPosInParent(it);
-            return prev0(pos) + 1;
-        }
-
-        /*
-            Initializes rank and select support for B
-        */
-       void initializeSupport(){
-            util::init_support(b_rank1,&B);
-            util::init_support(b_rank0,&B);
-            util::init_support(b_sel1,&B);
-            util::init_support(b_sel0,&B);
-       }
-
-       // Evaluar si después es mejor recibir los tags como ints
-       int_vector<> turn_into_int_vector(string s){
-           //Parsear string por espacios
-           vector<string> values = parse(s, ' ');
-           //// Crear int_vector para resultados int_vector<> O(n+1);
-           int_vector<> tags(values.size());
-           
-           //convertir cada termino parseado en un entero y guardarlo en el vector
-           int i = 0;
-           for(auto v: values){
-               tags[i++] = stoi(v);
-           }
-           return tags;
-       }
+        CompactTrie * compactTrie;
 
     public:
 
         /*
-            Constructor for initializing from file 
+        Constructor from CompactTrie
         */
-        CompactTrieIterator(string file_name){
-            loadFromFile(file_name);
-        };
-
-        /*
-            Constructor for initializing from table
-        */
-        CompactTrieIterator(bit_vector b, string s){
-            B = b;
+        CompactTrieIterator(CompactTrie* ct){
+            compactTrie = ct;
             it = 2;
-            // pasarle a contruct_im wt y el string pasado a int_vector
-            construct_im(wt, turn_into_int_vector(s));
-            // m(wt, s, 'd');
             at_root = true;
             at_end = false;
-            // file_name = "order1.txt";
-            initializeSupport();
         }
 
         /*
@@ -157,7 +52,7 @@ class CompactTrieIterator: public Iterator{
                 throw "Root doesnt have key";
             }
             else{
-                return wt[b_rank0(it)-2];
+                return compactTrie->key_at(it);
             }
         }
 
@@ -180,9 +75,13 @@ class CompactTrieIterator: public Iterator{
                 throw "Iterator is atEnd";
             }
             else{
-                parent_it = it;
-                it = child(it, 1);
-                pos_in_parent = 1;
+                bool has_children = compactTrie->childrenCount(it) != 0;
+                if(has_children){
+                    parent_it = it;
+                    it = compactTrie->child(it, 1);
+                    pos_in_parent = 1;
+                }
+                else throw "Node has no children";
             }
         }
 
@@ -197,13 +96,13 @@ class CompactTrieIterator: public Iterator{
                 throw "Iterator is atEnd";
             }
 
-            uint64_t parent_child_count = childrenCount(parent_it);
+            uint64_t parent_child_count = compactTrie->childrenCount(parent_it);
             if(parent_child_count == pos_in_parent){
                 at_end = true;
             }
             else{
                 pos_in_parent++;
-                it = child(parent_it, pos_in_parent);
+                it = compactTrie->child(parent_it, pos_in_parent);
             }
         }
         
@@ -221,8 +120,8 @@ class CompactTrieIterator: public Iterator{
                 at_root = true;
             }
             else{
-                pos_in_parent = childRank(it);
-                parent_it = parent(it);
+                pos_in_parent = compactTrie->childRank(it);
+                parent_it = compactTrie->parent(it);
             }
         }
 
@@ -239,17 +138,17 @@ class CompactTrieIterator: public Iterator{
             }
 
             // Nos indica cuantos hijos tiene el padre de el it actual ->O(1)
-            uint64_t parent_child_count = childrenCount(parent_it);
+            uint64_t parent_child_count = compactTrie->childrenCount(parent_it);
             // Nos indica cuantos 0s hay hasta it - 2, es decir la posición en el string de el char correspondiente a la posición del it -> O(1)
-            uint64_t i = b_rank0(it)-2;
+            uint64_t i = compactTrie->b_rank0(it)-2;
             // Nos indica la posición en el string de el char correspondiente a la posición del ultimo hijo del padre del it. -> O(1)
-            uint64_t f = b_rank0(child(parent_it, parent_child_count))-2;
+            uint64_t f = compactTrie->b_rank0(compactTrie->child(parent_it, parent_child_count))-2;
             
             bool found = false;
             for(i=i; i<=f; i++){
-                if(wt[i]>=seek_key){
-                    it = b_sel0(i+2)+1;
-                    pos_in_parent = childRank(it);
+                if(compactTrie->get_wt_at(i)>=seek_key){
+                    it = compactTrie->b_sel0(i+2)+1;
+                    pos_in_parent = compactTrie->childRank(it);
                     found = true;
                     break;
                 }
@@ -264,47 +163,48 @@ class CompactTrieIterator: public Iterator{
             Stores Compact Trie Iterator to file saving the size of B, B and S.
         */
         void storeToFile(string file_name){
-            ofstream stream(file_name);
-            if(stream.is_open()){
-                stream<<B.size()<<'\n';
-                for(uint64_t i=0; i<B.size(); i++){
-                    stream<<B[i]<<" ";
-                }
-                stream<<'\n';
-                for(uint64_t i=0; i<wt.size(); i++){
-                    stream<<wt[i]<<" ";
-                }
-            }
-            stream.close();
+            compactTrie->storeToFile(file_name);
+            // ofstream stream(file_name);
+            // if(stream.is_open()){
+            //     stream<<B.size()<<'\n';
+            //     for(uint64_t i=0; i<B.size(); i++){
+            //         stream<<B[i]<<" ";
+            //     }
+            //     stream<<'\n';
+            //     for(uint64_t i=0; i<wt.size(); i++){
+            //         stream<<wt[i]<<" ";
+            //     }
+            // }
+            // stream.close();
         }
 
         /*
             Loads Compact Trie from file restoring B and the Wavelet Tree
         */
-        void loadFromFile(string file_name){
-            ifstream stream(file_name);
-            uint64_t B_size;
-            string s;
-            uint64_t val;
-            at_root = true;
-            at_end = false;
-            it = 2;
+        // void loadFromFile(string file_name){
+        //     ifstream stream(file_name);
+        //     uint64_t B_size;
+        //     string s;
+        //     uint64_t val;
+        //     at_root = true;
+        //     at_end = false;
+        //     it = 2;
 
-            if(stream.is_open()){
-                stream>>B_size;
-                B = bit_vector(B_size);
-                for(uint64_t i=0; i<B_size; i++){
-                    stream>>val;
-                    B[i] = val;
-                }
-                stream.ignore(numeric_limits<streamsize>::max(),'\n');
-                getline(stream, s);
-            }
-            stream.close();
+        //     if(stream.is_open()){
+        //         stream>>B_size;
+        //         B = bit_vector(B_size);
+        //         for(uint64_t i=0; i<B_size; i++){
+        //             stream>>val;
+        //             B[i] = val;
+        //         }
+        //         stream.ignore(numeric_limits<streamsize>::max(),'\n');
+        //         getline(stream, s);
+        //     }
+        //     stream.close();
             
-            construct_im(wt, s, 'd');
-            initializeSupport();
-        }
+        //     construct_im(wt, s, 'd');
+        //     initializeSupport();
+        // }
         /*
             Returns the iterator to the start of the data
         */
@@ -313,6 +213,13 @@ class CompactTrieIterator: public Iterator{
             it = 2;
             at_end = false;
             at_root = true;
+        }
+        
+        /*
+            Returns pointer to CompactTrie from which the iterator is constructed 
+        */
+        CompactTrie* getCompactTrie(){
+            return compactTrie;
         }
 
         // Temporal 

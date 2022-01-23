@@ -15,6 +15,7 @@
 #include "index.hpp"
 #include "utils.hpp"
 #include "config.hpp"
+#include "compact_trie.hpp"
 
 using namespace std;
 
@@ -114,7 +115,8 @@ class TableIndexer{
             root = new Trie();
             createRegularTrie(index);
             toCompactForm();
-            compactTries.push_back(new CurrentIterator(B, S));
+            CompactTrie *ct = new CompactTrie(B,S);
+            compactTries.push_back(new CurrentIterator(ct));
             delete root;
         }
     }

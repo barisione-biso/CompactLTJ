@@ -23,12 +23,13 @@ class LTJ{
         vector<Tuple*> query;
         map<string, set<uint64_t>> instances; 
         map<uint64_t, set<string>> variables_per_depth;
-        map<string, uint64_t> variable_index_mapping;
+        map<string, set<uint64_t>> variable_tuple_mapping;
         bool at_end = false;
         uint64_t p = 0;
         uint64_t xp,x;
         uint64_t k;
         uint64_t key;
+        uint64_t iterator_count;
         u_int64_t depth;
         u_int64_t dim;
 
@@ -38,8 +39,11 @@ class LTJ{
 
 
 
-
-        void chooseIterators(){
+        /*
+            CURRENTLY: Chooses first order of the elements in the table
+            TODO: Should choose and order for the table based on what the user whants  
+        */  
+        void chooseOrder(){
             /*
                 debe elegir que iterador de cada indice ocupar
                 de momento será el primero
@@ -66,18 +70,34 @@ class LTJ{
             }
         }
 
+        /* 
+            Adds one iterator for each element in the query to the the iterators vector
+        */
+        void addIterators(){
+            CompactTrie *ct = iterators[0]->getCompactTrie();
+            for(int i=1; i<query.size(); i++){
+                iterators.push_back(new CompactTrieIterator(ct));
+            }
+        }
+
     public:
-        LTJ(vector<Index*> &ind, vector<Tuple*> &q, map<string, uint64_t> &variables_to_index){
+        LTJ(vector<Index*> &ind, vector<Tuple*> &q, map<string, set<uint64_t>> &variables_to_index){
+            // De moemento ind tiene sólo uno
             indexes = ind;
             query = q;
             /*De momento se asume que todas las tablas tienen la misma dimensión*/
             dim = indexes[0]->getDim();
-            chooseIterators();
+            // Elige el orden
+            chooseOrder();
+            // Agrega todos los iteradores al vector de iteradores. Uno por cada tupla de la query
+            addIterators();
+            //k es la cantidad de iteradores que se recorrerán que para la nueva solución son la cantidad de 
+            //tuplas en q
+            // k = q.size();
             k = iterators.size();
             depth = 0;
-            variable_index_mapping = variables_to_index;
+            variable_tuple_mapping = variables_to_index;
             resetIndexes();
-
             //para triejoin_tentativo
             instances_per_query.resize(query.size());
         }
@@ -111,6 +131,7 @@ class LTJ{
         */
         void leapfrog_search(){
             // cout<<"leapfrog_search"<<endl;
+            //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
             xp = iterators[modulo(int(p)-1,k)]->key();
             if(debug)cout<<"xp es "<<xp<<endl;
             while(true){
