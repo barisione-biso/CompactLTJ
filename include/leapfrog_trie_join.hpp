@@ -12,6 +12,95 @@
 
 using namespace std;
 
+class LeapfrogJoin{
+    private:
+        vector<Iterator*> iterators;
+        bool at_end;
+        // Iterador con la key mas pequeña
+        uint64_t p;
+        uint64_t xp,x;
+        // Cantidad de iteradores (Cuantas queries)
+        uint64_t k;
+        uint64_t key;
+
+        /*
+            Return module a%b, supports negative numbers
+        */
+        uint64_t modulo(int a, uint64_t b){
+            return (b + (a%b)) % b;
+        }
+
+    public:
+
+        LeapfrogJoin(vector<Iterator*> &its){
+            iterators = its;
+            at_end = false;
+            k = iterators.size();
+        }
+        
+        /*
+            Prepares the iterators and finds first result
+        */
+        void leapfrog_init(){
+                for(auto it:iterators){
+                    if(it->atEnd()) at_end = true;
+                }
+                if(!at_end){
+                    sort(iterators.begin(), iterators.end());
+                    p = 0;
+                    leapfrog_search();
+                }   
+        }
+
+        void leapfrog_search(){
+            //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
+            xp = iterators[modulo(int(p)-1,k)]->key();
+            while(true){
+                x = iterators[p]->key();
+                if(x==xp){
+                    key = x;
+                    return;
+                }
+                else{
+                    iterators[p]->seek(xp);
+                    if(iterators[p]->atEnd()){
+                        at_end = true;
+                        return;
+                    }
+                    else{
+                        xp = iterators[p]->key();
+                        p = modulo(p+1,k);
+                    }
+                }
+            }
+        }
+
+        /*
+            Moves all iterators to the next instance of the variable their are standing in
+        */
+        void leapfrog_next(){
+            iterators[p]->next();
+            if(iterators[p]->atEnd()) at_end = true;
+            else{
+                p = modulo(p+1,k);
+                leapfrog_search();
+            }
+        }
+
+        /*
+            Finds the first element of all iterators that is greater or equal that seekKey
+        */
+        void leapfrog_seek(uint64_t seekKey){
+            iterators[p]->seek(seekKey);
+            if(iterators[p]->atEnd()) at_end = true;
+            else{
+                p = modulo(p+1,k);
+                leapfrog_search();
+            }
+        }
+};
+
+
 class LTJ{
     
     private:
