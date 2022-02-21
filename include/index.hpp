@@ -16,14 +16,23 @@ class Index{
     private:
         u_int64_t dim;
         vector<string> orders;
-        vector<Iterator*> iterators;
+        map<string, CompactTrie*> orders_tries;
+        // vector<Iterator*> iterators;
         string folder = "../data/";
 
+        void set_orders_tries(vector<CompactTrie*> tries){
+            for(int i=0; i<orders.size(); i++){
+                orders_tries[orders[i]] = tries[i];
+            }
+        }
+
     public:
-        Index(u_int64_t d, vector<string> ord, vector<Iterator*> its, string file_name){
+        Index(u_int64_t d, vector<string> ord, vector<CompactTrie*> tries, string file_name){
+            //SE ASUME QUE EL PRIMER ORDEN DEL INDICE SIEMPRE ES EL ORDEN EN EL QUE VIENE LA TABLA 
             dim = d;
             orders = ord;
-            iterators = its;
+            // iterators = its;
+            set_orders_tries(tries);
             /* The folder where the index file will be saved will be in the data folder 
             with the name of the file that was indexed */
             uint64_t s = file_name.size();
@@ -45,20 +54,19 @@ class Index{
             ofstream stream(folder+"info.txt");
             if(stream.is_open()){
                 stream<<"dim: "<<dim<<'\n';
-                stream<<"orders: ";
+                stream<<"orders:";
                 for(auto order: orders){
+                    cout<<"--"<<order<<"--"<<endl;
+                    if(!first)stream<<",";
                     stream<<order;
-                    if(!first){
-                        stream<<", ";
-                    }
                     first = false;
                 }
             }
             stream.close();
 
             u_int64_t i = 0;
-            for(auto it: iterators){
-                it->getCompactTrie()->storeToFile(folder+"order"+to_string(i)+".txt");
+            for(auto p: orders_tries){
+                p.second->storeToFile(folder+"order"+to_string(i)+".txt");
                 // it->storeToFile(folder+"order"+to_string(i)+".txt");
                 i++;
             }
@@ -90,14 +98,14 @@ class Index{
 
             for(int i=0; i<orders.size(); i++){
                 CompactTrie *ct = new CompactTrie(folder+"order"+to_string(i)+".txt");
-                iterators.push_back(new CurrentIterator(ct));
+                orders_tries[orders[i]] = ct;
             }
         }
         /*
-            Returns a pointer to the i-th iterator
+            Returns a pointer to the trie associated with the o order
         */
-        Iterator* getIterator(u_int64_t i){
-            return iterators[i];
+        CompactTrie* getTrie(string o){
+            return orders_tries[o];
         }
 
         /*
@@ -110,11 +118,11 @@ class Index{
         /*
             Resets iterators to their begining state
         */    
-        void resetIterators(){
-            for(auto it: iterators){
-                it->backToStart();
-            }
-        }
+        // void resetIterators(){
+        //     for(auto p: orders_iterators){
+        //         p.second->backToStart();
+        //     }
+        // }
 };
 
 #endif

@@ -19,6 +19,7 @@ class CompactTrieIterator: public Iterator{
     private:
         bool at_end;
         bool at_root;
+        int depth;
         uint64_t it;
         uint64_t parent_it;
         uint64_t pos_in_parent;
@@ -34,6 +35,7 @@ class CompactTrieIterator: public Iterator{
             it = 2;
             at_root = true;
             at_end = false;
+            depth = -1;
         }
 
         /*
@@ -41,6 +43,9 @@ class CompactTrieIterator: public Iterator{
         */
         ~CompactTrieIterator(){};
 
+        int get_depth(){
+            return depth;
+        }
         /*
             Returns the key of the current position of the iterator
         */
@@ -80,6 +85,7 @@ class CompactTrieIterator: public Iterator{
                     parent_it = it;
                     it = compactTrie->child(it, 1);
                     pos_in_parent = 1;
+                    depth++;
                 }
                 else throw "Node has no children";
             }
@@ -113,7 +119,7 @@ class CompactTrieIterator: public Iterator{
             if(at_root){
                 throw "At root, cant go up";
             }
-
+            depth--;
             it = parent_it;
             at_end = false;
             if(it==2){

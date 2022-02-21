@@ -48,7 +48,7 @@ string trim(string s, char to_cut){
 /*
     Recives contents of file and saves each line in a vector of strings
 */
-bool get_file_content(string filename, vector<string> & vector_of_strings)
+bool get_file_content(string filename, vector<string> & vector_of_strings, vector<vector<string>> & gaos)
 {
     // Open the File
     ifstream in(filename.c_str());
@@ -59,12 +59,21 @@ bool get_file_content(string filename, vector<string> & vector_of_strings)
         return false;
     }
     string str;
+    bool reading_query = true;
     // Read the next line from File untill it reaches the end.
     while (getline(in, str))
     {
-        // Line contains string of length > 0 then save it in vector
-        if(str.size() > 0)
-            vector_of_strings.push_back(str);
+        if(reading_query){
+            // Line contains string of length > 0 then save it in vector
+            if(str.size() > 0) vector_of_strings.push_back(str);
+            reading_query = false;
+        }
+        else{
+            gaos.push_back(parse(str, ' '));
+            reading_query = true;
+        }
+
+        
     }
     //Close The File
     in.close();

@@ -13,9 +13,9 @@ using namespace std;
 int main(int argc, char* argv[]){
     try{
         vector<string> queries;
-        bool have_queries =  get_file_content(argv[1], queries);
+        vector<vector<string>> gaos;
+        bool have_queries =  get_file_content(argv[1], queries, gaos);
         // string query1 = "?x1 ?x2 ?x3";
-
         // Debería hacerse un index por argc sin contar a las queries
         TableIndexer ti = TableIndexer();
         Index index1 = ti.indexNewTable(argv[2]);
@@ -27,7 +27,10 @@ int main(int argc, char* argv[]){
         if(have_queries){
             for(string query_string : queries){  
                 cout<<"Query "<<query_number<<":"<<endl;
-                query_number++; 
+                cout<<"GAO: ";
+                for(auto var: gaos[query_number-1]){
+                    cout<<var<<" ";
+                }cout<<endl;
                 vector<Term*> terms_created;
                 // Guarda en que tuplas se encuentra cada variable
                 map<string, set<uint64_t>> variable_tuple_mapping;
@@ -42,21 +45,18 @@ int main(int argc, char* argv[]){
                     term_index++;
                 }
 
-                for(auto p: variable_tuple_mapping){
-                    cout<<p.first<<": ";
-                    for(auto t: p.second)cout<<t<<" ";
-                    cout<<endl;
-                }
-
                 //En vez de tener terms created, en variable_mapping vamos a guardar las variables y los indices
 
-                LTJ ltj(indexes, query, variable_tuple_mapping);
-                ltj.triejoin();
-                ltj.evaluate();
+                LTJ ltj(indexes, query, gaos[query_number-1], variable_tuple_mapping);
+                cout<<"Constructor works"<<endl;
+                ltj.triejoin_definitivo();
+                query_number++; 
+                cout<<endl<<endl<<endl;
             }
         }  
     }
     catch(const char *msg){
-        cerr<<msg<<endl;
+        
+        cerr<<"ERROR DURING QUERY:"<<msg<<endl;
     }
 }

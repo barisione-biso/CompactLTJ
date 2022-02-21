@@ -22,6 +22,7 @@ class LeapfrogJoin{
         // Cantidad de iteradores (Cuantas queries)
         uint64_t k;
         uint64_t key;
+        uint64_t dim;
 
         /*
             Return module a%b, supports negative numbers
@@ -30,12 +31,63 @@ class LeapfrogJoin{
             return (b + (a%b)) % b;
         }
 
+        void traverse(){
+            int i=0;
+            for(auto it: iterators){
+                cout<<"Iterator "<<i<<endl;
+                while(true){
+                    string instr;
+                    cin>>instr;
+
+                    try{
+                        if(instr=="open")it->open();
+                        if(instr=="next")it->next();
+                        if(instr=="end")cout<<it->atEnd()<<endl;
+                        if(instr=="key")cout<<it->key()<<endl;
+                        // if(instr=="show")ct.showValues();
+                        if(instr=="up")it->up();
+                        if(instr=="seek"){
+                            int x;
+                            cin>>x;
+                            it->seek(x);
+                        }
+                        if(instr=="close")break;
+                    }
+                    catch(const char* msg){
+                        cerr<<msg<<endl;
+                    }
+                }
+                i++;
+            }
+
+            for(auto it: iterators){
+                it->backToStart();
+            }
+        }
+
     public:
 
-        LeapfrogJoin(vector<Iterator*> &its){
+        LeapfrogJoin(vector<Iterator*> &its, uint64_t d, string var){
             iterators = its;
             at_end = false;
             k = iterators.size();
+            dim = d;
+            // depth = 0;
+            // traverse();
+        }
+        
+        /*
+            Returns true if any iterator of the LeapfrogJoin is at the end
+        */
+        bool is_at_end(){
+            return at_end;
+        }
+        
+        /*
+            Returns the key on which all iterators are standing 
+        */
+        uint64_t get_key(){
+            return key;
         }
         
         /*
@@ -48,7 +100,6 @@ class LeapfrogJoin{
                 if(!at_end){
                     sort(iterators.begin(), iterators.end());
                     p = 0;
-                    leapfrog_search();
                 }   
         }
 
@@ -98,6 +149,63 @@ class LeapfrogJoin{
                 leapfrog_search();
             }
         }
+        
+        /*
+            Moves iterators whos index in up_indicator is true. Used when only some of the iterators
+            associated with this variable should go up.
+            It doesn't move values horizontaly in the new level, it only sets them up so that it 
+            the next LeapfrogJoin can use them
+        */
+        void up(vector<bool> &up_indicator){
+            for(int i=0; i<iterators.size(); i++){
+                auto it = iterators[i];
+                if(up_indicator[i]){
+                    it->up();
+                }
+                else{
+                    it->up();
+                    it->open();
+                }
+            }
+            at_end = false;
+        }
+
+        /*
+            Moves all iterators related to LeapfrogJoin to the level above their current level 
+            except those in the first level after the root. 
+            It doesn't move values horizontaly in the new level, it only sets them up so that it 
+            the next LeapfrogJoin can use them
+        */
+        void up(){
+            for(auto it:iterators){
+                if(it->get_depth() == 0){
+                    it->up();
+                    it->open();
+                }
+                else{
+                    it->up();
+                }
+            }
+            at_end = false;
+        }
+
+        /*
+            Moves all iterators to the next level, provided they are not in the last level, 
+            in that case it does nothing.
+            It doesn't move values horizontaly in the new level, it only sets them up so that it 
+            the next LeapfrogJoin can use them
+        */
+        void open(){
+            for(auto it: iterators){
+                if(it->get_depth()<dim-1){
+                    it->open();
+                }
+            }
+            at_end = false;
+            //QUESTION: hay que hacer leapfrog init cada vez?
+            leapfrog_init();
+            // p = 0;
+        }
 };
 
 
@@ -110,9 +218,12 @@ class LTJ{
         vector<Iterator*> iterators;
         vector<Index*> indexes;
         vector<Tuple*> query;
+        vector<Tuple*> modified_query;
+        int tuple_index = 0;
         map<string, set<uint64_t>> instances; 
         map<uint64_t, set<string>> variables_per_depth;
         map<string, set<uint64_t>> variable_tuple_mapping;
+        map<string, LeapfrogJoin*> variable_lj_mapping;
         bool at_end = false;
         uint64_t p = 0;
         uint64_t xp,x;
@@ -121,6 +232,7 @@ class LTJ{
         uint64_t iterator_count;
         u_int64_t depth;
         u_int64_t dim;
+        vector<string> gao;
 
         // Cosas para triejoin_tentativo
         vector<map<string, set<uint64_t>>> instances_per_query;
@@ -132,15 +244,15 @@ class LTJ{
             CURRENTLY: Chooses first order of the elements in the table
             TODO: Should choose and order for the table based on what the user whants  
         */  
-        void chooseOrder(){
-            /*
-                debe elegir que iterador de cada indice ocupar
-                de momento será el primero
-            */
-            for(auto ind: indexes){
-                iterators.push_back(ind->getIterator(0));
-            }
-        }
+        // void chooseOrder(){
+        //     /*
+        //         debe elegir que iterador de cada indice ocupar
+        //         de momento será el primero
+        //     */
+        //     for(auto ind: indexes){
+        //         iterators.push_back(ind->getIterator(0));
+        //     }
+        // }
 
         /*
             Return module a%b, supports negative numbers
@@ -150,43 +262,132 @@ class LTJ{
         }
 
         /*
-            Resets all indexes to their start configuration
+            Resets all iterators to their start configuration
         */
-        void resetIndexes(){
+        void resetIterators(){
             at_end = false;
-            for(auto i: indexes){
-                i->resetIterators();
+            for(auto it: iterators){
+                it->backToStart();
             }
+            // for(auto i: indexes){
+            //     i->resetIterators();
+            // }
         }
 
         /* 
             Adds one iterator for each element in the query to the the iterators vector
         */
-        void addIterators(){
-            CompactTrie *ct = iterators[0]->getCompactTrie();
-            for(int i=1; i<query.size(); i++){
-                iterators.push_back(new CompactTrieIterator(ct));
+        // void addIterators(){
+        //     CompactTrie *ct = iterators[0]->getCompactTrie();
+        //     for(int i=1; i<query.size(); i++){
+        //         iterators.push_back(new CompactTrieIterator(ct));
+        //     }
+        // }
+
+        /*
+            Creates one leapfrog join for each variable on the join and assignes it the iterators 
+            asociated with the tuples that contain that variable
+        */
+        void createLeapfrogJoins(){
+            for(auto p: variable_tuple_mapping){
+                string var = p.first;
+                vector<Iterator*> iter;
+                for(auto tup: p.second){
+                    iter.push_back(iterators[tup]);
+                } 
+                variable_lj_mapping[var] = new LeapfrogJoin(iter, dim, var);
+            }
+        }
+
+        /*
+            Returns a string containing the constants that are in the tuple, 
+            it also adds the term asociated to the constant to the terms vector
+        */
+        string getConstantsOrder(Tuple* tuple, int &added_items, vector<Term*> &terms){
+            stringstream order;
+            for(int i=0; i<dim; i++){
+                Term* term = tuple->get_term(i);
+                if(!term->isVariable()){
+                    order<<i<<" ";
+                    added_items++;
+                    terms.push_back(term);
+                }
+            }
+            return order.str();
+        }
+
+        /*
+            Returns a strign containing the variables that are in tuple, but ordered according to the gao 
+            vector, it also adds the terms associated with each variable to the terms vector in the gao order
+        */
+        string getVariableOrder(Tuple* tuple, vector<string> gao, int &added_items, vector<Term*> &terms){
+            stringstream order;
+            for(auto var: gao){
+                for(int i=0; i<dim; i++){
+                    Term* term = tuple->get_term(i);
+                    if(term->isVariable() && term->getVariable() == var){
+                        order<<i;
+                        added_items++;
+                        if(added_items < dim)order<<" ";
+                        terms.push_back(term);
+                        break;
+                    }
+                }
+            }
+            return order.str();
+        }
+
+        /*
+            Adds iterators to the iteratos vector creating a CompactTrieIterator using the order 
+            that is required by gao. It also stores in modified query, the updated version of the query that follows the gao order.
+        */
+        void setIterators(vector<string> &gao){
+            vector<string> required_orders;
+            for(auto tuple: query){
+                stringstream order;
+                int added_items = 0;
+                vector<Term*> terms;
+                order<<getConstantsOrder(tuple, added_items, terms);
+                order<<getVariableOrder(tuple, gao, added_items, terms);
+                order.seekp(-1, std::ios_base::end);
+                required_orders.push_back(order.str());
+                modified_query.push_back(new Tuple(terms));
+            }
+
+            for(auto order : required_orders){
+                iterators.push_back(new CompactTrieIterator(indexes[0]->getTrie(order)));
+            }
+
+            cout<<"ORDERS: "<<endl;
+            for(auto order : required_orders){
+                cout<<"-"<<order<<"-"<<endl;
             }
         }
 
     public:
-        LTJ(vector<Index*> &ind, vector<Tuple*> &q, map<string, set<uint64_t>> &variables_to_index){
+        LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index){
+            cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             indexes = ind;
             query = q;
+            gao = gao_vector;
             /*De momento se asume que todas las tablas tienen la misma dimensión*/
             dim = indexes[0]->getDim();
+            
+            setIterators(gao);
             // Elige el orden
-            chooseOrder();
+            // chooseOrder();
             // Agrega todos los iteradores al vector de iteradores. Uno por cada tupla de la query
-            addIterators();
+            // addIterators();
+            variable_tuple_mapping = variables_to_index;
+            createLeapfrogJoins();
             //k es la cantidad de iteradores que se recorrerán que para la nueva solución son la cantidad de 
             //tuplas en q
             // k = q.size();
             k = iterators.size();
             depth = 0;
-            variable_tuple_mapping = variables_to_index;
-            resetIndexes();
+            
+            // resetIndexes();
             //para triejoin_tentativo
             instances_per_query.resize(query.size());
         }
@@ -249,7 +450,8 @@ class LTJ{
             Moves all iterators to the next instance of the variable their are standing in
         */
         void leapfrog_next(){
-            // cout<<"leapfrog_next"<<endl;
+            cout<<"leapfrog_next"<<endl;
+            cout<<"p is "<<p<<endl;
             iterators[p]->next();
             if(iterators[p]->atEnd()) at_end = true;
             else{
@@ -262,11 +464,12 @@ class LTJ{
             Makes all iterators open to go to the next variable
         */
         void triejoin_open(){
-            // cout<<"trijoin_open"<<endl;
+            cout<<"trijoin_open"<<endl;
             depth++;
             for(auto it:iterators){
                 it->open();
             }
+            cout<<"Opened"<<endl;
             leapfrog_init();
         }
 
@@ -463,7 +666,7 @@ class LTJ{
                         goUpAndSearch(is_variable, current_depth, current_values, variable, tupla); 
                     }
                 }
-                resetIndexes();
+                resetIterators();
                 depth = 0;
             }
         }
@@ -476,8 +679,252 @@ class LTJ{
                     cout<<v<<" ";
                 }
                 cout<<endl;
+            }    
+        }
+        
+        /*
+            Returns the index of the variable in the given tuple. -1 if the variable isn't in the tuple
+        */
+        int get_var_index_in_tuple(Tuple *tuple, string var){
+            for(int i=0; i<dim; i++){
+                Term *term = tuple->get_term(i);
+                if(term->isVariable() && term->getVariable()==var){
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /*
+            Returns gao score for the given variable 
+        */
+        int get_gao_score(string var){
+            for(int i=0; i<gao.size(); i++){
+                if(gao[i]==var)return i;
+            }
+            return -1;
+        }
+        
+        /*
+            Returns a vector indicating if each of the iterators associated with the variable should, 
+            or can go up a level
+        */
+        vector<bool> check_for_prev_value(string var){
+            vector<bool> should_go_up;
+            for(auto tuple_index : variable_tuple_mapping[var]){
+                Tuple *tuple = modified_query[tuple_index];
+                int term_index = get_var_index_in_tuple(tuple, var);
+                if(term_index == 0){
+                    should_go_up.push_back(false);
+                }
+                else{
+                    Term *prev_term = tuple->get_term(term_index-1);
+                    if(!prev_term->isVariable()){
+                        should_go_up.push_back(false);
+                    }
+                    else{
+                        should_go_up.push_back(true);
+                    }
+                }
+            }
+            return should_go_up;
+        }
+        
+        /*
+            Goes up on all necessary iterators until gao_index and gao_score are the same. 
+            If at the final position there is an iterator at_end, then it calls goUp.
+        */
+        bool goUpUntil(int gao_score, int &gao_index){
+            int beg = gao_index;
+            for(int i=beg; i>gao_score; i--){
+                string var = gao[i];
+                if(debug)cout<<"Going up on var "<<var<<endl;
+                LeapfrogJoin* lj = variable_lj_mapping[var];
+                vector<bool> should_go_up = check_for_prev_value(var);
+                lj->up(should_go_up);
+                // lj->up();
+                gao_index--;
+            }
+            LeapfrogJoin* lj = variable_lj_mapping[gao[gao_score]];
+            lj->leapfrog_next();
+            if(lj->is_at_end()){
+                if(gao_score==0){
+                    if(debug)cout<<"Cant go up"<<endl;
+                    return true;
+                }
+                if(debug)cout<<"going up again on "<<gao[gao_index]<<" index "<<gao_index<<endl;
+                return goUp(gao[gao_index], gao_index);
+            }
+            else{
+                return false;
+            }
+        }
+        
+        /*
+            Checks until what variable should all iterators go up, based on the previous variable with 
+            the smalles gao_score. It moves the iterators up until they can search for a new match or 
+            en up in the root
+        */
+        bool goUp(string var, int &gao_index){
+            //Cual es la variable de menor gao a la que se llega
+            //1. En que consultas está la variable actual?
+            //2. En cada consulta cual era la variable anterior
+            //3. Ver cual es la variable anterior con menor gao
+            if(debug)cout<<"Index in each tuple of "<<var<<endl;
+            vector<pair<int, string>> gao_scores;
+            for(auto tuple_index : variable_tuple_mapping[var]){
+                if(debug)cout<<"tuple_index "<<tuple_index<<endl;
+                Tuple *tuple = modified_query[tuple_index];
+                if(debug)cout<<"got tuple "<<tuple_index<<" successfuly"<<endl;
+                int term_index = get_var_index_in_tuple(tuple, var);
+                if(term_index == 0){
+                    continue;
+                }
+                else{
+                    Term *prev_term = tuple->get_term(term_index-1);
+                    if(!prev_term->isVariable()){
+
+                        //TODO: Esto no se debería hacer porque altera los valores de at_end de los LJ
+                        // iterators[tuple_index]->up();
+                        // iterators[tuple_index]->open();
+                        // //Hacer hacer up y luego open para quedar en el primer valor de esta misma variable
+                    }
+                    else{
+                        int gao_score = get_gao_score(prev_term->getVariable());
+                        gao_scores.push_back(make_pair(gao_score, prev_term->getVariable()));
+                    }
+                }
+            }
+            sort(gao_scores.begin(), gao_scores.end());
+            if(gao_scores.size() == 0){
+                return true;
+            }
+            else{
+                int new_gao_index = gao_scores[0].first;
+                if(debug)cout<<"new gao index "<<new_gao_index<<endl;
+                return goUpUntil(new_gao_index, gao_index);
             }
 
+
+        }
+
+        void triejoin_definitivo(){
+            //I: Para mostrar tabla de resultados
+            vector<vector<int>> results;
+            vector<int> result(gao.size());
+            //F: Para mostrar tabla de resultados
+            if(debug)cout<<"Starting Triejoin"<<endl;
+            triejoin_open();
+            bool finished = false;
+            //Donde nos encontramos en cada iterador?
+            if(debug)cout<<"Iterators positions and keys:"<<endl;
+            for(auto it: iterators){
+                if(debug)cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            }
+
+            //Resolvemos las constantes para todas las tuplas
+            if(debug)cout<<"Working with constants"<<endl;
+            for(int i=0; i<modified_query.size(); i++){
+                Tuple* tuple = modified_query[i];
+                for(int j=0; j<dim; j++){
+                    Term* term = tuple->get_term(j);
+                    if(!term->isVariable()){
+                        if(debug)cout<<"Term no es variable es "<<term->getConstant()<<endl;
+                        iterators[i]->seek(term->getConstant());
+                        if(iterators[i]->key() == term->getConstant()){
+                            if(debug)cout<<"Se encontró la constante "<<term->getConstant()<<endl;
+                            iterators[i]->open();
+                        }
+                        // cout<<"se movió iterador "<<i<<" a "<<iterators[i]->key()<<endl;
+                    }
+                    else break;
+                }
+            }
+            if(debug)cout<<"Constants handled"<<endl;
+
+            //Donde nos encontramos en cada iterador?
+            if(debug)cout<<"Iterators positions and keys:"<<endl;
+            for(auto it: iterators){
+                if(debug)cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            }
+
+
+            //Resolvemos las variables en el órden en el que aparecen en gao
+            int gao_index = 0;
+            while(gao_index < gao.size() && !finished){
+                string var = gao[gao_index];
+                if(debug)cout<<"buscando para var "<<var<<endl;
+                LeapfrogJoin* lj = variable_lj_mapping[var];
+                if(debug)cout<<"Se encontró LJ para "<<var<<endl;
+                
+                // if(lj->is_at_end()){
+                //     cout<<"variable was in end"<<endl;
+                //     try{
+                //         lj->up();
+                //         lj->leapfrog_next();
+                //         gao_index--;
+                //     }
+                //     catch(const char *msg){
+                //         return;
+                //     }
+                // }
+                // if(from_up){
+                //     lj->leapfrog_next();
+                //     from_up = false;
+                // }
+                // else{
+                //     // cout<<"LJ not at end"<<endl;
+                    
+                //     // cout<<"Se hizo search en LJ"<<endl;
+                // }
+                lj->leapfrog_search();
+                int current_level = gao_index;
+                while(current_level == gao_index){
+                    if(lj->is_at_end()){
+                        if(gao_index == 0)return;
+                        else {
+                            try{
+                                finished = goUp(var, gao_index);
+                                // Si lj tiene sólo un iterador podemos llegar y subir
+                                // lj->up();
+                                // from_up = true;
+                                // gao_index--;
+                            }
+                            catch(const char *msg){
+                                return;
+                            }
+                            
+                        }
+                    }
+                    else{
+                        result[gao_index] = lj->get_key();
+                        cout<<var<<": "<<lj->get_key()<<endl;
+                        if(gao_index == gao.size()-1){
+                            results.push_back(result);
+                            if(debug)cout<<"Fin del resultado!"<<endl;
+                            lj->leapfrog_next();
+                        }
+                        else{
+                            lj->open();
+                            gao_index++;
+                            // cout<<"found result"<<endl;
+                        }
+                    }
+                } 
+            }
+
+            for(auto var : gao){
+                cout<<var<<"|";
+            }
+            cout<<endl;
+
+            for(auto res : results){
+                for(auto val: res){
+                    cout<<val<<"  |";
+                }
+                cout<<endl;
+            }
+            cout<<endl;
             
         }
         /*
@@ -552,6 +999,8 @@ class LTJ{
             }
         }
         */
+
+        
         //Probando
 
         void keys(){

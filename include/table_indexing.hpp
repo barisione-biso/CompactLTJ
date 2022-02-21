@@ -31,7 +31,7 @@ class TableIndexer{
     Trie* root;
     bit_vector B;
     string S;
-    vector<Iterator *> compactTries;
+    vector<CompactTrie *> compactTries;
 
     /*
         Turns uint64_t vector in to bitvector B 
@@ -116,7 +116,7 @@ class TableIndexer{
             createRegularTrie(index);
             toCompactForm();
             CompactTrie *ct = new CompactTrie(B,S);
-            compactTries.push_back(new CurrentIterator(ct));
+            compactTries.push_back(ct);
             delete root;
         }
     }
@@ -191,8 +191,11 @@ class TableIndexer{
 
             do{
                 stream.str("");
+                bool first = true;
                 for(auto &value: rows){
-                    stream<<value<<" ";
+                    if(!first)stream<<" ";
+                    stream<<value;
+                    first=false;
                 }
                 orders.push_back(stream.str());
             }while(next_permutation(rows.begin(), rows.end()));
