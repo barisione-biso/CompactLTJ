@@ -142,10 +142,12 @@ class TableIndexer{
     */
     Index indexNewTable(string file_name){
         clearData();
-        if(file_name.substr(file_name.size()-4, 4) != ".txt") {
+        string file_extention = file_name.substr(file_name.size()-4, 4);
+        if(file_extention != ".txt" && file_extention != ".dat") {
             Index ind(file_name);
             return ind;
         }
+        cout<<"building index"<<endl;
         ifstream reader(file_name);
         string line;
         bool first_line = true;

@@ -3,10 +3,19 @@
 
 #include <fstream>
 #include <sstream> 
+#include <set>
+#include <map>
 #include "term.hpp"
 #include "tuple.hpp"
 
 using namespace std;
+
+bool onlySpaces(string &s){
+    for(auto c : s){
+        if(c!=' ')return false;
+    }
+    return true;
+}
 /*
     Parses string (line) by a single char (delimiter)
     Returns vector with all the parts of the parsed string 
@@ -23,7 +32,8 @@ vector<string> parse(string line, char delimiter){
     }
 
     if(first !=line.size()){
-        results.push_back(line.substr(first, line.size()-first));
+        string last_bit = line.substr(first, line.size()-first);
+        if(!onlySpaces(last_bit))results.push_back(last_bit);
     }
 
     return results;

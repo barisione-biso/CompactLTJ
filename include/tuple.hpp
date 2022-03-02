@@ -41,7 +41,7 @@ class Tuple {
                 t->getValues();
                 cout<<" ";
             }
-            cout<<endl;
+            // cout<<endl;
         }
 };
 #endif

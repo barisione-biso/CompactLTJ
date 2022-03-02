@@ -831,9 +831,14 @@ class LTJ{
                     if(!term->isVariable()){
                         if(debug)cout<<"Term no es variable es "<<term->getConstant()<<endl;
                         iterators[i]->seek(term->getConstant());
-                        if(iterators[i]->key() == term->getConstant()){
+                        if(!iterators[i]->atEnd() && iterators[i]->key() == term->getConstant()){
                             if(debug)cout<<"Se encontró la constante "<<term->getConstant()<<endl;
                             iterators[i]->open();
+                        }
+                        else{
+                            // Si es que el valor no es igual a la constante entonces no 
+                            // hay valores que cumplan esta tupla
+                            return;
                         }
                         // cout<<"se movió iterador "<<i<<" a "<<iterators[i]->key()<<endl;
                     }

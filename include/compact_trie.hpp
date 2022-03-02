@@ -16,7 +16,7 @@ using namespace sdsl;
 class CompactTrie{
     private:
         bit_vector B;
-        wm_int<> wt;
+        // wm_int<> wt;
 
         /*
             Initializes rank and select support for B
@@ -50,6 +50,8 @@ class CompactTrie{
         rank_support_v<0> b_rank0;
         select_support_mcl<0> b_sel0;
         select_support_mcl<1> b_sel1;
+
+        wm_int<> wt;
 
         /*
             Constuctor from LOUDS representation (b) and tags for trie representations (s)
