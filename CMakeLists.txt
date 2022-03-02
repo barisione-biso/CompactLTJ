@@ -47,5 +47,5 @@ add_executable(query_index src/query_index.cpp)
 # 3rd party libs
 add_subdirectory(./libs/sdsl-lite)
 target_link_libraries( main sdsl divsufsort divsufsort64)
-target_link_libraries( build_index PUBLIC ${CXX_FILESYSTEM_LIBRARIES} sdsl divsufsort divsufsort64)
-target_link_libraries( query_index PUBLIC ${CXX_FILESYSTEM_LIBRARIES} sdsl divsufsort divsufsort64)
+target_link_libraries( build_index PUBLIC stdc++fs sdsl divsufsort divsufsort64)
+target_link_libraries( query_index PUBLIC stdc++fs sdsl divsufsort divsufsort64)
