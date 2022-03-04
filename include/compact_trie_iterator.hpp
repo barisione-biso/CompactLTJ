@@ -151,8 +151,13 @@ class CompactTrieIterator: public Iterator{
             uint64_t f = compactTrie->b_rank0(compactTrie->child(parent_it, parent_child_count))-2;
             
             bool found = false;
+
+            // cout<<"RNV: "<<compactTrie->wt.range_next_value(seek_key, i, f)<<endl;
             for(i=i; i<=f; i++){
+
                 if(compactTrie->get_wt_at(i)>=seek_key){
+                    // cout<<"wt at: "<<compactTrie->get_wt_at(i)<<endl;
+                    // cout<<"i RNV: "<<i<<endl;
                     it = compactTrie->b_sel0(i+2)+1;
                     pos_in_parent = compactTrie->childRank(it);
                     found = true;

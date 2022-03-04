@@ -366,7 +366,7 @@ class LTJ{
 
     public:
         LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index){
-            cout<<"Calling LTJ constructor"<<endl;
+            // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             indexes = ind;
             query = q;
@@ -464,12 +464,12 @@ class LTJ{
             Makes all iterators open to go to the next variable
         */
         void triejoin_open(){
-            cout<<"trijoin_open"<<endl;
+            // cout<<"trijoin_open"<<endl;
             depth++;
             for(auto it:iterators){
                 it->open();
             }
-            cout<<"Opened"<<endl;
+            // cout<<"Opened"<<endl;
             leapfrog_init();
         }
 
