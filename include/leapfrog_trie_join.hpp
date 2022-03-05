@@ -931,6 +931,12 @@ class LTJ{
             }
             cout<<endl;
             
+            ofstream stream("../data/result.txt");
+            if(stream.is_open()){
+                stream<<"Termino ejecución"<<'\n';
+                stream<<"Cantidad de resultados "<<results.size()<<'\n';
+            }
+            stream.close();
         }
         /*
         void trijoin_tentativo(){
