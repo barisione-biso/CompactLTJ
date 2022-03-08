@@ -19,6 +19,11 @@ int main(int argc, char* argv[]){
         // Debería hacerse un index por argc sin contar a las queries
         TableIndexer ti = TableIndexer();
         Index index1 = ti.indexNewTable(argv[2]);
+
+        uint64_t limit = -1;
+        if(argc > 3){
+            limit = stoi(argv[3]);
+        }
         // Index index2 = ti.indexNewTable(argv[3]);
 
         // vector<Index*> indexes = {&index1, &index2};
@@ -47,7 +52,7 @@ int main(int argc, char* argv[]){
 
                 //En vez de tener terms created, en variable_mapping vamos a guardar las variables y los indices
 
-                LTJ ltj(indexes, query, gaos[query_number-1], variable_tuple_mapping);
+                LTJ ltj(indexes, query, gaos[query_number-1], variable_tuple_mapping, limit);
                 cout<<"Constructor works"<<endl;
                 ltj.triejoin_definitivo();
                 query_number++; 

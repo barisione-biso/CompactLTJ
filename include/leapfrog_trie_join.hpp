@@ -238,6 +238,7 @@ class LTJ{
         u_int64_t depth;
         u_int64_t dim;
         vector<string> gao;
+        uint64_t limit;
 
         // Cosas para triejoin_tentativo
         vector<map<string, set<uint64_t>>> instances_per_query;
@@ -371,7 +372,7 @@ class LTJ{
         }
 
     public:
-        LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index){
+        LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             indexes = ind;
@@ -396,6 +397,7 @@ class LTJ{
             // resetIndexes();
             //para triejoin_tentativo
             instances_per_query.resize(query.size());
+            limit = lmt;
         }
 
         /*
@@ -819,6 +821,7 @@ class LTJ{
             vector<vector<int>> results;
             vector<int> result(gao.size());
             //F: Para mostrar tabla de resultados
+            uint64_t count=0;
             if(debug)cout<<"Starting Triejoin"<<endl;
             triejoin_open();
             bool finished = false;
@@ -913,6 +916,11 @@ class LTJ{
                         if(debug)cout<<var<<": "<<lj->get_key()<<endl;
                         if(gao_index == gao.size()-1){
                             results.push_back(result);
+                            count++;
+                            if(count == limit){
+                                finished = true;
+                                break;
+                            }
                             if(debug)cout<<"Fin del resultado!"<<endl;
                             lj->leapfrog_next();
                         }
