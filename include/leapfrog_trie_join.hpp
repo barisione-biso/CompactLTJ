@@ -23,6 +23,7 @@ class LeapfrogJoin{
         uint64_t k;
         uint64_t key;
         uint64_t dim;
+        bool debug=false;
 
         /*
             Return module a%b, supports negative numbers
@@ -105,9 +106,13 @@ class LeapfrogJoin{
 
         void leapfrog_search(){
             //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
+            if(debug)cout<<"Entrando a leapfrog_search"<<endl;
             xp = iterators[modulo(int(p)-1,k)]->key();
+            if(debug)cout<<"xp es "<<xp<<endl;
             while(true){
+                if(debug)cout<<"p es "<<p<<endl;
                 x = iterators[p]->key();
+                if(debug)cout<<"x es "<<x<<endl;
                 if(x==xp){
                     key = x;
                     return;
@@ -296,6 +301,7 @@ class LTJ{
                     iter.push_back(iterators[tup]);
                 } 
                 variable_lj_mapping[var] = new LeapfrogJoin(iter, dim, var);
+                variable_lj_mapping[var]->leapfrog_init();
             }
         }
 
@@ -883,6 +889,7 @@ class LTJ{
                 //     // cout<<"Se hizo search en LJ"<<endl;
                 // }
                 lj->leapfrog_search();
+                if(debug)cout<<"Se hizo search"<<endl;
                 int current_level = gao_index;
                 while(current_level == gao_index){
                     if(lj->is_at_end()){
@@ -903,7 +910,7 @@ class LTJ{
                     }
                     else{
                         result[gao_index] = lj->get_key();
-                        cout<<var<<": "<<lj->get_key()<<endl;
+                        if(debug)cout<<var<<": "<<lj->get_key()<<endl;
                         if(gao_index == gao.size()-1){
                             results.push_back(result);
                             if(debug)cout<<"Fin del resultado!"<<endl;
