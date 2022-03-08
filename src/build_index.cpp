@@ -4,6 +4,9 @@
 
 using namespace std;
 
+using namespace std::chrono;
+using timer = std::chrono::high_resolution_clock;
+
 int main(int argc, char **argv){
     try{
         
@@ -11,14 +14,21 @@ int main(int argc, char **argv){
             cout<<"No extra command line argument given other that program name"<<endl;
             return 0;
         }
+        
 
         TableIndexer ti = TableIndexer();
 
-        for(int i=1; i<argc; i++){
-            string file_name = argv[i];
-            Index ind = ti.indexNewTable(file_name);
-        }
+        // for(int i=1; i<argc; i++){
+            
+        // }
+
+        string file_name = argv[1];
+        auto start = timer::now();
+        Index ind = ti.indexNewTable(file_name);
+        auto stop = timer::now();
         
+        cout << "Index saved" << endl;
+        cout << duration_cast<seconds>(stop-start).count() << " seconds." << endl;
         // ti.indexNewTable(file_name);
         
         // ind.save();
