@@ -4,13 +4,13 @@
 #include <iostream>
 #include <string>
 #include "iterator.hpp"
-#include <filesystem>
+#include <experimental/filesystem>
 #include "utils.hpp"
 #include "config.hpp"
 #include "compact_trie.hpp"
 
 using namespace std;
-namespace fs = std::__fs::filesystem;
+namespace fs = std::experimental::filesystem;
 
 class Index{
     private:
