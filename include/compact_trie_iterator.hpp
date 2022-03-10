@@ -17,6 +17,7 @@ using namespace sdsl;
 
 class CompactTrieIterator: public Iterator{
     private:
+        bool debug = false;
         bool at_end;
         bool at_root;
         int depth;
@@ -136,6 +137,7 @@ class CompactTrieIterator: public Iterator{
             If not possible then it moves the iterator to the end
         */
         void seek(uint64_t seek_key){
+            if(debug)cout<<"Se llama a seek de "<<seek_key<<endl;
             if(at_root){
                 throw "At root, cant seek";
             }
@@ -151,22 +153,40 @@ class CompactTrieIterator: public Iterator{
             uint64_t f = compactTrie->b_rank0(compactTrie->child(parent_it, parent_child_count))-2;
             
             bool found = false;
+            if(debug)cout<<"i y f "<<i<<" "<<f<<endl;
+            if(debug)cout<<"parent_child_count "<<parent_child_count<<endl;
+            if(debug)cout<<"it "<<it<<endl;
+           
+            // auto new_info = compactTrie->wt.range_next_value_pos(seek_key, i, f);
+            // auto val = new_info.first;
+            // auto pos = new_info.second;
+            
+            // for(auto j=i; j<=f; j++){
+            //     // if(debug)cout<<compactTrie->get_wt_at(j)<<endl;
+            //     if(compactTrie->get_wt_at(j)>=seek_key){
+            //         if(debug)cout<<"wt at: "<<compactTrie->get_wt_at(j)<<endl;
+            //         if(debug)cout<<"i RNV: "<<j<<endl;
+            //         it = compactTrie->b_sel0(j+2)+1;
+            //         pos_in_parent = compactTrie->childRank(it);
+            //         found = true;
+            //         break;
+            //     }
+            // }
 
-            // cout<<"RNV: "<<compactTrie->wt.range_next_value(seek_key, i, f)<<endl;
-            for(i=i; i<=f; i++){
+            // if(!found){
+            //     at_end = true;
+            // }
 
-                if(compactTrie->get_wt_at(i)>=seek_key){
-                    // cout<<"wt at: "<<compactTrie->get_wt_at(i)<<endl;
-                    // cout<<"i RNV: "<<i<<endl;
-                    it = compactTrie->b_sel0(i+2)+1;
-                    pos_in_parent = compactTrie->childRank(it);
-                    found = true;
-                    break;
-                }
-            }
-
-            if(!found){
+            auto new_info = compactTrie->wt.range_next_value_pos(seek_key, i, f);
+            auto val = new_info.first;
+            auto pos = new_info.second;
+            
+            if(pos == f+1){
                 at_end = true;
+            }
+            else{
+                it = compactTrie->b_sel0(pos+2)+1;
+                pos_in_parent = compactTrie->childRank(it);
             }
         }
 
