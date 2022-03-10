@@ -66,7 +66,7 @@ class Index{
 
             u_int64_t i = 0;
             for(auto p: orders_tries){
-                p.second->storeToFile(folder+"order"+to_string(i)+".txt");
+                p.second->storeToFile(folder+"order"+to_string(i));
                 // it->storeToFile(folder+"order"+to_string(i)+".txt");
                 i++;
             }
@@ -97,7 +97,7 @@ class Index{
             stream.close();
 
             for(int i=0; i<orders.size(); i++){
-                CompactTrie *ct = new CompactTrie(folder+"order"+to_string(i)+".txt");
+                CompactTrie *ct = new CompactTrie(folder+"order"+to_string(i));
                 orders_tries[orders[i]] = ct;
             }
         }

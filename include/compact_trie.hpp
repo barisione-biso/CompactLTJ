@@ -51,7 +51,7 @@ class CompactTrie{
         select_support_mcl<0> b_sel0;
         select_support_mcl<1> b_sel1;
 
-        wm_int<> wt;
+        wm_int<bit_vector> wt;
 
         /*
             Constuctor from LOUDS representation (b) and tags for trie representations (s)
@@ -153,42 +153,20 @@ class CompactTrie{
             Stores Compact Trie Iterator to file saving the size of B, B and S.
         */
         void storeToFile(string file_name){
-            ofstream stream(file_name);
-            if(stream.is_open()){
-                stream<<B.size()<<'\n';
-                for(uint64_t i=0; i<B.size(); i++){
-                    stream<<B[i]<<" ";
-                }
-                stream<<'\n';
-                for(uint64_t i=0; i<wt.size(); i++){
-                    stream<<wt[i]<<" ";
-                }
-            }
-            stream.close();
+            string B_file = file_name + ".B";
+            string WM_file = file_name + ".WM";
+            store_to_file(B, B_file);
+            store_to_file(wt, WM_file);
         }
 
         /*
             Loads Compact Trie from file restoring B and the Wavelet Tree
         */
         void loadFromFile(string file_name){
-            ifstream stream(file_name);
-            uint64_t B_size;
-            string s;
-            uint64_t val;
-
-            if(stream.is_open()){
-                stream>>B_size;
-                B = bit_vector(B_size);
-                for(uint64_t i=0; i<B_size; i++){
-                    stream>>val;
-                    B[i] = val;
-                }
-                stream.ignore(numeric_limits<streamsize>::max(),'\n');
-                getline(stream, s);
-            }
-            stream.close();
-            
-            construct_im(wt, s, 'd');
+            string B_file = file_name + ".B";
+            string WM_file = file_name + ".WM";
+            load_from_file(B, B_file);
+            load_from_file(wt, WM_file);
             initializeSupport();
         }
 };
