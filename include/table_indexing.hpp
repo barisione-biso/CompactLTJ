@@ -30,7 +30,8 @@ class TableIndexer{
     bool all_orders;
     Trie* root;
     bit_vector B;
-    string S;
+    int_vector<64> S;
+    // string S;
     vector<CompactTrie *> compactTries;
 
     /*
@@ -47,14 +48,14 @@ class TableIndexer{
     /*
         Turns uint64_t vector in to string S
     */
-    void toSequence(vector<uint64_t> &s){
-        ostringstream stream;
+    // void toSequence(vector<uint64_t> &s){
+    //     ostringstream stream;
 
-        for(auto &val: s){
-            stream<<val<<" ";
-        }
-        S = stream.str();
-    }
+    //     for(auto &val: s){
+    //         stream<<val<<" ";
+    //     }
+    //     S = stream.str();
+    // }
 
     /*
         Creates a traditional trie with the table contents following the order in index
@@ -99,7 +100,12 @@ class TableIndexer{
         }
 
         toBitvector(b);
-        toSequence(s);
+
+        S.resize(s.size());
+        for(auto i=0; i<s.size(); i++){
+            S[i] = s[i];
+        } 
+        // toSequence(s);
     }
 
     /*
@@ -141,7 +147,8 @@ class TableIndexer{
         Second line of the file indicates which orders need to be indexed.
     */
     Index indexNewTable(string file_name){
-        clearData();
+        //Solo estamos indexando una tabla asi que el clear no es necesario
+        //clearData();
         string file_extention = file_name.substr(file_name.size()-4, 4);
         if(file_extention != ".txt" && file_extention != ".dat") {
             Index ind(file_name);
@@ -202,6 +209,9 @@ class TableIndexer{
                 orders.push_back(stream.str());
             }while(next_permutation(rows.begin(), rows.end()));
         }
+
+        // A partir de acá se define la creación del indice
+        
         createIndexes();
         // compactTrie.store_to_file();
         Index ind(dim ,orders, compactTries, file_name);
