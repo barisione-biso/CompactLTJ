@@ -20,10 +20,12 @@ class CompactTrieIterator: public Iterator{
         bool debug = false;
         bool at_end;
         bool at_root;
+        bool key_flag;
         int depth;
         uint64_t it;
         uint64_t parent_it;
         uint64_t pos_in_parent;
+        uint64_t key_val;
         CompactTrie * compactTrie;
 
     public:
@@ -37,6 +39,7 @@ class CompactTrieIterator: public Iterator{
             at_root = true;
             at_end = false;
             depth = -1;
+            key_flag = false;
         }
 
         /*
@@ -58,7 +61,11 @@ class CompactTrieIterator: public Iterator{
                 throw "Root doesnt have key";
             }
             else{
-                return compactTrie->key_at(it);
+                if(key_flag){
+                    key_flag = false;
+                    return key_val;
+                }
+                else return compactTrie->key_at(it);
             }
         }
 
@@ -187,6 +194,8 @@ class CompactTrieIterator: public Iterator{
             else{
                 it = compactTrie->b_sel0(pos+2)+1;
                 pos_in_parent = compactTrie->childRank(it);
+                key_flag = true;
+                key_val = val;
             }
         }
 
