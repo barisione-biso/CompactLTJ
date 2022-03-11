@@ -18,7 +18,8 @@ int main(int argc, char* argv[]){
         // string query1 = "?x1 ?x2 ?x3";
         // Debería hacerse un index por argc sin contar a las queries
         TableIndexer ti = TableIndexer();
-        Index index1 = ti.indexNewTable(argv[2]);
+        // Index index1 = ti.indexNewTable(argv[2]);
+        Index index1 = ti.loadIndex(argv[2]);
 
         uint64_t limit = -1;
         if(argc > 3){

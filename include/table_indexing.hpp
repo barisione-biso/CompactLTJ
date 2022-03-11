@@ -33,6 +33,7 @@ class TableIndexer{
     string S;
     int_vector<> seq;
     vector<CompactTrie *> compactTries;
+    Index* index;
 
     /*
         Turns uint64_t vector in to bitvector B 
@@ -148,18 +149,29 @@ class TableIndexer{
 
     TableIndexer(){}
 
-    /*
-        Recives a file with the table that needs to be indexed.
-        First line of the file indicates the dimensions of the table
-        Second line of the file indicates which orders need to be indexed.
-    */
-    Index indexNewTable(string file_name){
-        clearData();
+    Index loadIndex(string file_name){
         string file_extention = file_name.substr(file_name.size()-4, 4);
         if(file_extention != ".txt" && file_extention != ".dat") {
             Index ind(file_name);
             return ind;
         }
+        else{
+            throw "Index must be built before queries can be answered, run \n\
+            > ./build_index "+file_name;
+        }
+    }
+
+    void saveIndex(){
+        index->save();
+    }
+    /*
+        Recives a file with the table that needs to be indexed.
+        First line of the file indicates the dimensions of the table
+        Second line of the file indicates which orders need to be indexed.
+    */
+    void indexNewTable(string file_name){
+        // clearData();
+        
         cout<<"building index"<<endl;
         ifstream reader(file_name);
         string line;
@@ -217,9 +229,9 @@ class TableIndexer{
         }
         createIndexes();
         // compactTrie.store_to_file();
-        Index ind(dim ,orders, compactTries, file_name);
-        ind.save();
-        return ind;
+        index = new Index(dim ,orders, compactTries, file_name);
+        // ind.save();
+        // return index;
     } 
 };
 

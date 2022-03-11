@@ -24,8 +24,10 @@ int main(int argc, char **argv){
 
         string file_name = argv[1];
         auto start = timer::now();
-        Index ind = ti.indexNewTable(file_name);
+        ti.indexNewTable(file_name);
         auto stop = timer::now();
+
+        ti.saveIndex();
         
         cout << "Index saved" << endl;
         cout << duration_cast<seconds>(stop-start).count() << " seconds." << endl;
