@@ -164,15 +164,8 @@ class TableIndexer{
     void saveIndex(){
         index->save();
     }
-    /*
-        Recives a file with the table that needs to be indexed.
-        First line of the file indicates the dimensions of the table
-        Second line of the file indicates which orders need to be indexed.
-    */
-    void indexNewTable(string file_name){
-        // clearData();
-        
-        cout<<"building index"<<endl;
+
+    void readTable(string file_name){
         ifstream reader(file_name);
         string line;
         bool first_line = true;
@@ -227,6 +220,16 @@ class TableIndexer{
                 orders.push_back(stream.str());
             }while(next_permutation(rows.begin(), rows.end()));
         }
+    }
+    /*
+        Recives a file with the table that needs to be indexed.
+        First line of the file indicates the dimensions of the table
+        Second line of the file indicates which orders need to be indexed.
+    */
+    void indexNewTable(string file_name){
+        // clearData();
+        
+        cout<<"building index"<<endl;
         createIndexes();
         // compactTrie.store_to_file();
         index = new Index(dim ,orders, compactTries, file_name);

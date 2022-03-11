@@ -17,13 +17,16 @@ int main(int argc, char **argv){
         
 
         TableIndexer ti = TableIndexer();
+        
 
         // for(int i=1; i<argc; i++){
             
         // }
 
         string file_name = argv[1];
+        ti.readTable(file_name);
         auto start = timer::now();
+
         ti.indexNewTable(file_name);
         auto stop = timer::now();
 
