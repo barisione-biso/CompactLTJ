@@ -365,10 +365,10 @@ class LTJ{
                 iterators.push_back(new CompactTrieIterator(indexes[0]->getTrie(order)));
             }
 
-            cout<<"ORDERS: "<<endl;
-            for(auto order : required_orders){
-                cout<<"-"<<order<<"-"<<endl;
-            }
+            // cout<<"ORDERS: "<<endl;
+            // for(auto order : required_orders){
+            //     cout<<"-"<<order<<"-"<<endl;
+            // }
         }
 
     public:
@@ -816,9 +816,9 @@ class LTJ{
 
         }
 
-        void triejoin_definitivo(){
+        void triejoin_definitivo(int &number_of_results){
             //I: Para mostrar tabla de resultados
-            vector<vector<int>> results;
+            // vector<vector<int>> results;
             vector<int> result(gao.size());
             //F: Para mostrar tabla de resultados
             uint64_t count=0;
@@ -915,7 +915,7 @@ class LTJ{
                         result[gao_index] = lj->get_key();
                         if(debug)cout<<var<<": "<<lj->get_key()<<endl;
                         if(gao_index == gao.size()-1){
-                            results.push_back(result);
+                            // results.push_back(result);
                             count++;
                             if(count == limit){
                                 finished = true;
@@ -933,25 +933,27 @@ class LTJ{
                 } 
             }
 
-            for(auto var : gao){
-                cout<<var<<"|";
-            }
-            cout<<endl;
+            number_of_results = count;
 
-            for(auto res : results){
-                for(auto val: res){
-                    cout<<val<<"  |";
-                }
-                cout<<endl;
-            }
-            cout<<endl;
+            // for(auto var : gao){
+            //     cout<<var<<"|";
+            // }
+            // cout<<endl;
+
+            // for(auto res : results){
+            //     for(auto val: res){
+            //         cout<<val<<"  |";
+            //     }
+            //     cout<<endl;
+            // }
+            // cout<<endl;
             
-            ofstream stream("../data/result.txt");
-            if(stream.is_open()){
-                stream<<"Termino ejecución"<<'\n';
-                stream<<"Cantidad de resultados "<<results.size()<<'\n';
-            }
-            stream.close();
+            // ofstream stream("../data/result.txt");
+            // if(stream.is_open()){
+            //     stream<<"Termino ejecución"<<'\n';
+            //     stream<<"Cantidad de resultados "<<results.size()<<'\n';
+            // }
+            // stream.close();
         }
         /*
         void trijoin_tentativo(){
