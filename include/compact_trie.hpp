@@ -56,9 +56,9 @@ class CompactTrie{
         /*
             Constuctor from LOUDS representation (b) and tags for trie representations (s)
         */
-        CompactTrie(bit_vector b, int_vector<64> s){
+        CompactTrie(bit_vector b, string s){
             B = b;
-            construct_im(wt, s);
+            construct_im(wt, turn_into_int_vector(s));
             initializeSupport();
         }
 
