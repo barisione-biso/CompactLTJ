@@ -25,15 +25,18 @@ int main(int argc, char **argv){
 
         string file_name = argv[1];
         ti.readTable(file_name);
+        memory_monitor::start();
         auto start = timer::now();
 
         ti.indexNewTable(file_name);
         auto stop = timer::now();
+        memory_monitor::stop();
 
         ti.saveIndex();
         
         cout << "Index saved" << endl;
         cout << duration_cast<seconds>(stop-start).count() << " seconds." << endl;
+        cout << memory_monitor::peak() << " bytes." << endl;
         // ti.indexNewTable(file_name);
         
         // ind.save();

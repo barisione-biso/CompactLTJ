@@ -233,6 +233,8 @@ class TableIndexer{
         createIndexes();
         // compactTrie.store_to_file();
         index = new Index(dim ,orders, compactTries, file_name);
+
+        cout<<"Index built "<<index->size()<< " bytes."<<endl;
         // ind.save();
         // return index;
     } 

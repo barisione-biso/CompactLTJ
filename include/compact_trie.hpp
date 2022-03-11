@@ -79,6 +79,10 @@ class CompactTrie{
         */
         ~CompactTrie(){};
 
+        uint64_t size(){
+            return size_in_bytes(B) + size_in_bytes(wt) + size_in_bytes(b_rank1) + \
+            size_in_bytes(b_rank0) + size_in_bytes(b_sel0) + size_in_bytes(b_sel1);
+        }
         /*
             Recives index in bit vector
             Returns index of next 0

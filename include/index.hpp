@@ -44,6 +44,21 @@ class Index{
             load();
         }
 
+        uint64_t size(){
+            uint64_t orders_size =  sizeof(vector<string>);
+            for(auto val: orders){
+                orders_size+=sizeof(val);
+            }
+
+            uint64_t map_size = sizeof(orders_tries);
+            for(auto p: orders_tries){
+                map_size += sizeof(p.first);
+                map_size += p.second->size();
+            }
+
+            return orders_size + map_size;
+        }
+
         /*
             Saves index representation in folder with the same name of the entry file
         */
