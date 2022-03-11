@@ -62,6 +62,11 @@ class CompactTrie{
             initializeSupport();
         }
 
+        CompactTrie(bit_vector b, int_vector<> s){
+            B = b;
+            construct_im(wt, s);
+            initializeSupport();
+        }
         /*
             Constructor from file with representation
         */

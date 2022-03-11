@@ -31,6 +31,7 @@ class TableIndexer{
     Trie* root;
     bit_vector B;
     string S;
+    int_vector<> seq;
     vector<CompactTrie *> compactTries;
 
     /*
@@ -99,7 +100,18 @@ class TableIndexer{
         }
 
         toBitvector(b);
-        toSequence(s);
+
+        seq.resize(s.size());
+        for(auto i=0; i<s.size(); i++){
+            seq[i] = s[i];
+        } 
+
+        // cout<<"printing seq"<<endl;
+        // for(auto v: seq){
+        //     cout<<v<<" ";
+        // }
+        // cout<<endl;
+        // toSequence(s);
     }
 
     /*
@@ -115,7 +127,8 @@ class TableIndexer{
             root = new Trie();
             createRegularTrie(index);
             toCompactForm();
-            CompactTrie *ct = new CompactTrie(B,S);
+            CompactTrie *ct = new CompactTrie(B,seq);
+            // CompactTrie *ct = new CompactTrie(B,S);
             compactTries.push_back(ct);
             delete root;
         }
