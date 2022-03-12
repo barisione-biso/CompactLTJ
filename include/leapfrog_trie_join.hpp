@@ -9,6 +9,7 @@
 
 #include "index.hpp"
 #include "iterator.hpp"
+#include "config.hpp"
 
 using namespace std;
 
@@ -362,7 +363,7 @@ class LTJ{
             }
 
             for(auto order : required_orders){
-                iterators.push_back(new CompactTrieIterator(indexes[0]->getTrie(order)));
+                iterators.push_back(new CurrentIterator(indexes[0]->getTrie(order)));
             }
 
             // cout<<"ORDERS: "<<endl;

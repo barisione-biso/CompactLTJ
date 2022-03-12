@@ -2,7 +2,8 @@
 #define ITERATOR_H
 
 #include <iostream>
-#include "compact_trie.hpp"
+// #include "compact_trie.hpp"
+#include "trie_interface.hpp"
 
 using namespace std;
 
@@ -28,7 +29,7 @@ class Iterator{
         }
         //Temporal
         virtual void getIteratorPos() = 0;
-        virtual CompactTrie* getCompactTrie() = 0;
+        virtual TrieInterface* getCompactTrie() = 0;
 };
 
 #endif

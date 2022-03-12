@@ -7,7 +7,6 @@
 #include <experimental/filesystem>
 #include "utils.hpp"
 #include "config.hpp"
-#include "compact_trie.hpp"
 
 using namespace std;
 namespace fs = std::experimental::filesystem;
@@ -16,18 +15,18 @@ class Index{
     private:
         u_int64_t dim;
         vector<string> orders;
-        map<string, CompactTrie*> orders_tries;
+        map<string, CTrie*> orders_tries;
         // vector<Iterator*> iterators;
         string folder = "../data/";
 
-        void set_orders_tries(vector<CompactTrie*> tries){
+        void set_orders_tries(vector<CTrie*> tries){
             for(int i=0; i<orders.size(); i++){
                 orders_tries[orders[i]] = tries[i];
             }
         }
 
     public:
-        Index(u_int64_t d, vector<string> ord, vector<CompactTrie*> tries, string file_name){
+        Index(u_int64_t d, vector<string> ord, vector<CTrie*> tries, string file_name){
             //SE ASUME QUE EL PRIMER ORDEN DEL INDICE SIEMPRE ES EL ORDEN EN EL QUE VIENE LA TABLA 
             dim = d;
             orders = ord;
@@ -112,14 +111,14 @@ class Index{
             stream.close();
 
             for(int i=0; i<orders.size(); i++){
-                CompactTrie *ct = new CompactTrie(folder+"order"+to_string(i));
+                CTrie *ct = new CTrie(folder+"order"+to_string(i));
                 orders_tries[orders[i]] = ct;
             }
         }
         /*
             Returns a pointer to the trie associated with the o order
         */
-        CompactTrie* getTrie(string o){
+        CTrie* getTrie(string o){
             return orders_tries[o];
         }
 

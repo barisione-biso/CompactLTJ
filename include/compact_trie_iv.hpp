@@ -1,21 +1,21 @@
-#ifndef COMPACT_TRIE_H
-#define COMPACT_TRIE_H
+#ifndef COMPACT_TRIE_IV_H
+#define COMPACT_TRIE_IV_H
 
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sdsl/vectors.hpp>
-#include <sdsl/wavelet_trees.hpp>
-#include <sdsl/wm_int.hpp>
 #include "utils.hpp"
 #include "trie_interface.hpp"
+
 using namespace std;
 using namespace sdsl;
 
-class CompactTrie: public TrieInterface{
+class CompactTrieIV: public TrieInterface{
     private:
         bit_vector B;
+        int_vector<> seq;
         // wm_int<> wt;
 
         /*
@@ -28,21 +28,6 @@ class CompactTrie: public TrieInterface{
             util::init_support(b_sel0,&B);
        }
 
-       // Evaluar si después es mejor recibir los tags como ints
-       int_vector<> turn_into_int_vector(string s){
-           //Parsear string por espacios
-           vector<string> values = parse(s, ' ');
-           //// Crear int_vector para resultados int_vector<> O(n+1);
-           int_vector<> tags(values.size());
-           
-           //convertir cada termino parseado en un entero y guardarlo en el vector
-           int i = 0;
-           for(auto v: values){
-               tags[i++] = stoi(v);
-           }
-           return tags;
-       }
-
     public:
 
         //Rank & Support arrays
@@ -51,36 +36,25 @@ class CompactTrie: public TrieInterface{
         select_support_mcl<0> b_sel0;
         select_support_mcl<1> b_sel1;
 
-        wm_int<bit_vector> wt;
-
-        /*
-            Constuctor from LOUDS representation (b) and tags for trie representations (s)
-        */
-        CompactTrie(bit_vector b, string s){
+        CompactTrieIV(bit_vector b, int_vector<> s){
             B = b;
-            construct_im(wt, turn_into_int_vector(s));
-            initializeSupport();
-        }
-
-        CompactTrie(bit_vector b, int_vector<> s){
-            B = b;
-            construct_im(wt, s);
+            seq = s;
             initializeSupport();
         }
         /*
             Constructor from file with representation
         */
-        CompactTrie(string file_name){
+        CompactTrieIV(string file_name){
             loadFromFile(file_name);
         };
 
         /*
             Destructor
         */
-        ~CompactTrie(){};
+        ~CompactTrieIV(){};
 
         uint64_t size(){
-            return size_in_bytes(B) + size_in_bytes(wt) + size_in_bytes(b_rank1) + \
+            return size_in_bytes(B) + size_in_bytes(seq) + size_in_bytes(b_rank1) + \
             size_in_bytes(b_rank0) + size_in_bytes(b_sel0) + size_in_bytes(b_sel1);
         }
         /*
@@ -147,25 +121,28 @@ class CompactTrie: public TrieInterface{
             Returns key that corresponds to given node(it)
         */
         uint64_t key_at(uint64_t it){
-            return wt[b_rank0(it)-2];
+            return seq[b_rank0(it)-2];
         }
 
-        /*
-            Returns i-th element of the original sequence s 
-        */
-        uint64_t get_wt_at(uint64_t i){
-            return wt[i];
+        pair<uint64_t, uint64_t> binary_search_seek(uint64_t val, uint64_t i, uint64_t f){
+            if(seq[f]<val)return make_pair(0,f+1);
+            uint64_t mid; 
+            while(i<f){
+                mid = (i + f)/2;
+                if(seq[mid]<val)i = mid+1;
+                else if(seq[mid]>=val)f = mid;
+            }
+            return make_pair(seq[i], i);
         }
-
         
         /*
             Stores Compact Trie Iterator to file saving the size of B, B and S.
         */
         void storeToFile(string file_name){
             string B_file = file_name + ".B";
-            string WM_file = file_name + ".WM";
+            string IV_file = file_name + ".IV";
             store_to_file(B, B_file);
-            store_to_file(wt, WM_file);
+            store_to_file(seq, IV_file);
         }
 
         /*
@@ -173,9 +150,9 @@ class CompactTrie: public TrieInterface{
         */
         void loadFromFile(string file_name){
             string B_file = file_name + ".B";
-            string WM_file = file_name + ".WM";
+            string IV_file = file_name + ".IV";
             load_from_file(B, B_file);
-            load_from_file(wt, WM_file);
+            load_from_file(seq, IV_file);
             initializeSupport();
         }
 };

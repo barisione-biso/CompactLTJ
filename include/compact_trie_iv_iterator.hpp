@@ -1,21 +1,19 @@
-#ifndef COMPACT_TRIE_ITERATOR_H
-#define COMPACT_TRIE_ITERATOR_H
+#ifndef COMPACT_TRIE_ITERATOR_IV_H
+#define COMPACT_TRIE_ITERATOR_IV_H
 
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sdsl/vectors.hpp>
-#include <sdsl/wavelet_trees.hpp>
-#include <sdsl/wm_int.hpp>
 #include "iterator.hpp"
 #include "utils.hpp"
-#include "compact_trie.hpp"
+#include "compact_trie_iv.hpp"
 
 using namespace std;
 using namespace sdsl;
 
-class CompactTrieIterator: public Iterator{
+class CompactTrieIVIterator: public Iterator{
     private:
         bool debug = false;
         bool at_end;
@@ -26,14 +24,14 @@ class CompactTrieIterator: public Iterator{
         uint64_t parent_it;
         uint64_t pos_in_parent;
         uint64_t key_val;
-        CompactTrie * compactTrie;
+        CompactTrieIV* compactTrie;
 
     public:
 
         /*
         Constructor from CompactTrie
         */
-        CompactTrieIterator(CompactTrie* ct){
+        CompactTrieIVIterator(CompactTrieIV* ct){
             compactTrie = ct;
             it = 2;
             at_root = true;
@@ -44,7 +42,7 @@ class CompactTrieIterator: public Iterator{
         /*
             Destructor
         */
-        ~CompactTrieIterator(){};
+        ~CompactTrieIVIterator(){};
 
         int get_depth(){
             return depth;
@@ -162,28 +160,9 @@ class CompactTrieIterator: public Iterator{
             if(debug)cout<<"i y f "<<i<<" "<<f<<endl;
             if(debug)cout<<"parent_child_count "<<parent_child_count<<endl;
             if(debug)cout<<"it "<<it<<endl;
-           
-            // auto new_info = compactTrie->wt.range_next_value_pos(seek_key, i, f);
-            // auto val = new_info.first;
-            // auto pos = new_info.second;
-            
-            // for(auto j=i; j<=f; j++){
-            //     // if(debug)cout<<compactTrie->get_wt_at(j)<<endl;
-            //     if(compactTrie->get_wt_at(j)>=seek_key){
-            //         if(debug)cout<<"wt at: "<<compactTrie->get_wt_at(j)<<endl;
-            //         if(debug)cout<<"i RNV: "<<j<<endl;
-            //         it = compactTrie->b_sel0(j+2)+1;
-            //         pos_in_parent = compactTrie->childRank(it);
-            //         found = true;
-            //         break;
-            //     }
-            // }
 
-            // if(!found){
-            //     at_end = true;
-            // }
-
-            auto new_info = compactTrie->wt.range_next_value_pos(seek_key, i, f);
+            if(debug)cout<<"calling binary_search "<<endl;
+            auto new_info = compactTrie->binary_search_seek(seek_key, i, f);
             auto val = new_info.first;
             auto pos = new_info.second;
             
