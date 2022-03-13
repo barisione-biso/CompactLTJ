@@ -42,6 +42,12 @@ class Index{
             folder = folder_name;
             load();
         }
+        
+        ~Index(){
+            
+        }
+
+        
 
         uint64_t size(){
             uint64_t orders_size =  sizeof(vector<string>);

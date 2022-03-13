@@ -71,6 +71,14 @@ int main(int argc, char* argv[]){
                 cout << query_number <<  ";" << number_of_results << ";" << (unsigned long long)(total_time*1000000000ULL) << endl;
                 query_number++; 
                 // cout<<endl<<endl<<endl;
+
+                // for(auto tuple: query){
+                //     delete tuple;
+                // }
+
+                // for(auto term: terms_created){
+                //     delete term
+                // }
             }
         }  
     }

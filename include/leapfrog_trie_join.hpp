@@ -25,6 +25,7 @@ class LeapfrogJoin{
         uint64_t key;
         uint64_t dim;
         bool debug=false;
+        
 
         /*
             Return module a%b, supports negative numbers
@@ -212,6 +213,16 @@ class LeapfrogJoin{
             leapfrog_init();
             // p = 0;
         }
+
+        void check_depths(vector<int> goal_depths){
+            int i=0;
+            for(auto it: iterators){
+                while(it->get_depth()>goal_depths[i]){
+                    it->up();
+                }
+                i++;
+            }
+        }
 };
 
 
@@ -243,6 +254,8 @@ class LTJ{
 
         // Cosas para triejoin_tentativo
         vector<map<string, set<uint64_t>>> instances_per_query;
+        bool show_results=true;
+        map<string, int> gao_map;
 
 
 
@@ -366,10 +379,22 @@ class LTJ{
                 iterators.push_back(new CurrentIterator(indexes[0]->getTrie(order)));
             }
 
+            if(debug){
+                cout<<"ORDERS: "<<endl;
+                for(auto order : required_orders){
+                    cout<<"-"<<order<<"-"<<endl;
+                }
+            }
             // cout<<"ORDERS: "<<endl;
             // for(auto order : required_orders){
             //     cout<<"-"<<order<<"-"<<endl;
             // }
+        }
+
+        void setGaoMap(){
+            for(int i=0; i<gao.size(); i++){
+                gao_map[gao[i]] = i;
+            }
         }
 
     public:
@@ -399,6 +424,7 @@ class LTJ{
             //para triejoin_tentativo
             instances_per_query.resize(query.size());
             limit = lmt;
+            setGaoMap();
         }
 
         /*
@@ -718,7 +744,7 @@ class LTJ{
             Returns a vector indicating if each of the iterators associated with the variable should, 
             or can go up a level
         */
-        vector<bool> check_for_prev_value(string var){
+        vector<bool> check_for_prev_value(string var, int gao_score){
             vector<bool> should_go_up;
             for(auto tuple_index : variable_tuple_mapping[var]){
                 Tuple *tuple = modified_query[tuple_index];
@@ -732,6 +758,11 @@ class LTJ{
                         should_go_up.push_back(false);
                     }
                     else{
+                        //Si el termino previo es una variable con < gao score que el que buscamos
+                        string prev_var = prev_term->getVariable();
+                        if(get_gao_score(prev_var) < gao_score){
+                            should_go_up.push_back(false);
+                        }
                         should_go_up.push_back(true);
                     }
                 }
@@ -739,6 +770,17 @@ class LTJ{
             return should_go_up;
         }
         
+        void check_iterators_position(LeapfrogJoin* lj, string var){
+            if(debug)cout<<"checking iterators positions"<<endl;
+            //para cada iterador de lj obtener la posición en la query de la variable que se busca
+            // y verificar que la altura en la que está calza con la altura que necesita
+            vector<int> goal_depths;
+            for(auto tuple_index : variable_tuple_mapping[var]){
+                Tuple *tuple = modified_query[tuple_index];
+                goal_depths.push_back(get_var_index_in_tuple(tuple, var));
+            }
+            lj->check_depths(goal_depths);
+        }
         /*
             Goes up on all necessary iterators until gao_index and gao_score are the same. 
             If at the final position there is an iterator at_end, then it calls goUp.
@@ -749,12 +791,30 @@ class LTJ{
                 string var = gao[i];
                 if(debug)cout<<"Going up on var "<<var<<endl;
                 LeapfrogJoin* lj = variable_lj_mapping[var];
-                vector<bool> should_go_up = check_for_prev_value(var);
+                vector<bool> should_go_up = check_for_prev_value(var, gao_score);
+                if(debug)cout<<"cheching should go up"<<endl;
+                if(debug){
+                    for(auto v: should_go_up){
+                        cout<<v<<" ";
+                    }
+                    cout<<endl;
+                }
+
                 lj->up(should_go_up);
                 // lj->up();
                 gao_index--;
             }
+            if(debug)cout<<"Iterators positions and keys:"<<endl;
+            for(auto it: iterators){
+                if(debug)cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            }
+            if(debug)cout<<"gao score is "<<gao_score<<" "<<gao[gao_score]<<endl;
             LeapfrogJoin* lj = variable_lj_mapping[gao[gao_score]];
+            check_iterators_position(lj, gao[gao_score]);
+            if(debug)cout<<"Iterators positions and keys:"<<endl;
+            for(auto it: iterators){
+                if(debug)cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            }
             lj->leapfrog_next();
             if(lj->is_at_end()){
                 if(gao_score==0){
@@ -786,13 +846,14 @@ class LTJ{
                 Tuple *tuple = modified_query[tuple_index];
                 if(debug)cout<<"got tuple "<<tuple_index<<" successfuly"<<endl;
                 int term_index = get_var_index_in_tuple(tuple, var);
+                if(debug)cout<<"term_index "<<term_index<<endl;
                 if(term_index == 0){
                     continue;
                 }
                 else{
                     Term *prev_term = tuple->get_term(term_index-1);
                     if(!prev_term->isVariable()){
-
+                        
                         //TODO: Esto no se debería hacer porque altera los valores de at_end de los LJ
                         // iterators[tuple_index]->up();
                         // iterators[tuple_index]->open();
@@ -800,6 +861,7 @@ class LTJ{
                     }
                     else{
                         int gao_score = get_gao_score(prev_term->getVariable());
+                        if(debug)cout<<"gao score prev term "<<gao_score<<endl;
                         gao_scores.push_back(make_pair(gao_score, prev_term->getVariable()));
                     }
                 }
@@ -819,7 +881,7 @@ class LTJ{
 
         void triejoin_definitivo(int &number_of_results){
             //I: Para mostrar tabla de resultados
-            // vector<vector<int>> results;
+            vector<vector<int>> results;
             vector<int> result(gao.size());
             //F: Para mostrar tabla de resultados
             uint64_t count=0;
@@ -916,7 +978,7 @@ class LTJ{
                         result[gao_index] = lj->get_key();
                         if(debug)cout<<var<<": "<<lj->get_key()<<endl;
                         if(gao_index == gao.size()-1){
-                            // results.push_back(result);
+                            if(show_results)results.push_back(result);
                             count++;
                             if(count == limit){
                                 finished = true;
@@ -935,19 +997,20 @@ class LTJ{
             }
 
             number_of_results = count;
+            if(show_results){
+                for(auto var : gao){
+                    cout<<var<<"|";
+                }
+                cout<<endl;
 
-            // for(auto var : gao){
-            //     cout<<var<<"|";
-            // }
-            // cout<<endl;
-
-            // for(auto res : results){
-            //     for(auto val: res){
-            //         cout<<val<<"  |";
-            //     }
-            //     cout<<endl;
-            // }
-            // cout<<endl;
+                for(auto res : results){
+                    for(auto val: res){
+                        cout<<val<<"  |";
+                    }
+                    cout<<endl;
+                }
+                cout<<endl;
+            }
             
             // ofstream stream("../data/result.txt");
             // if(stream.is_open()){
