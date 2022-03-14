@@ -129,6 +129,7 @@ class CompactTrieIVIterator: public Iterator{
             at_end = false;
             if(it==2){
                 at_root = true;
+                cout<<"subi hasta la root"<<endl;
             }
             else{
                 pos_in_parent = compactTrie->childRank(it);
