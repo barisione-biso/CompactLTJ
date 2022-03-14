@@ -924,7 +924,7 @@ class LTJ{
                 }
             }
             if(debug){cout<<"Constants handled"<<endl;}
-            cout<<"Pasamos constantes"<<endl;
+
             //Donde nos encontramos en cada iterador?
             if(debug){
                 cout<<"Iterators positions and keys:"<<endl;
@@ -983,7 +983,9 @@ class LTJ{
                         }
                     }
                     else{
+                        cout<<"tratando de obtener key"<<endl;
                         result[gao_index] = lj->get_key();
+                        cout<<"obtuve key"<<endl;
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
                         if(gao_index == gao.size()-1){
                             if(show_results){results.push_back(result);}
