@@ -804,7 +804,7 @@ class LTJ{
                     }
                     cout<<endl;
                 }
-
+                cout<<"en el up de goUpUntil "<<endl;
                 lj->up(should_go_up);
                 // lj->up();
                 gao_index--;
