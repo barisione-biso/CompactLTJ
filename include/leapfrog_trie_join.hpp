@@ -113,9 +113,9 @@ class LeapfrogJoin{
             if(debug){cout<<"xp es "<<xp<<endl;}
             while(true){
                 if(debug){cout<<"p es "<<p<<endl;}
-                cout<<"obteniendo x en search"<<endl;
+                // cout<<"obteniendo x en search"<<endl;
                 x = iterators[p]->key();
-                cout<<"obtuve x en search"<<endl;
+                // cout<<"obtuve x en search"<<endl;
                 if(debug){cout<<"x es "<<x<<endl;}
                 if(x==xp){
                     key = x;
@@ -168,13 +168,13 @@ class LeapfrogJoin{
         void up(vector<bool> &up_indicator){
             for(int i=0; i<iterators.size(); i++){
                 auto it = iterators[i];
-                cout<<"up indicator es "<<up_indicator[i]<<endl;
+                if(debug){cout<<"up indicator es "<<up_indicator[i]<<endl;}
                 if(up_indicator[i]){
-                    cout<<"solo subi"<<endl;
+                    if(debug){cout<<"solo subi"<<endl;}
                     it->up();
                 }
                 else{
-                    cout<<"subi y bajo"<<endl;
+                    if(debug){cout<<"subi y bajo"<<endl;}
                     it->up();
                     it->open();
                 }
@@ -220,7 +220,7 @@ class LeapfrogJoin{
         }
 
         void check_depths(vector<int> goal_depths){
-            cout<<"se hizo check_depths"<<endl;
+            if(debug){cout<<"se hizo check_depths"<<endl;}
             int i=0;
             for(auto it: iterators){
                 while(it->get_depth()>goal_depths[i]){
@@ -236,7 +236,7 @@ class LTJ{
     
     private:
         //BORRAR
-        bool debug = false;
+        bool debug = true;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
@@ -260,7 +260,7 @@ class LTJ{
 
         // Cosas para triejoin_tentativo
         vector<map<string, set<uint64_t>>> instances_per_query;
-        bool show_results=false;
+        bool show_results=true;
         map<string, int> gao_map;
 
 
@@ -755,7 +755,7 @@ class LTJ{
             for(auto tuple_index : variable_tuple_mapping[var]){
                 Tuple *tuple = modified_query[tuple_index];
                 int term_index = get_var_index_in_tuple(tuple, var);
-                cout<<"term_index es "<<term_index<<endl;
+                if(debug){cout<<"term_index es "<<term_index<<endl;}
                 if(term_index == 0){
                     should_go_up.push_back(false);
                 }
@@ -808,7 +808,7 @@ class LTJ{
                     }
                     cout<<endl;
                 }
-                cout<<"en el up de goUpUntil "<<endl;
+                if(debug){cout<<"en el up de goUpUntil "<<endl;}
                 lj->up(should_go_up);
                 // lj->up();
                 gao_index--;
@@ -884,7 +884,8 @@ class LTJ{
                 return true;
             }
             else{
-                int new_gao_index = gao_scores[0].first;
+                // int new_gao_index = gao_scores[0].first;
+                int new_gao_index = gao_scores[gao_scores.size()-1].first;
                 if(debug){cout<<"new gao index "<<new_gao_index<<endl;}
                 return goUpUntil(new_gao_index, gao_index);
             }
@@ -978,17 +979,18 @@ class LTJ{
                     if(lj->is_at_end()){
                         if(gao_index == 0)return;
                         else {
-                            try{
-                                finished = goUp(var, gao_index);
-                                // Si lj tiene sólo un iterador podemos llegar y subir
-                                // lj->up();
-                                // from_up = true;
-                                // gao_index--;
-                            }
-                            catch(const char *msg){
-                                return;
-                            }
-                            
+                            if(debug){cout<<"going up"<<endl;}
+                            finished = goUp(var, gao_index);
+                            // try{
+                            //     finished = goUp(var, gao_index);
+                            //     // Si lj tiene sólo un iterador podemos llegar y subir
+                            //     // lj->up();
+                            //     // from_up = true;
+                            //     // gao_index--;
+                            // }
+                            // catch(const char *msg){
+                            //     return;
+                            // }
                         }
                     }
                     else{
