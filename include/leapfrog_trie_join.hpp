@@ -752,6 +752,7 @@ class LTJ{
             for(auto tuple_index : variable_tuple_mapping[var]){
                 Tuple *tuple = modified_query[tuple_index];
                 int term_index = get_var_index_in_tuple(tuple, var);
+                cout<<"term_index es "<<term_index<<endl;
                 if(term_index == 0){
                     should_go_up.push_back(false);
                 }
