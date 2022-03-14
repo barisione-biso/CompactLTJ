@@ -218,6 +218,7 @@ class LeapfrogJoin{
         }
 
         void check_depths(vector<int> goal_depths){
+            cout<<"se hizo check_depths"<<endl;
             int i=0;
             for(auto it: iterators){
                 while(it->get_depth()>goal_depths[i]){
