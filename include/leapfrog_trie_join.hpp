@@ -766,7 +766,9 @@ class LTJ{
                         if(get_gao_score(prev_var) < gao_score){
                             should_go_up.push_back(false);
                         }
-                        should_go_up.push_back(true);
+                        else{
+                            should_go_up.push_back(true);
+                        }
                     }
                 }
             }
