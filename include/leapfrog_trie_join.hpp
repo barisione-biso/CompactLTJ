@@ -168,10 +168,13 @@ class LeapfrogJoin{
         void up(vector<bool> &up_indicator){
             for(int i=0; i<iterators.size(); i++){
                 auto it = iterators[i];
+                cout<<"up indicator es "<<up_indicator[i]<<endl;
                 if(up_indicator[i]){
+                    cout<<"solo subi"<<endl;
                     it->up();
                 }
                 else{
+                    cout<<"subi y bajo"<<endl;
                     it->up();
                     it->open();
                 }
