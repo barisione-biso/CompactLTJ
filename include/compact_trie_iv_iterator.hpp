@@ -91,6 +91,7 @@ class CompactTrieIVIterator: public Iterator{
                     it = compactTrie->child(it, 1);
                     pos_in_parent = 1;
                     depth++;
+                    cout<<"printing key in open "<<key()<<endl;
                 }
                 else throw "Node has no children";
             }
