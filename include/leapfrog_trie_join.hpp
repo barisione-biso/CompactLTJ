@@ -751,6 +751,7 @@ class LTJ{
             or can go up a level
         */
         vector<bool> check_for_prev_value(string var, int gao_score){
+            if(debug){cout<<"cheching for prev value "<<var<<" "<<gao_score<<endl;}
             vector<bool> should_go_up;
             for(auto tuple_index : variable_tuple_mapping[var]){
                 Tuple *tuple = modified_query[tuple_index];
@@ -821,15 +822,20 @@ class LTJ{
             }
             if(debug){cout<<"gao score is "<<gao_score<<" "<<gao[gao_score]<<endl;}
             LeapfrogJoin* lj = variable_lj_mapping[gao[gao_score]];
-            check_iterators_position(lj, gao[gao_score]);
-            if(debug){
-                cout<<"Iterators positions and keys:"<<endl;
-                for(auto it: iterators){
-                    cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
-                }
+            if(debug && lj->is_at_end()){
+                cout<<"el iterador ya estaba en at end"<<endl;
             }
+            check_iterators_position(lj, gao[gao_score]);
+            // if(debug){
+            //     cout<<"Iterators positions and keys:"<<endl;
+            //     for(auto it: iterators){
+            //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            //     }
+            // }
+            if(debug)cout<<"se hace next para "<<gao[gao_score]<<endl;
             lj->leapfrog_next();
             if(lj->is_at_end()){
+                cout<<"el iterador esta at en en goUpUntil"<<endl;
                 if(gao_score==0){
                     if(debug){cout<<"Cant go up"<<endl;}
                     return true;
@@ -852,45 +858,51 @@ class LTJ{
             //1. En que consultas está la variable actual?
             //2. En cada consulta cual era la variable anterior
             //3. Ver cual es la variable anterior con menor gao
-            if(debug){cout<<"Index in each tuple of "<<var<<endl;}
-            vector<pair<int, string>> gao_scores;
-            for(auto tuple_index : variable_tuple_mapping[var]){
-                if(debug){cout<<"tuple_index "<<tuple_index<<endl;}
-                Tuple *tuple = modified_query[tuple_index];
-                if(debug){cout<<"got tuple "<<tuple_index<<" successfuly"<<endl;}
-                int term_index = get_var_index_in_tuple(tuple, var);
-                if(debug){cout<<"term_index "<<term_index<<endl;}
-                if(term_index == 0){
-                    continue;
-                }
-                else{
-                    Term *prev_term = tuple->get_term(term_index-1);
-                    if(!prev_term->isVariable()){
+            // if(debug){cout<<"Index in each tuple of "<<var<<endl;}
+            // vector<pair<int, string>> gao_scores;
+            // for(auto tuple_index : variable_tuple_mapping[var]){
+            //     if(debug){cout<<"tuple_index "<<tuple_index<<endl;}
+            //     Tuple *tuple = modified_query[tuple_index];
+            //     if(debug){cout<<"got tuple "<<tuple_index<<" successfuly"<<endl;}
+            //     int term_index = get_var_index_in_tuple(tuple, var);
+            //     if(debug){cout<<"term_index "<<term_index<<endl;}
+            //     if(term_index == 0){
+            //         continue;
+            //     }
+            //     else{
+            //         Term *prev_term = tuple->get_term(term_index-1);
+            //         if(!prev_term->isVariable()){
                         
-                        //TODO: Esto no se debería hacer porque altera los valores de at_end de los LJ
-                        // iterators[tuple_index]->up();
-                        // iterators[tuple_index]->open();
-                        // //Hacer hacer up y luego open para quedar en el primer valor de esta misma variable
-                    }
-                    else{
-                        int gao_score = get_gao_score(prev_term->getVariable());
-                        if(debug){cout<<"gao score prev term "<<gao_score<<endl;}
-                        gao_scores.push_back(make_pair(gao_score, prev_term->getVariable()));
-                    }
-                }
-            }
-            sort(gao_scores.begin(), gao_scores.end());
-            if(gao_scores.size() == 0){
+            //             //TODO: Esto no se debería hacer porque altera los valores de at_end de los LJ
+            //             // iterators[tuple_index]->up();
+            //             // iterators[tuple_index]->open();
+            //             // //Hacer hacer up y luego open para quedar en el primer valor de esta misma variable
+            //         }
+            //         else{
+            //             int gao_score = get_gao_score(prev_term->getVariable());
+            //             if(debug){cout<<"gao score prev term "<<gao_score<<endl;}
+            //             gao_scores.push_back(make_pair(gao_score, prev_term->getVariable()));
+            //         }
+            //     }
+            // }
+            // sort(gao_scores.begin(), gao_scores.end());
+            // if(gao_scores.size() == 0){
+            //     return true;
+            // }
+            // else{
+            //     // int new_gao_index = gao_scores[0].first;
+            //     int new_gao_index = gao_scores[gao_scores.size()-1].first;
+            //     if(debug){cout<<"new gao index "<<new_gao_index<<endl;}
+            //     return goUpUntil(new_gao_index, gao_index);
+            // }
+
+
+            if(gao_index==0){
                 return true;
             }
             else{
-                // int new_gao_index = gao_scores[0].first;
-                int new_gao_index = gao_scores[gao_scores.size()-1].first;
-                if(debug){cout<<"new gao index "<<new_gao_index<<endl;}
-                return goUpUntil(new_gao_index, gao_index);
+                return goUpUntil(gao_index-1, gao_index);
             }
-
-
         }
 
         void triejoin_definitivo(int &number_of_results){
