@@ -230,7 +230,7 @@ class LTJ{
     
     private:
         //BORRAR
-        bool debug = true;
+        bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
@@ -924,7 +924,7 @@ class LTJ{
                 }
             }
             if(debug){cout<<"Constants handled"<<endl;}
-
+            cout<<"Pasamos constantes"<<endl;
             //Donde nos encontramos en cada iterador?
             if(debug){
                 cout<<"Iterators positions and keys:"<<endl;
