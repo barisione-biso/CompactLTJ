@@ -109,13 +109,13 @@ class LeapfrogJoin{
         void leapfrog_search(){
             //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
             if(debug){cout<<"Entrando a leapfrog_search"<<endl;}
-            cout<<"obteniendo key en search"<<endl;
             xp = iterators[modulo(int(p)-1,k)]->key();
-            cout<<"se obtuvo key en search"<<endl;
             if(debug){cout<<"xp es "<<xp<<endl;}
             while(true){
                 if(debug){cout<<"p es "<<p<<endl;}
+                cout<<"obteniendo x en search"<<endl;
                 x = iterators[p]->key();
+                cout<<"obtuve x en search"<<endl;
                 if(debug){cout<<"x es "<<x<<endl;}
                 if(x==xp){
                     key = x;
