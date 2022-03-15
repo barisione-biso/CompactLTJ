@@ -236,7 +236,7 @@ class LTJ{
     
     private:
         //BORRAR
-        bool debug = false;
+        bool debug = true;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
@@ -446,7 +446,7 @@ class LTJ{
             instances_per_query.resize(query.size());
             limit = lmt;
             setGaoMap();
-            checkIterators();
+            // checkIterators();
         }
 
         /*
