@@ -528,19 +528,19 @@ class LTJ{
                 it->open();
             }
             // cout<<"Opened"<<endl;
-            if(debug){
-                cout<<"Iterators positions and keys before leapfrog_init:"<<endl;
-                for(auto it: this->iterators){
-                    cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
-                }
-            }
-            this->leapfrog_init();
-            if(debug){
-                cout<<"Iterators positions and keys after leapfrog_init:"<<endl;
-                for(auto it: iterators){
-                    cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
-                }
-            }
+            // if(debug){
+            //     cout<<"Iterators positions and keys before leapfrog_init:"<<endl;
+            //     for(auto it: this->iterators){
+            //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            //     }
+            // }
+            // leapfrog_init();
+            // if(debug){
+            //     cout<<"Iterators positions and keys after leapfrog_init:"<<endl;
+            //     for(auto it: iterators){
+            //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            //     }
+            // }
         }
 
         /*
@@ -975,6 +975,8 @@ class LTJ{
                 }
             }
             if(debug){cout<<"Constants handled"<<endl;}
+
+            leapfrog_init();
 
             //Donde nos encontramos en cada iterador?
             if(debug){
