@@ -12,7 +12,8 @@ using namespace std;
 namespace fs = std::experimental::filesystem;
 
 class Index{
-    private:
+    public:
+    // private:
         u_int64_t dim;
         vector<string> orders;
         map<string, CTrie*> orders_tries;
@@ -25,7 +26,7 @@ class Index{
             }
         }
 
-    public:
+    // public:
         Index(u_int64_t d, vector<string> ord, vector<CTrie*> tries, string file_name){
             //SE ASUME QUE EL PRIMER ORDEN DEL INDICE SIEMPRE ES EL ORDEN EN EL QUE VIENE LA TABLA 
             dim = d;

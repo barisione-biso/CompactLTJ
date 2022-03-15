@@ -13,7 +13,8 @@ using namespace std;
 using namespace sdsl;
 
 class CompactTrieIV: public TrieInterface{
-    private:
+    public:
+    // private:
         bit_vector B;
         int_vector<> seq;
         // wm_int<> wt;
@@ -28,7 +29,7 @@ class CompactTrieIV: public TrieInterface{
             util::init_support(b_sel0,&B);
        }
 
-    public:
+    // public:
 
         //Rank & Support arrays
         rank_support_v<1> b_rank1;

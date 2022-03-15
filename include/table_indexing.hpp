@@ -21,7 +21,8 @@ using namespace std;
 using namespace sdsl;
 
 class TableIndexer{
-    private:
+    public:
+    // private:
 
     vector<vector<uint64_t> > table;
     vector<string> orders;
@@ -144,7 +145,7 @@ class TableIndexer{
         }
         compactTries.clear();
     }
-    public:
+    // public:
 
     TableIndexer(){}
 

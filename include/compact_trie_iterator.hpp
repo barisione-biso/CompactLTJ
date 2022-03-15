@@ -16,7 +16,8 @@ using namespace std;
 using namespace sdsl;
 
 class CompactTrieIterator: public Iterator{
-    private:
+    public:
+    // private:
         bool debug = false;
         bool at_end;
         bool at_root;
@@ -28,7 +29,7 @@ class CompactTrieIterator: public Iterator{
         uint64_t key_val;
         CompactTrie * compactTrie;
 
-    public:
+    // public:
 
         /*
         Constructor from CompactTrie

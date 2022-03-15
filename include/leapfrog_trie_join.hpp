@@ -14,7 +14,8 @@
 using namespace std;
 
 class LeapfrogJoin{
-    private:
+    public:
+    // private:
         vector<Iterator*> iterators;
         bool at_end;
         // Iterador con la key mas pequeña
@@ -68,7 +69,7 @@ class LeapfrogJoin{
             }
         }
 
-    public:
+    // public:
 
         LeapfrogJoin(vector<Iterator*> &its, uint64_t d, string var){
             iterators = its;
@@ -233,8 +234,8 @@ class LeapfrogJoin{
 
 
 class LTJ{
-    
-    private:
+    public:
+    // private:
         //BORRAR
         bool debug = true;
         //HASTA AQUI
@@ -418,7 +419,7 @@ class LTJ{
             }
         }
 
-    public:
+    // public:
         LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno

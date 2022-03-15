@@ -4,9 +4,10 @@
 #include <vector>
 
 class Tuple {
-    private:
-        vector<Term*> terms;
     public:
+    // private:
+        vector<Term*> terms;
+    // public:
         /*
             Empty Constructor
         */

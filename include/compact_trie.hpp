@@ -14,7 +14,8 @@ using namespace std;
 using namespace sdsl;
 
 class CompactTrie: public TrieInterface{
-    private:
+    public:
+    // private:
         bit_vector B;
         // wm_int<> wt;
 
@@ -43,7 +44,7 @@ class CompactTrie: public TrieInterface{
            return tags;
        }
 
-    public:
+    // public:
 
         //Rank & Support arrays
         rank_support_v<1> b_rank1;

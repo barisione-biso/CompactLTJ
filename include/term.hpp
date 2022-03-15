@@ -6,11 +6,12 @@
 using namespace std;
 
 class Term {
-    private: 
+    public:
+    // private: 
         bool is_variable;
         string varname;
         uint64_t constant;
-    public:
+    // public:
         /*
             Empty constructor
         */

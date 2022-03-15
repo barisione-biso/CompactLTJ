@@ -7,11 +7,12 @@
 using namespace std;
 
 class Trie{
-    private:
+    public:
+    // private:
         map<uint64_t, Trie*> children;
         map<uint64_t, Trie*>::iterator it;
         bool has_children;
-    public:
+    // public:
     
         Trie(){
             has_children = false;
