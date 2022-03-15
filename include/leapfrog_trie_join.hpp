@@ -527,7 +527,19 @@ class LTJ{
                 it->open();
             }
             // cout<<"Opened"<<endl;
+            if(debug){
+                cout<<"Iterators positions and keys before leapfrog_init:"<<endl;
+                for(auto it: iterators){
+                    cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+                }
+            }
             leapfrog_init();
+            if(debug){
+                cout<<"Iterators positions and keys after leapfrog_init:"<<endl;
+                for(auto it: iterators){
+                    cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+                }
+            }
         }
 
         /*
