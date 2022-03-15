@@ -236,7 +236,7 @@ class LTJ{
     
     private:
         //BORRAR
-        bool debug = true;
+        bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
@@ -403,6 +403,21 @@ class LTJ{
             }
         }
 
+        void checkIterators(){
+            cout<<"checking iterators"<<endl;
+
+            for(auto it: iterators){
+                cout<<"Checking it"<<endl;
+                it->open();
+                while(!it->atEnd()){
+                    cout<<it->key()<<" ";
+                    it->next();
+                }
+                cout<<endl;
+                it->up();
+            }
+        }
+
     public:
         LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
@@ -431,6 +446,7 @@ class LTJ{
             instances_per_query.resize(query.size());
             limit = lmt;
             setGaoMap();
+            checkIterators();
         }
 
         /*
@@ -835,7 +851,7 @@ class LTJ{
             if(debug)cout<<"se hace next para "<<gao[gao_score]<<endl;
             lj->leapfrog_next();
             if(lj->is_at_end()){
-                cout<<"el iterador esta at en en goUpUntil"<<endl;
+                if(debug){cout<<"el iterador esta at en en goUpUntil"<<endl;}
                 if(gao_score==0){
                     if(debug){cout<<"Cant go up"<<endl;}
                     return true;
