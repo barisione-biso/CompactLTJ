@@ -108,6 +108,7 @@ class LeapfrogJoin{
         }
 
         void leapfrog_search(){
+            leapfrog_init();
             //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
             if(debug){cout<<"Entrando a leapfrog_search"<<endl;}
             xp = iterators[modulo(int(p)-1,k)]->key();
