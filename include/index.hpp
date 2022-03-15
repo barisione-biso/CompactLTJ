@@ -135,6 +135,9 @@ class Index{
             return dim;
         }
 
+        vector<string> getOrders(){
+            return orders;
+        } 
         /*
             Resets iterators to their begining state
         */    

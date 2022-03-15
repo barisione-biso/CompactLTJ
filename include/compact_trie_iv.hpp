@@ -155,6 +155,14 @@ class CompactTrieIV: public TrieInterface{
             load_from_file(seq, IV_file);
             initializeSupport();
         }
+
+        uint64_t getMaxSequence(){
+            uint64_t maximum = 0;
+            for(auto val: seq){
+                if(val > maximum)maximum = val;
+            }
+            return maximum;
+        }
 };
 
 #endif

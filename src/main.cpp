@@ -56,11 +56,23 @@ uint64_t getMaxDataPoint(string file_name){
     return maximum;
 }
 
+void maxValueIndexChecking(string file_name){
+    TableIndexer ti = TableIndexer();
+    Index index = ti.loadIndex(file_name);
+
+    vector<string> orders = index.getOrders();
+    for(auto order : orders){
+        CTrie* ct = index.getTrie(order);
+        cout<<"Max value for sequence in order "<<order<<": "<<ct->getMaxSequence()<<endl;
+    }
+}
+
 int main(int argc, char** argv){
     // int_vector<> vec = {1, 2, 3, 5, 6, 7};
     // pair<uint64_t, uint64_t> info = binary_search_seek(1, 0, 0, vec);
     // cout<<info.first<<" "<<info.second<<endl;
-    cout<<getMaxDataPoint(argv[1])<<endl;
+    // cout<<getMaxDataPoint(argv[1])<<endl;
+    maxValueIndexChecking(argv[1]);
 }
 // int main(int argc, char** argv)
 // {  
