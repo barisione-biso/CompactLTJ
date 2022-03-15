@@ -17,8 +17,6 @@ class Term {
         */
         Term();
 
-        ~Term(){};
-
         /*
             Constructor for constant terms
         */

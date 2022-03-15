@@ -454,20 +454,6 @@ class LTJ{
             // checkIterators();
         }
 
-        ~LTJ(){
-            for(auto var_lj : variable_lj_mapping){
-                delete var_lj.second;
-            }
-
-            for(auto tuple: modified_query){
-                delete tuple;
-            }
-
-            for(auto it: iterators){
-                delete it;
-            }
-        }
-
         /*
             Prepares the iterators and finds first result
         */

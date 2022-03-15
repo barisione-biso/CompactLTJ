@@ -58,11 +58,11 @@ uint64_t getMaxDataPoint(string file_name){
 
 void maxValueIndexChecking(string file_name){
     TableIndexer ti = TableIndexer();
-    Index* index = ti.loadIndex(file_name);
+    Index index = ti.loadIndex(file_name);
 
-    vector<string> orders = index->getOrders();
+    vector<string> orders = index.getOrders();
     for(auto order : orders){
-        CTrie* ct = index->getTrie(order);
+        CTrie* ct = index.getTrie(order);
         cout<<"Max value for sequence in order "<<order<<": "<<ct->getMaxSequence()<<endl;
     }
 }
