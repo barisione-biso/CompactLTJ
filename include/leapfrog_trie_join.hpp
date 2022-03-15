@@ -263,7 +263,7 @@ class LTJ{
 
         // Cosas para triejoin_tentativo
         vector<map<string, set<uint64_t>>> instances_per_query;
-        bool show_results=true;
+        bool show_results=false;
         map<string, int> gao_map;
 
 
