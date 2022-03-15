@@ -30,6 +30,7 @@ class Iterator{
         //Temporal
         virtual void getIteratorPos() = 0;
         virtual TrieInterface* getCompactTrie() = 0;
+        virtual uint64_t getTuple() = 0;
 };
 
 #endif

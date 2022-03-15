@@ -221,14 +221,15 @@ class LeapfrogJoin{
             // p = 0;
         }
 
-        void check_depths(vector<int> goal_depths){
+        void check_depths(map<uint64_t,uint64_t> goal_depths){
             if(debug){cout<<"se hizo check_depths"<<endl;}
-            int i=0;
             for(auto it: iterators){
-                while(it->get_depth()>goal_depths[i]){
+                uint64_t index_tuple = it->getTuple();
+                while(it->get_depth()>goal_depths[index_tuple]){
+                    if(debug){cout<<"el depth "<<it->get_depth()<<" "<<goal_depths[index_tuple]<<endl;}
                     it->up();
                 }
-                i++;
+                if(debug){cout<<"la tupla "<<index_tuple<<" subio al nivel "<<it->get_depth();}
             }
         }
 };
@@ -238,7 +239,7 @@ class LTJ{
     public:
     // private:
         //BORRAR
-        bool debug = true;
+        bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
@@ -262,7 +263,7 @@ class LTJ{
 
         // Cosas para triejoin_tentativo
         vector<map<string, set<uint64_t>>> instances_per_query;
-        bool show_results=false;
+        bool show_results=true;
         map<string, int> gao_map;
 
 
@@ -381,10 +382,12 @@ class LTJ{
                 order.seekp(-1, std::ios_base::end);
                 required_orders.push_back(order.str());
                 modified_query.push_back(new Tuple(terms));
-            }
+            }  
+            uint64_t index_tuple = 0;
 
             for(auto order : required_orders){
-                iterators.push_back(new CurrentIterator(indexes[0]->getTrie(order)));
+                iterators.push_back(new CurrentIterator(indexes[0]->getTrie(order), index_tuple));
+                index_tuple++;
             }
 
             if(debug){
@@ -814,11 +817,15 @@ class LTJ{
             if(debug){cout<<"checking iterators positions"<<endl;}
             //para cada iterador de lj obtener la posición en la query de la variable que se busca
             // y verificar que la altura en la que está calza con la altura que necesita
-            vector<int> goal_depths;
+            map<uint64_t, uint64_t> goal_depths;
+            // vector<int> goal_depths;
             for(auto tuple_index : variable_tuple_mapping[var]){
                 Tuple *tuple = modified_query[tuple_index];
-                goal_depths.push_back(get_var_index_in_tuple(tuple, var));
+                goal_depths[tuple_index] = get_var_index_in_tuple(tuple, var);
+                // goal_depths.push_back(get_var_index_in_tuple(tuple, var));
+                if(debug){cout<<"la tupla "<<tuple_index<<" debe ir a "<<goal_depths[tuple_index]<<endl;}
             }
+            if(debug){cout<<"goal depths tiene tamaño "<<goal_depths.size()<<endl;}
             lj->check_depths(goal_depths);
         }
         /*

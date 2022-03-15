@@ -27,6 +27,7 @@ class CompactTrieIterator: public Iterator{
         uint64_t parent_it;
         uint64_t pos_in_parent;
         uint64_t key_val;
+        uint64_t tuple;
         CompactTrie * compactTrie;
 
     // public:
@@ -34,12 +35,13 @@ class CompactTrieIterator: public Iterator{
         /*
         Constructor from CompactTrie
         */
-        CompactTrieIterator(CompactTrie* ct){
+        CompactTrieIterator(CompactTrie* ct, uint64_t tup){
             compactTrie = ct;
             it = 2;
             at_root = true;
             at_end = false;
             depth = -1;
+            tuple = tup;
         }
 
         /*
@@ -265,6 +267,10 @@ class CompactTrieIterator: public Iterator{
         // Temporal 
         void getIteratorPos(){
             cout<<"it esta en: "<<it<<endl;
+        }
+
+        uint64_t getTuple(){
+            return tuple;
         }
 };
 
