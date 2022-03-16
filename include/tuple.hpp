@@ -13,6 +13,8 @@ class Tuple {
         */
         Tuple();
 
+        ~Tuple(){};
+
         /*
             Constructor recives a vector of terms 
         */

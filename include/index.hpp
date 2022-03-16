@@ -19,6 +19,7 @@ class Index{
         map<string, CTrie*> orders_tries;
         // vector<Iterator*> iterators;
         string folder = "../data/";
+        bool loaded = false;
 
         void set_orders_tries(vector<CTrie*> tries){
             for(int i=0; i<orders.size(); i++){
@@ -41,11 +42,17 @@ class Index{
 
         Index(string folder_name){
             folder = folder_name;
+            loaded = true;
             load();
         }
         
         ~Index(){
-            
+            // cout<<"calling destructor"<<endl;
+            if(loaded){
+                for(auto order_trie : orders_tries){
+                    delete order_trie.second;
+                }
+            }
         }
 
         
