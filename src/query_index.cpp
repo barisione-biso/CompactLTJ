@@ -81,7 +81,9 @@ int main(int argc, char* argv[]){
                 // }
             }
         }  
-        delete index1;
+        for(auto index: indexes){
+            delete index;
+        }
     }
     catch(const char *msg){
         
