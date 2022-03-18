@@ -160,10 +160,10 @@ class TableIndexer{
         }
     }
 
-    Index* loadIndex(string file_name){
+    Index loadIndex(string file_name){
         string file_extention = file_name.substr(file_name.size()-4, 4);
         if(file_extention != ".txt" && file_extention != ".dat") {
-            return new Index(file_name);
+            return Index(file_name);
             // Index ind(file_name);
             // return ind;
         }

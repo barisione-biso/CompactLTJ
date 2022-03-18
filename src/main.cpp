@@ -12,59 +12,59 @@
 using namespace std;
 using namespace sdsl;
 
-pair<uint64_t, uint64_t> binary_search_seek(uint64_t val, uint64_t i, uint64_t f, int_vector<> &v){
-    if(v[f]<val)return make_pair(0,f+1);
-    uint64_t mid; 
-    while(i<f){
-        mid = (i + f)/2;
-        if(v[mid]<val)i = mid+1;
-        else if(v[mid]>=val)f = mid;
-    }
-    return make_pair(v[i], i);
-}
+// pair<uint64_t, uint64_t> binary_search_seek(uint64_t val, uint64_t i, uint64_t f, int_vector<> &v){
+//     if(v[f]<val)return make_pair(0,f+1);
+//     uint64_t mid; 
+//     while(i<f){
+//         mid = (i + f)/2;
+//         if(v[mid]<val)i = mid+1;
+//         else if(v[mid]>=val)f = mid;
+//     }
+//     return make_pair(v[i], i);
+// }
 
-typedef unsigned int u_int;
+// typedef unsigned int u_int;
 
-uint64_t getMaxDataPoint(string file_name){
-    ifstream reader(file_name);
-    string line;
-    bool first_line = true;
-    bool second_line = false;
-    u_int64_t maximum = 0;
+// uint64_t getMaxDataPoint(string file_name){
+//     ifstream reader(file_name);
+//     string line;
+//     bool first_line = true;
+//     bool second_line = false;
+//     u_int64_t maximum = 0;
 
-    while(reader.is_open() && getline(reader, line)){
-        if(first_line && line.substr(0,4) == "dim:"){
-            first_line = false;
-            second_line = true;
-        }
-        else if(second_line && line.substr(0, 7) == "orders:"){
-            second_line = false;
-        }
-        else{
-            vector<string> line_values = parse(line, ' ');
+//     while(reader.is_open() && getline(reader, line)){
+//         if(first_line && line.substr(0,4) == "dim:"){
+//             first_line = false;
+//             second_line = true;
+//         }
+//         else if(second_line && line.substr(0, 7) == "orders:"){
+//             second_line = false;
+//         }
+//         else{
+//             vector<string> line_values = parse(line, ' ');
 
-            for(int i=0; i<3; i++){
-                uint64_t val =  stoi(line_values[i]);
-                if(val > maximum){
-                    maximum = val;
-                }
-            }
-        }
-    }
-    reader.close();
+//             for(int i=0; i<3; i++){
+//                 uint64_t val =  stoi(line_values[i]);
+//                 if(val > maximum){
+//                     maximum = val;
+//                 }
+//             }
+//         }
+//     }
+//     reader.close();
 
-    return maximum;
-}
+//     return maximum;
+// }
 
 void maxValueIndexChecking(string file_name){
-    TableIndexer ti = TableIndexer();
-    Index* index = ti.loadIndex(file_name);
+    // TableIndexer ti = TableIndexer();
+    // Index index = ti.loadIndex(file_name);
 
-    vector<string> orders = index->getOrders();
-    for(auto order : orders){
-        CTrie* ct = index->getTrie(order);
-        cout<<"Max value for sequence in order "<<order<<": "<<ct->getMaxSequence()<<endl;
-    }
+    // vector<string> orders = index.getOrders();
+    // for(auto order : orders){
+    //     CTrie ct = index.getTrie(order);
+    //     cout<<"Max value for sequence in order "<<order<<": "<<ct.getMaxSequence()<<endl;
+    // }
 }
 
 int main(int argc, char** argv){
@@ -72,7 +72,7 @@ int main(int argc, char** argv){
     // pair<uint64_t, uint64_t> info = binary_search_seek(1, 0, 0, vec);
     // cout<<info.first<<" "<<info.second<<endl;
     // cout<<getMaxDataPoint(argv[1])<<endl;
-    maxValueIndexChecking(argv[1]);
+    // maxValueIndexChecking(argv[1]);
 }
 // int main(int argc, char** argv)
 // {  

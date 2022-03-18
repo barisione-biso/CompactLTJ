@@ -22,9 +22,9 @@ int main(int argc, char* argv[]){
         // Debería hacerse un index por argc sin contar a las queries
         TableIndexer ti = TableIndexer();
         // Index index1 = ti.indexNewTable(argv[2]);
-        Index* index1 = ti.loadIndex(argv[2]);
+        Index index1 = ti.loadIndex(argv[2]);
 
-        cout << "Index loaded " << index1->size() << " bytes" << endl;
+        cout << "Index loaded " << index1.size() << " bytes" << endl;
 
         high_resolution_clock::time_point start, stop;
         double total_time = 0.0;
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
         // Index index2 = ti.indexNewTable(argv[3]);
 
         // vector<Index*> indexes = {&index1, &index2};
-        vector<Index*> indexes = {index1};
+        vector<Index*> indexes = {&index1};
         uint64_t query_number = 1;
         if(have_queries){
             for(string query_string : queries){  
@@ -81,9 +81,9 @@ int main(int argc, char* argv[]){
                 // }
             }
         }  
-        for(auto index: indexes){
-            delete index;
-        }
+        // for(auto index: indexes){
+        //     delete index;
+        // }
     }
     catch(const char *msg){
         
