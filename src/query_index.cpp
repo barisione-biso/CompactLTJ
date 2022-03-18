@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
                 // for(auto var: gaos[query_number-1]){
                 //     cout<<var<<" ";
                 // }cout<<endl;
-                vector<Term*> terms_created;
+                // vector<Term*> terms_created;
                 // Guarda en que tuplas se encuentra cada variable
                 map<string, set<uint64_t>> variable_tuple_mapping;
                 vector<Tuple*> query;
@@ -72,13 +72,13 @@ int main(int argc, char* argv[]){
                 query_number++; 
                 // cout<<endl<<endl<<endl;
 
-                for(auto tuple: query){
-                    delete tuple;
-                }
+                // for(auto tuple: query){
+                //     delete tuple;
+                // }
 
-                for(auto term: terms_created){
-                    delete term;
-                }
+                // for(auto term: terms_created){
+                //     delete term;
+                // }
             }
         }  
         delete index1;

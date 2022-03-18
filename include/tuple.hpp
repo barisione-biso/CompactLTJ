@@ -7,19 +7,31 @@ class Tuple {
     public:
     // private:
         vector<Term*> terms;
+        bool modified = false;
     // public:
         /*
             Empty Constructor
         */
         Tuple();
 
-        ~Tuple(){};
+        ~Tuple(){
+            if(modified){
+                for(auto term : terms){
+                    delete term;
+                }
+            }
+        };
 
         /*
             Constructor recives a vector of terms 
         */
         Tuple(vector<Term*> t){
             terms = t;
+        }
+
+        Tuple(vector<Term*> t, bool modified){
+            terms = t;
+            modified = true;
         }
 
         /*

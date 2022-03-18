@@ -381,7 +381,7 @@ class LTJ{
                 order<<getVariableOrder(tuple, gao, added_items, terms);
                 order.seekp(-1, std::ios_base::end);
                 required_orders.push_back(order.str());
-                modified_query.push_back(new Tuple(terms));
+                modified_query.push_back(new Tuple(terms, true));
             }  
             uint64_t index_tuple = 0;
 
