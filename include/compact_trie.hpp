@@ -179,6 +179,10 @@ class CompactTrie: public TrieInterface{
             load_from_file(wt, WM_file);
             initializeSupport();
         }
+        
+        uint64_t getMaxSequence(){
+            return 0;
+        }
 };
 
 #endif
