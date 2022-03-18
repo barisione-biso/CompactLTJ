@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
                 // vector<Term*> terms_created;
                 // Guarda en que tuplas se encuentra cada variable
                 map<string, set<uint64_t>> variable_tuple_mapping;
-                vector<Tuple*> query;
+                vector<Tuple> query;
 
                 vector<string> tokens_query = parse(query_string, '.');
                 

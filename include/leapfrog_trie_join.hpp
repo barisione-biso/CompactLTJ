@@ -243,7 +243,7 @@ class LTJ{
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> indexes;
-        vector<Tuple*> query;
+        vector<Tuple> query;
         vector<Tuple*> modified_query;
         int tuple_index = 0;
         map<string, set<uint64_t>> instances; 
@@ -333,10 +333,10 @@ class LTJ{
             Returns a string containing the constants that are in the tuple, 
             it also adds the term asociated to the constant to the terms vector
         */
-        string getConstantsOrder(Tuple* tuple, int &added_items, vector<Term*> &terms){
+        string getConstantsOrder(Tuple tuple, int &added_items, vector<Term*> &terms){
             stringstream order;
             for(int i=0; i<dim; i++){
-                Term* term = tuple->get_term(i);
+                Term* term = tuple.get_term(i);
                 if(!term->isVariable()){
                     order<<i<<" ";
                     added_items++;
@@ -350,11 +350,11 @@ class LTJ{
             Returns a strign containing the variables that are in tuple, but ordered according to the gao 
             vector, it also adds the terms associated with each variable to the terms vector in the gao order
         */
-        string getVariableOrder(Tuple* tuple, vector<string> gao, int &added_items, vector<Term*> &terms){
+        string getVariableOrder(Tuple tuple, vector<string> gao, int &added_items, vector<Term*> &terms){
             stringstream order;
             for(auto var: gao){
                 for(int i=0; i<dim; i++){
-                    Term* term = tuple->get_term(i);
+                    Term* term = tuple.get_term(i);
                     if(term->isVariable() && term->getVariable() == var){
                         order<<i;
                         added_items++;
@@ -424,7 +424,7 @@ class LTJ{
         }
 
     // public:
-        LTJ(vector<Index*> &ind, vector<Tuple*> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
+        LTJ(vector<Index*> &ind, vector<Tuple> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             indexes = ind;
