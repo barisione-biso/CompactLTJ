@@ -105,7 +105,7 @@ bool is_number(string & s)
 */
 Tuple get_tuple(string &s, map<string, set<uint64_t>> & variable_tuple_mapping, uint64_t &i){
     vector<string> terms_string = parse(trim(s, ' '), ' ');
-    vector<Term*> new_terms;
+    vector<Term> new_terms;
     u_int64_t value;
 
     for(auto s: terms_string){
@@ -113,11 +113,11 @@ Tuple get_tuple(string &s, map<string, set<uint64_t>> & variable_tuple_mapping, 
         if(is_number(s)){
             istringstream iss(s);
             iss >> value;
-            new_terms.push_back(new Term(value));
+            new_terms.push_back(Term(value));
         }
         else{
             variable_tuple_mapping[s].insert(i);
-            new_terms.push_back(new Term(s));
+            new_terms.push_back(Term(s));
         }
     }
     

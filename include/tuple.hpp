@@ -6,7 +6,7 @@
 class Tuple {
     public:
     // private:
-        vector<Term*> terms;
+        vector<Term> terms;
         bool modified = false;
     // public:
         /*
@@ -15,29 +15,24 @@ class Tuple {
         Tuple();
 
         ~Tuple(){
-            if(modified){
-                for(auto term : terms){
-                    delete term;
-                }
-            }
+            // if(modified){
+            //     for(auto term : terms){
+            //         delete term;
+            //     }
+            // }
         };
 
         /*
             Constructor recives a vector of terms 
         */
-        Tuple(vector<Term*> t){
+        Tuple(vector<Term> t){
             terms = t;
-        }
-
-        Tuple(vector<Term*> t, bool modified){
-            terms = t;
-            modified = true;
         }
 
         /*
             Sets the terms of the tuple to t
         */
-        void set_terms(vector<Term*> t){
+        void set_terms(vector<Term> t){
             terms = t;
         }
 
@@ -45,7 +40,7 @@ class Tuple {
             Returns the term with the index i in the terms associated with this tuple
         */
         Term* get_term(uint64_t i){
-            return terms[i];
+            return &terms[i];
         }
 
         /*
@@ -53,7 +48,7 @@ class Tuple {
         */
         void printTuple(){
             for(auto t: terms){
-                t->getValues();
+                t.getValues();
                 cout<<" ";
             }
             // cout<<endl;

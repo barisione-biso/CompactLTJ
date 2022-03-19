@@ -338,14 +338,14 @@ class LTJ{
             Returns a string containing the constants that are in the tuple, 
             it also adds the term asociated to the constant to the terms vector
         */
-        string getConstantsOrder(Tuple tuple, int &added_items, vector<Term*> &terms){
+        string getConstantsOrder(Tuple tuple, int &added_items, vector<Term> &terms){
             stringstream order;
             for(int i=0; i<dim; i++){
                 Term* term = tuple.get_term(i);
                 if(!term->isVariable()){
                     order<<i<<" ";
                     added_items++;
-                    terms.push_back(term);
+                    terms.push_back(*term);
                 }
             }
             return order.str();
@@ -355,7 +355,7 @@ class LTJ{
             Returns a strign containing the variables that are in tuple, but ordered according to the gao 
             vector, it also adds the terms associated with each variable to the terms vector in the gao order
         */
-        string getVariableOrder(Tuple tuple, vector<string> gao, int &added_items, vector<Term*> &terms){
+        string getVariableOrder(Tuple tuple, vector<string> gao, int &added_items, vector<Term> &terms){
             stringstream order;
             for(auto var: gao){
                 for(int i=0; i<dim; i++){
@@ -364,7 +364,7 @@ class LTJ{
                         order<<i;
                         added_items++;
                         if(added_items < dim)order<<" ";
-                        terms.push_back(term);
+                        terms.push_back(*term);
                         break;
                     }
                 }
@@ -381,12 +381,12 @@ class LTJ{
             for(auto tuple: query){
                 stringstream order;
                 int added_items = 0;
-                vector<Term*> terms;
+                vector<Term> terms;
                 order<<getConstantsOrder(tuple, added_items, terms);
                 order<<getVariableOrder(tuple, gao, added_items, terms);
                 order.seekp(-1, std::ios_base::end);
                 required_orders.push_back(order.str());
-                modified_query.push_back(new Tuple(terms, true));
+                modified_query.push_back(new Tuple(terms));
             }  
             uint64_t index_tuple = 0;
 
