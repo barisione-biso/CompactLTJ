@@ -42,6 +42,8 @@ class CompactTrieIVIterator: public Iterator{
             tuple = tup;
         }
 
+        CompactTrieIVIterator(){}
+
         /*
             Destructor
         */

@@ -27,6 +27,16 @@ class LeapfrogJoin{
         uint64_t dim;
         bool debug=false;
         
+        LeapfrogJoin(vector<Iterator*> its, uint64_t d, string var){
+            this->iterators = its;
+            this->at_end = false;
+            this->k = iterators.size();
+            this->dim = d;
+            // depth = 0;
+            // traverse();
+        }
+
+        LeapfrogJoin(){ }
 
         /*
             Return module a%b, supports negative numbers
@@ -71,14 +81,7 @@ class LeapfrogJoin{
 
     // public:
 
-        LeapfrogJoin(vector<Iterator*> &its, uint64_t d, string var){
-            iterators = its;
-            at_end = false;
-            k = iterators.size();
-            dim = d;
-            // depth = 0;
-            // traverse();
-        }
+        
         
         /*
             Returns true if any iterator of the LeapfrogJoin is at the end
@@ -98,13 +101,13 @@ class LeapfrogJoin{
             Prepares the iterators and finds first result
         */
         void leapfrog_init(){
-                for(auto it:iterators){
-                    if(it->atEnd()) at_end = true;
-                }
-                if(!at_end){
-                    sort(iterators.begin(), iterators.end());
-                    p = 0;
-                }   
+            for(auto it:iterators){
+                if(it->atEnd()) at_end = true;
+            }
+            if(!at_end){
+                sort(iterators.begin(), iterators.end());
+                p = 0;
+            }   
         }
 
         void leapfrog_search(){
@@ -249,7 +252,7 @@ class LTJ{
         map<string, set<uint64_t>> instances; 
         map<uint64_t, set<string>> variables_per_depth;
         map<string, set<uint64_t>> variable_tuple_mapping;
-        map<string, LeapfrogJoin*> variable_lj_mapping;
+        map<string, LeapfrogJoin> variable_lj_mapping;
         bool at_end = false;
         uint64_t p = 0;
         uint64_t xp,x;
@@ -324,8 +327,10 @@ class LTJ{
                 for(auto tup: p.second){
                     iter.push_back(iterators[tup]);
                 } 
-                variable_lj_mapping[var] = new LeapfrogJoin(iter, dim, var);
-                variable_lj_mapping[var]->leapfrog_init();
+                variable_lj_mapping[var] = LeapfrogJoin(iter, dim, var);
+                // variable_lj_mapping.insert(make_pair(var, LeapfrogJoin(iter, dim, var)));
+                // variable_lj_mapping[var] = new LeapfrogJoin(iter, dim, var);
+                variable_lj_mapping[var].leapfrog_init();
             }
         }
 
@@ -455,9 +460,9 @@ class LTJ{
         }
 
         ~LTJ(){
-            for(auto var_lj : variable_lj_mapping){
-                delete var_lj.second;
-            }
+            // for(auto var_lj : variable_lj_mapping){
+            //     delete var_lj.second;
+            // }
 
             for(auto tuple: modified_query){
                 delete tuple;
@@ -851,7 +856,7 @@ class LTJ{
             for(int i=beg; i>gao_score; i--){
                 string var = gao[i];
                 if(debug){cout<<"Going up on var "<<var<<endl;}
-                LeapfrogJoin* lj = variable_lj_mapping[var];
+                LeapfrogJoin* lj = &variable_lj_mapping[var];
                 vector<bool> should_go_up = check_for_prev_value(var, gao_score);
                 if(debug){cout<<"cheching should go up"<<endl;}
                 if(debug){
@@ -872,7 +877,7 @@ class LTJ{
                 }
             }
             if(debug){cout<<"gao score is "<<gao_score<<" "<<gao[gao_score]<<endl;}
-            LeapfrogJoin* lj = variable_lj_mapping[gao[gao_score]];
+            LeapfrogJoin* lj = &variable_lj_mapping[gao[gao_score]];
             if(debug && lj->is_at_end()){
                 cout<<"el iterador ya estaba en at end"<<endl;
             }
@@ -1014,7 +1019,7 @@ class LTJ{
             while(gao_index < gao.size() && !finished){
                 string var = gao[gao_index];
                 if(debug){cout<<"buscando para var "<<var<<endl;}
-                LeapfrogJoin* lj = variable_lj_mapping[var];
+                LeapfrogJoin* lj = &variable_lj_mapping[var];
                 if(debug){cout<<"Se encontró LJ para "<<var<<endl;}
                 
                 // if(lj->is_at_end()){
