@@ -142,6 +142,7 @@ class CompactTrieIV: public TrieInterface{
         void storeToFile(string file_name){
             string B_file = file_name + ".B";
             string IV_file = file_name + ".IV";
+            util::bit_compress(seq);
             store_to_file(B, B_file);
             store_to_file(seq, IV_file);
         }
