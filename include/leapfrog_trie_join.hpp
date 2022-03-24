@@ -246,7 +246,7 @@ class LTJ{
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> *indexes;
-        vector<Tuple> query;
+        vector<Tuple> *query;
         vector<Tuple*> modified_query;
         int tuple_index = 0;
         map<string, set<uint64_t>> instances; 
@@ -378,7 +378,10 @@ class LTJ{
         */
         void setIterators(vector<string> &gao){
             vector<string> required_orders;
-            for(auto tuple: query){
+            
+            // for(auto tuple: &query)
+            for(auto it=query->begin(); it!=query->end(); it++){
+                Tuple &tuple = *it;
                 stringstream order;
                 int added_items = 0;
                 vector<Term> terms;
@@ -429,11 +432,11 @@ class LTJ{
         }
 
     // public:
-        LTJ(vector<Index*> *ind, vector<Tuple> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
-            indexes = ind;
-            query = q;
+            this->indexes = ind;
+            this->query = q;
             gao = gao_vector;
             /*De momento se asume que todas las tablas tienen la misma dimensión*/
             dim = indexes->at(0)->getDim();
@@ -453,7 +456,7 @@ class LTJ{
             
             // resetIndexes();
             //para triejoin_tentativo
-            instances_per_query.resize(query.size());
+            instances_per_query.resize(query->size());
             limit = lmt;
             setGaoMap();
             // checkIterators();

@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
                 int number_of_results = 0;
                 //En vez de tener terms created, en variable_mapping vamos a guardar las variables y los indices
                 start = high_resolution_clock::now();
-                LTJ ltj(&indexes, query, gaos[query_number-1], variable_tuple_mapping, limit);
+                LTJ ltj(&indexes, &query, gaos[query_number-1], variable_tuple_mapping, limit);
                 // cout<<"Constructor works"<<endl;
                 ltj.triejoin_definitivo(number_of_results);
                 stop = high_resolution_clock::now();
