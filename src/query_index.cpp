@@ -13,6 +13,20 @@ using namespace std;
 using namespace std::chrono;
 
 
+Index loadIndex(string file_name){
+    string file_extention = file_name.substr(file_name.size()-4, 4);
+        if(file_extention != ".txt" && file_extention != ".dat") {
+            return Index(file_name);
+            // Index ind(file_name);
+            // return ind;
+        }
+        else{
+            throw "Index must be built before queries can be answered, run \n\
+            > ./build_index "+file_name;
+        }
+}
+
+
 int main(int argc, char* argv[]){
     try{
         vector<string> queries;
@@ -20,9 +34,10 @@ int main(int argc, char* argv[]){
         bool have_queries =  get_file_content(argv[1], queries, gaos);
         // string query1 = "?x1 ?x2 ?x3";
         // Debería hacerse un index por argc sin contar a las queries
-        TableIndexer ti = TableIndexer();
-        // Index index1 = ti.indexNewTable(argv[2]);
-        Index index1 = ti.loadIndex(argv[2]);
+        // TableIndexer ti = TableIndexer();
+        // // Index index1 = ti.indexNewTable(argv[2]);
+        // Index index1 = ti.loadIndex(argv[2]);
+        Index index1 = loadIndex(argv[2]);
 
         cout << "Index loaded " << index1.size() << " bytes" << endl;
 
