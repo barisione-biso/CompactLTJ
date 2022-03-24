@@ -563,12 +563,12 @@ class LTJ{
                 // lj->up();
                 gao_index--;
             }
-            if(debug){
-                cout<<"Iterators positions and keys:"<<endl;
-                for(auto it: iterators){
-                    cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
-                }
-            }
+            // if(debug){
+            //     cout<<"Iterators positions and keys:"<<endl;
+            //     for(auto it: iterators){
+            //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            //     }
+            // }
             if(debug){cout<<"gao score is "<<gao_score<<" "<<gao->at(gao_score)<<endl;}
             LeapfrogJoin* lj = &variable_lj_mapping[gao->at(gao_score)];
             if(debug && lj->is_at_end()){
