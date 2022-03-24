@@ -126,7 +126,7 @@ class Index{
 
             for(int i=0; i<orders.size(); i++){
                 CTrie *ct = new CTrie(folder+"order"+to_string(i));
-                orders_tries[orders[i]] = ct;
+                this->orders_tries[orders[i]] = ct;
             }
         }
         /*

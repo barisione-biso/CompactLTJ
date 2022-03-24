@@ -34,7 +34,7 @@ class CompactTrieIVIterator: public Iterator{
         Constructor from CompactTrie
         */
         CompactTrieIVIterator(CompactTrieIV* ct, uint64_t tup){
-            compactTrie = ct;
+            this->compactTrie = ct;
             it = 2;
             at_root = true;
             at_end = false;

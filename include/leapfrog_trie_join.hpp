@@ -340,7 +340,7 @@ class LTJ{
             Returns a string containing the constants that are in the tuple, 
             it also adds the term asociated to the constant to the terms vector
         */
-        string getConstantsOrder(Tuple tuple, int &added_items, vector<Term> &terms){
+        string getConstantsOrder(Tuple &tuple, int &added_items, vector<Term> &terms){
             stringstream order;
             for(int i=0; i<dim; i++){
                 Term* term = tuple.get_term(i);
@@ -357,7 +357,7 @@ class LTJ{
             Returns a strign containing the variables that are in tuple, but ordered according to the gao 
             vector, it also adds the terms associated with each variable to the terms vector in the gao order
         */
-        string getVariableOrder(Tuple tuple, int &added_items, vector<Term> &terms){
+        string getVariableOrder(Tuple &tuple, int &added_items, vector<Term> &terms){
             stringstream order;
 
             for(auto it=gao->begin(); it!=gao->end(); it++){
