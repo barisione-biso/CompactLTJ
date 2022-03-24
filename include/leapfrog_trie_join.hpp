@@ -27,7 +27,7 @@ class LeapfrogJoin{
         uint64_t dim;
         bool debug=false;
         
-        LeapfrogJoin(vector<Iterator*> its, uint64_t d, string var){
+        LeapfrogJoin(vector<Iterator*> its, uint64_t d, string &var){
             this->iterators = its;
             this->at_end = false;
             this->k = iterators.size();
@@ -469,7 +469,7 @@ class LTJ{
         /*
             Returns the index of the variable in the given tuple. -1 if the variable isn't in the tuple
         */
-        int get_var_index_in_tuple(Tuple *tuple, string var){
+        int get_var_index_in_tuple(Tuple *tuple, string &var){
             for(int i=0; i<dim; i++){
                 Term *term = tuple->get_term(i);
                 if(term->isVariable() && term->getVariable()==var){
@@ -482,7 +482,7 @@ class LTJ{
         /*
             Returns gao score for the given variable 
         */
-        int get_gao_score(string var){
+        int get_gao_score(string &var){
             for(int i=0; i<gao->size(); i++){
                 if(gao->at(i)==var)return i;
             }
@@ -493,7 +493,7 @@ class LTJ{
             Returns a vector indicating if each of the iterators associated with the variable should, 
             or can go up a level
         */
-        void check_for_prev_value(string var, int gao_score, vector<bool> &should_go_up){
+        void check_for_prev_value(string &var, int &gao_score, vector<bool> &should_go_up){
             if(debug){cout<<"cheching for prev value "<<var<<" "<<gao_score<<endl;}
             // vector<bool> should_go_up;
             for(auto tuple_index : variable_tuple_mapping->at(var)){
@@ -523,7 +523,7 @@ class LTJ{
             // return should_go_up;
         }
         
-        void check_iterators_position(LeapfrogJoin* lj, string var){
+        void check_iterators_position(LeapfrogJoin* lj, string &var){
             if(debug){cout<<"checking iterators positions"<<endl;}
             //para cada iterador de lj obtener la posición en la query de la variable que se busca
             // y verificar que la altura en la que está calza con la altura que necesita

@@ -132,7 +132,7 @@ class Index{
         /*
             Returns a pointer to the trie associated with the o order
         */
-        CTrie* getTrie(string o){
+        CTrie* getTrie(string &o){
             return orders_tries[o];
         }
 
