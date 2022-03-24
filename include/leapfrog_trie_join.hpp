@@ -25,7 +25,7 @@ class LeapfrogJoin{
         uint64_t k;
         uint64_t key;
         uint64_t dim;
-        bool debug=false;
+        bool debug=true;
         
         LeapfrogJoin(vector<Iterator*> its, uint64_t d, string &var){
             this->iterators = its;
@@ -242,7 +242,7 @@ class LTJ{
     public:
     // private:
         //BORRAR
-        bool debug = false;
+        bool debug = true;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> *indexes;
