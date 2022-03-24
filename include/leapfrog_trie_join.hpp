@@ -808,9 +808,9 @@ class LTJ{
             Returns a vector indicating if each of the iterators associated with the variable should, 
             or can go up a level
         */
-        vector<bool> check_for_prev_value(string var, int gao_score){
+        void check_for_prev_value(string var, int gao_score, vector<bool> &should_go_up){
             if(debug){cout<<"cheching for prev value "<<var<<" "<<gao_score<<endl;}
-            vector<bool> should_go_up;
+            // vector<bool> should_go_up;
             for(auto tuple_index : variable_tuple_mapping->at(var)){
                 Tuple *tuple = modified_query[tuple_index];
                 int term_index = get_var_index_in_tuple(tuple, var);
@@ -835,7 +835,7 @@ class LTJ{
                     }
                 }
             }
-            return should_go_up;
+            // return should_go_up;
         }
         
         void check_iterators_position(LeapfrogJoin* lj, string var){
@@ -863,7 +863,9 @@ class LTJ{
                 string var = gao->at(i);
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
-                vector<bool> should_go_up = check_for_prev_value(var, gao_score);
+                vector<bool> should_go_up;
+                // vector<bool> should_go_up = check_for_prev_value(var, gao_score);
+                check_for_prev_value(var, gao_score,should_go_up);
                 if(debug){cout<<"cheching should go up"<<endl;}
                 if(debug){
                     for(auto v: should_go_up){
@@ -903,7 +905,7 @@ class LTJ{
                     return true;
                 }
                 if(debug){cout<<"going up again on "<<gao->at(gao_index)<<" index "<<gao_index<<endl;}
-                return goUp(gao->at(gao_index), gao_index);
+                return goUp(gao_index);
             }
             else{
                 return false;
@@ -915,7 +917,7 @@ class LTJ{
             the smalles gao_score. It moves the iterators up until they can search for a new match or 
             en up in the root
         */
-        bool goUp(string var, int &gao_index){
+        bool goUp(int &gao_index){
             //Cual es la variable de menor gao a la que se llega
             //1. En que consultas está la variable actual?
             //2. En cada consulta cual era la variable anterior
@@ -1056,7 +1058,7 @@ class LTJ{
                         if(gao_index == 0)return;
                         else {
                             if(debug){cout<<"going up"<<endl;}
-                            finished = goUp(var, gao_index);
+                            finished = goUp(gao_index);
                             // try{
                             //     finished = goUp(var, gao_index);
                             //     // Si lj tiene sólo un iterador podemos llegar y subir
