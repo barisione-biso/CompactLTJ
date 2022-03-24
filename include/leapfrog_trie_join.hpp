@@ -251,7 +251,7 @@ class LTJ{
         int tuple_index = 0;
         map<string, set<uint64_t>> instances; 
         map<uint64_t, set<string>> variables_per_depth;
-        map<string, set<uint64_t>> variable_tuple_mapping;
+        map<string, set<uint64_t>> *variable_tuple_mapping;
         map<string, LeapfrogJoin> variable_lj_mapping;
         bool at_end = false;
         uint64_t p = 0;
@@ -321,7 +321,9 @@ class LTJ{
             asociated with the tuples that contain that variable
         */
         void createLeapfrogJoins(){
-            for(auto p: variable_tuple_mapping){
+            for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
+                auto &p = *it;
+            // for(auto p: variable_tuple_mapping){
                 string var = p.first;
                 vector<Iterator*> iter;
                 for(auto tup: p.second){
@@ -435,7 +437,7 @@ class LTJ{
         }
 
     // public:
-        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint64_t>> *variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             this->indexes = ind;
@@ -449,7 +451,7 @@ class LTJ{
             // chooseOrder();
             // Agrega todos los iteradores al vector de iteradores. Uno por cada tupla de la query
             // addIterators();
-            variable_tuple_mapping = variables_to_index;
+            this->variable_tuple_mapping = variables_to_index;
             createLeapfrogJoins();
             //k es la cantidad de iteradores que se recorrerán que para la nueva solución son la cantidad de 
             //tuplas en q
@@ -811,7 +813,7 @@ class LTJ{
         vector<bool> check_for_prev_value(string var, int gao_score){
             if(debug){cout<<"cheching for prev value "<<var<<" "<<gao_score<<endl;}
             vector<bool> should_go_up;
-            for(auto tuple_index : variable_tuple_mapping[var]){
+            for(auto tuple_index : variable_tuple_mapping->at(var)){
                 Tuple *tuple = modified_query[tuple_index];
                 int term_index = get_var_index_in_tuple(tuple, var);
                 if(debug){cout<<"term_index es "<<term_index<<endl;}
@@ -844,7 +846,7 @@ class LTJ{
             // y verificar que la altura en la que está calza con la altura que necesita
             map<uint64_t, uint64_t> goal_depths;
             // vector<int> goal_depths;
-            for(auto tuple_index : variable_tuple_mapping[var]){
+            for(auto tuple_index : variable_tuple_mapping->at(var)){
                 Tuple *tuple = modified_query[tuple_index];
                 goal_depths[tuple_index] = get_var_index_in_tuple(tuple, var);
                 // goal_depths.push_back(get_var_index_in_tuple(tuple, var));
