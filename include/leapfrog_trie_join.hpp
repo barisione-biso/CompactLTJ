@@ -224,7 +224,7 @@ class LeapfrogJoin{
             // p = 0;
         }
 
-        void check_depths(map<uint64_t,uint64_t> goal_depths){
+        void check_depths(map<uint64_t,uint64_t> &goal_depths){
             if(debug){cout<<"se hizo check_depths"<<endl;}
             for(auto it: iterators){
                 uint64_t index_tuple = it->getTuple();
@@ -265,7 +265,6 @@ class LTJ{
         uint64_t limit;
 
         // Cosas para triejoin_tentativo
-        vector<map<string, set<uint64_t>>> instances_per_query;
         bool show_results=false;
         map<string, int> gao_map;
 
@@ -461,7 +460,6 @@ class LTJ{
             
             // resetIndexes();
             //para triejoin_tentativo
-            instances_per_query.resize(query->size());
             limit = lmt;
             setGaoMap();
             // checkIterators();
