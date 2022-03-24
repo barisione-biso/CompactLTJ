@@ -245,7 +245,7 @@ class LTJ{
         bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
-        vector<Index*> indexes;
+        vector<Index*> *indexes;
         vector<Tuple> query;
         vector<Tuple*> modified_query;
         int tuple_index = 0;
@@ -391,7 +391,7 @@ class LTJ{
             uint64_t index_tuple = 0;
 
             for(auto order : required_orders){
-                iterators.push_back(new CurrentIterator(indexes[0]->getTrie(order), index_tuple));
+                iterators.push_back(new CurrentIterator(indexes->at(0)->getTrie(order), index_tuple));
                 index_tuple++;
             }
 
@@ -429,14 +429,14 @@ class LTJ{
         }
 
     // public:
-        LTJ(vector<Index*> &ind, vector<Tuple> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> &q, vector<string> &gao_vector, map<string, set<uint64_t>> &variables_to_index, uint64_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             indexes = ind;
             query = q;
             gao = gao_vector;
             /*De momento se asume que todas las tablas tienen la misma dimensión*/
-            dim = indexes[0]->getDim();
+            dim = indexes->at(0)->getDim();
             
             setIterators(gao);
             // Elige el orden
