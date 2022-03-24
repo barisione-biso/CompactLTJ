@@ -155,6 +155,7 @@ class CompactTrieIV: public TrieInterface{
             string IV_file = file_name + ".IV";
             load_from_file(B, B_file);
             load_from_file(seq, IV_file);
+            util::bit_compress(seq);
             initializeSupport();
         }
 
