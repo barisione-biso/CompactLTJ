@@ -24,9 +24,9 @@ class TableIndexer{
     public:
     // private:
 
-    vector<vector<uint64_t> > table;
+    vector<vector<uint32_t> > table;
     vector<string> orders;
-    uint64_t dim;
+    uint32_t dim;
     bool all_orders;
     Trie* root;
     bit_vector B;
@@ -39,7 +39,7 @@ class TableIndexer{
     /*
         Turns uint64_t vector in to bitvector B 
     */
-    void toBitvector(vector<uint64_t> &b){
+    void toBitvector(vector<uint32_t> &b){
         B = bit_vector(b.size(), 0);
 
         for(int i=0; i<b.size(); i++){
@@ -50,7 +50,7 @@ class TableIndexer{
     /*
         Turns uint64_t vector in to string S
     */
-    void toSequence(vector<uint64_t> &s){
+    void toSequence(vector<uint32_t> &s){
         ostringstream stream;
 
         for(auto &val: s){
@@ -62,7 +62,7 @@ class TableIndexer{
     /*
         Creates a traditional trie with the table contents following the order in index
     */
-    void createRegularTrie(map<u_int64_t, u_int64_t> index){
+    void createRegularTrie(map<uint32_t,uint32_t> index){
         Trie* node;
 
         for(int j=0; j<table[0].size(); j++){
@@ -77,9 +77,9 @@ class TableIndexer{
         Turns Trie into a bitvector B and a sequence S
     */
     void toCompactForm(){
-        vector<uint64_t> b;
-        vector<uint64_t> s;
-        map<uint64_t, Trie*> node_children;
+        vector<uint32_t> b;
+        vector<uint32_t> s;
+        map<uint32_t, Trie*> node_children;
         queue<Trie*> q;
         Trie* node;
 
@@ -122,7 +122,7 @@ class TableIndexer{
     void createIndexes(){
         for(auto &value: orders){
             vector<string> order = parse(value, ' ');
-            map<u_int64_t, u_int64_t> index;
+            map<uint32_t, uint32_t> index;
             for(int j=0; j<order.size(); j++){
                 index[j] = stoi(order[j]);
             }
@@ -182,7 +182,7 @@ class TableIndexer{
         string line;
         bool first_line = true;
         bool second_line = false;
-        u_int64_t value;
+        uint32_t value;
 
         while(reader.is_open() && getline(reader, line)){
             if(first_line && line.substr(0,4) == "dim:"){
@@ -215,7 +215,7 @@ class TableIndexer{
         reader.close();
 
         if(all_orders){
-            vector<uint64_t> rows(dim);
+            vector<uint32_t> rows(dim);
             ostringstream stream;
             for(int i=0; i<dim; i++){
                 rows[i] = i;

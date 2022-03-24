@@ -39,7 +39,7 @@ class Tuple {
         /*
             Returns the term with the index i in the terms associated with this tuple
         */
-        Term* get_term(uint64_t i){
+        Term* get_term(uint32_t i){
             return &terms[i];
         }
 

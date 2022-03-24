@@ -62,8 +62,8 @@ class CompactTrieIV: public TrieInterface{
             Recives index in bit vector
             Returns index of next 0
         */
-        uint64_t succ0(uint64_t it){
-            uint64_t cant_0 = b_rank0(it);
+        uint32_t succ0(uint32_t it){
+            uint32_t cant_0 = b_rank0(it);
             return b_sel0(cant_0 + 1);
         }
         
@@ -71,8 +71,8 @@ class CompactTrieIV: public TrieInterface{
             Recives index in bit vector
             Returns index of previous 0
         */
-        uint64_t prev0(uint64_t it){
-            uint64_t cant_0 = b_rank0(it);
+        uint32_t prev0(uint32_t it){
+            uint32_t cant_0 = b_rank0(it);
             return b_sel0(cant_0);
         }
 
@@ -80,7 +80,7 @@ class CompactTrieIV: public TrieInterface{
             Recives index of current node and the child that is required
             Returns index of the nth child of current node
         */
-        uint64_t child(uint64_t it, uint64_t n){
+        uint32_t child(uint32_t it, uint32_t n){
             return b_sel0(b_rank1(it+n)) + 1;
         }
 
@@ -88,7 +88,7 @@ class CompactTrieIV: public TrieInterface{
             Recives index of node whos children we want to count
             Returns how many children said node has
         */
-        uint64_t childrenCount(uint64_t it){
+        uint32_t childrenCount(uint32_t it){
             return succ0(it) - it;
         }
 
@@ -96,7 +96,7 @@ class CompactTrieIV: public TrieInterface{
             Recives node index
             Returns index of position in parent
         */
-        uint64_t getPosInParent(uint64_t it){
+        uint32_t getPosInParent(uint32_t it){
             return b_sel1(b_rank0(it));
         }
 
@@ -104,8 +104,8 @@ class CompactTrieIV: public TrieInterface{
             Recives index of node
             Return which child of its parent it is
         */
-        uint64_t childRank(uint64_t it){
-            uint64_t pos = getPosInParent(it);
+        uint32_t childRank(uint32_t it){
+            uint32_t pos = getPosInParent(it);
             return pos - prev0(pos);
         }
 
@@ -113,21 +113,21 @@ class CompactTrieIV: public TrieInterface{
             Recives index of node
             Returns index of parent node
         */  
-        uint64_t parent(uint64_t it){
-            uint64_t pos = getPosInParent(it);
+        uint32_t parent(uint32_t it){
+            uint32_t pos = getPosInParent(it);
             return prev0(pos) + 1;
         }
 
         /*
             Returns key that corresponds to given node(it)
         */
-        uint64_t key_at(uint64_t it){
+        uint32_t key_at(uint32_t it){
             return seq[b_rank0(it)-2];
         }
 
-        pair<uint64_t, uint64_t> binary_search_seek(uint64_t val, uint64_t i, uint64_t f){
+        pair<uint32_t, uint32_t> binary_search_seek(uint32_t val, uint32_t i, uint32_t f){
             if(seq[f]<val)return make_pair(0,f+1);
-            uint64_t mid; 
+            uint32_t mid; 
             while(i<f){
                 mid = (i + f)/2;
                 if(seq[mid]<val)i = mid+1;
@@ -158,8 +158,8 @@ class CompactTrieIV: public TrieInterface{
             initializeSupport();
         }
 
-        uint64_t getMaxSequence(){
-            uint64_t maximum = 0;
+        uint32_t getMaxSequence(){
+            uint32_t maximum = 0;
             for(auto val: seq){
                 if(val > maximum)maximum = val;
             }

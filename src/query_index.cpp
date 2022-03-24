@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
         double total_time = 0.0;
         duration<double> time_span;
 
-        uint64_t limit = -1;
+        uint32_t limit = -1;
         if(argc > 3){
             limit = stoi(argv[3]);
         }
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
 
         // vector<Index*> indexes = {&index1, &index2};
         vector<Index*> indexes = {&index1};
-        uint64_t query_number = 1;
+        uint32_t query_number = 1;
         if(have_queries){
             for(string query_string : queries){  
                 // cout<<"Query "<<query_number<<":"<<endl;
@@ -63,13 +63,13 @@ int main(int argc, char* argv[]){
                 // }cout<<endl;
                 // vector<Term*> terms_created;
                 // Guarda en que tuplas se encuentra cada variable
-                map<string, set<uint64_t>> variable_tuple_mapping;
+                map<string, set<uint32_t>> variable_tuple_mapping;
                 vector<Tuple> query;
 
                 vector<string> tokens_query = parse(query_string, '.');
                 
                 
-                uint64_t term_index = 0;
+                uint32_t term_index = 0;
                 for(string token : tokens_query){
                     query.push_back(get_tuple(token, variable_tuple_mapping, term_index));
                     term_index++;

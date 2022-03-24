@@ -10,7 +10,7 @@ class Term {
     // private: 
         bool is_variable;
         string varname;
-        uint64_t constant;
+        uint32_t constant;
     // public:
         /*
             Empty constructor
@@ -22,7 +22,7 @@ class Term {
         /*
             Constructor for constant terms
         */
-        Term(uint64_t c){
+        Term(uint32_t c){
             is_variable = false;
             constant = c;
         }
@@ -54,7 +54,7 @@ class Term {
             Returns value asociated to the constant variable.
             Before calling it, it should be checked that the term is not a variable
         */
-        uint64_t getConstant(){
+        uint32_t getConstant(){
             return constant;
         }
         

@@ -9,8 +9,8 @@ using namespace std;
 class Trie{
     public:
     // private:
-        map<uint64_t, Trie*> children;
-        map<uint64_t, Trie*>::iterator it;
+        map<uint32_t, Trie*> children;
+        map<uint32_t, Trie*>::iterator it;
         bool has_children;
     // public:
     
@@ -24,17 +24,17 @@ class Trie{
             }
         }
 
-        Trie* insert(uint64_t);
+        Trie* insert(uint32_t);
         void traverse();
         bool hasChildren();
-        uint64_t childrenCount();
-        map<uint64_t, Trie*> getChildren();
+        uint32_t childrenCount();
+        map<uint32_t, Trie*> getChildren();
 };
 
 /*
     Creates a new node in the trie if the tag wasn't already in the trie
 */
-Trie* Trie::insert(uint64_t tag){
+Trie* Trie::insert(uint32_t tag){
     has_children = true;
     it = children.find(tag);
     Trie* node;
@@ -79,14 +79,14 @@ bool Trie::hasChildren(){
 /*
     Returns the amount of children of the node
 */
-uint64_t Trie::childrenCount(){
+uint32_t Trie::childrenCount(){
     return children.size();
 }
 
 /*
     Returns a map with de children of the node and their associated tags
 */
-map<uint64_t, Trie*> Trie::getChildren(){
+map<uint32_t, Trie*> Trie::getChildren(){
     return children;
 }
 #endif

@@ -19,15 +19,15 @@ class LeapfrogJoin{
         vector<Iterator*> iterators;
         bool at_end;
         // Iterador con la key mas pequeña
-        uint64_t p;
-        uint64_t xp,x;
+        uint32_t p;
+        uint32_t xp,x;
         // Cantidad de iteradores (Cuantas queries)
-        uint64_t k;
-        uint64_t key;
-        uint64_t dim;
-        bool debug=true;
+        uint32_t k;
+        uint32_t key;
+        uint32_t dim;
+        bool debug=false;
         
-        LeapfrogJoin(vector<Iterator*> its, uint64_t d, string &var){
+        LeapfrogJoin(vector<Iterator*> its, uint32_t d, string &var){
             this->iterators = its;
             this->at_end = false;
             this->k = iterators.size();
@@ -41,7 +41,7 @@ class LeapfrogJoin{
         /*
             Return module a%b, supports negative numbers
         */
-        uint64_t modulo(int a, uint64_t b){
+        uint32_t modulo(int a, uint32_t b){
             return (b + (a%b)) % b;
         }
 
@@ -93,7 +93,7 @@ class LeapfrogJoin{
         /*
             Returns the key on which all iterators are standing 
         */
-        uint64_t get_key(){
+        uint32_t get_key(){
             return key;
         }
         
@@ -155,7 +155,7 @@ class LeapfrogJoin{
         /*
             Finds the first element of all iterators that is greater or equal that seekKey
         */
-        void leapfrog_seek(uint64_t seekKey){
+        void leapfrog_seek(uint32_t seekKey){
             iterators[p]->seek(seekKey);
             if(iterators[p]->atEnd()) at_end = true;
             else{
@@ -224,10 +224,10 @@ class LeapfrogJoin{
             // p = 0;
         }
 
-        void check_depths(map<uint64_t,uint64_t> &goal_depths){
+        void check_depths(map<uint32_t,uint32_t> &goal_depths){
             if(debug){cout<<"se hizo check_depths"<<endl;}
             for(auto it: iterators){
-                uint64_t index_tuple = it->getTuple();
+                uint32_t index_tuple = it->getTuple();
                 while(it->get_depth()>goal_depths[index_tuple]){
                     if(debug){cout<<"el depth "<<it->get_depth()<<" "<<goal_depths[index_tuple]<<endl;}
                     it->up();
@@ -242,24 +242,24 @@ class LTJ{
     public:
     // private:
         //BORRAR
-        bool debug = true;
+        bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> *indexes;
         vector<Tuple> *query;
         vector<Tuple*> modified_query;
         int tuple_index = 0;
-        map<string, set<uint64_t>> *variable_tuple_mapping;
+        map<string, set<uint32_t>> *variable_tuple_mapping;
         map<string, LeapfrogJoin> variable_lj_mapping;
         bool at_end = false;
-        uint64_t p = 0;
-        uint64_t xp,x;
-        uint64_t k;
-        uint64_t key;
-        u_int64_t depth;
-        u_int64_t dim;
+        uint32_t p = 0;
+        uint32_t xp,x;
+        uint32_t k;
+        uint32_t key;
+        uint32_t depth;
+        uint32_t dim;
         vector<string> *gao;
-        uint64_t limit;
+        uint32_t limit;
 
         // Cosas para triejoin_tentativo
         bool show_results=false;
@@ -268,7 +268,7 @@ class LTJ{
         /*
             Return module a%b, supports negative numbers
         */
-        uint64_t modulo(int a, uint64_t b){
+        uint32_t modulo(int a, uint32_t b){
             return (b + (a%b)) % b;
         }
 
@@ -365,7 +365,7 @@ class LTJ{
                 required_orders.push_back(order.str());
                 modified_query.push_back(new Tuple(terms));
             }  
-            uint64_t index_tuple = 0;
+            uint32_t index_tuple = 0;
 
             for(auto order : required_orders){
                 iterators.push_back(new CurrentIterator(indexes->at(0)->getTrie(order), index_tuple));
@@ -402,7 +402,7 @@ class LTJ{
         }
 
     // public:
-        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint64_t>> *variables_to_index, uint64_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
             // cout<<"Calling LTJ constructor"<<endl;
             // De moemento ind tiene sólo uno
             this->indexes = ind;
@@ -527,7 +527,7 @@ class LTJ{
             if(debug){cout<<"checking iterators positions"<<endl;}
             //para cada iterador de lj obtener la posición en la query de la variable que se busca
             // y verificar que la altura en la que está calza con la altura que necesita
-            map<uint64_t, uint64_t> goal_depths;
+            map<uint32_t, uint32_t> goal_depths;
             // vector<int> goal_depths;
             for(auto tuple_index : variable_tuple_mapping->at(var)){
                 Tuple *tuple = modified_query[tuple_index];
@@ -610,7 +610,7 @@ class LTJ{
             vector<vector<int>> results;
             vector<int> result(gao->size());
             //F: Para mostrar tabla de resultados
-            uint64_t count=0;
+            uint32_t count=0;
             if(debug){cout<<"Starting Triejoin"<<endl;}
             triejoin_open();
             bool finished = false;
@@ -723,7 +723,7 @@ class LTJ{
             }
         }
 
-        u_int64_t get_key(){
+        uint32_t get_key(){
             return key;
         }
 };

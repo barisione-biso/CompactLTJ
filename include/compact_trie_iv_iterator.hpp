@@ -21,11 +21,11 @@ class CompactTrieIVIterator: public Iterator{
         bool at_root;
         bool key_flag;
         int depth;
-        uint64_t it;
-        uint64_t parent_it;
-        uint64_t pos_in_parent;
-        uint64_t key_val;
-        uint64_t tuple;
+        uint32_t it;
+        uint32_t parent_it;
+        uint32_t pos_in_parent;
+        uint32_t key_val;
+        uint32_t tuple;
         CompactTrieIV* compactTrie;
 
     // public:
@@ -33,7 +33,7 @@ class CompactTrieIVIterator: public Iterator{
         /*
         Constructor from CompactTrie
         */
-        CompactTrieIVIterator(CompactTrieIV* ct, uint64_t tup){
+        CompactTrieIVIterator(CompactTrieIV* ct, uint32_t tup){
             this->compactTrie = ct;
             it = 2;
             at_root = true;
@@ -55,7 +55,7 @@ class CompactTrieIVIterator: public Iterator{
         /*
             Returns the key of the current position of the iterator
         */
-        uint64_t key(){
+        uint32_t key(){
             if(at_end){
                 throw "Iterator is atEnd";
             }
@@ -113,7 +113,7 @@ class CompactTrieIVIterator: public Iterator{
                 throw "Iterator is atEnd";
             }
 
-            uint64_t parent_child_count = compactTrie->childrenCount(parent_it);
+            uint32_t parent_child_count = compactTrie->childrenCount(parent_it);
             if(parent_child_count == pos_in_parent){
                 at_end = true;
             }
@@ -147,7 +147,7 @@ class CompactTrieIVIterator: public Iterator{
             Moves the iterator to the closes position that is equal or bigger than seek key
             If not possible then it moves the iterator to the end
         */
-        void seek(uint64_t seek_key){
+        void seek(uint32_t seek_key){
             if(debug)cout<<"Se llama a seek de "<<seek_key<<endl;
             if(at_root){
                 throw "At root, cant seek";
@@ -157,11 +157,11 @@ class CompactTrieIVIterator: public Iterator{
             }
 
             // Nos indica cuantos hijos tiene el padre de el it actual ->O(1)
-            uint64_t parent_child_count = compactTrie->childrenCount(parent_it);
+            uint32_t parent_child_count = compactTrie->childrenCount(parent_it);
             // Nos indica cuantos 0s hay hasta it - 2, es decir la posición en el string de el char correspondiente a la posición del it -> O(1)
-            uint64_t i = compactTrie->b_rank0(it)-2;
+            uint32_t i = compactTrie->b_rank0(it)-2;
             // Nos indica la posición en el string de el char correspondiente a la posición del ultimo hijo del padre del it. -> O(1)
-            uint64_t f = compactTrie->b_rank0(compactTrie->child(parent_it, parent_child_count))-2;
+            uint32_t f = compactTrie->b_rank0(compactTrie->child(parent_it, parent_child_count))-2;
             
             bool found = false;
             if(debug)cout<<"i y f "<<i<<" "<<f<<endl;
@@ -252,7 +252,7 @@ class CompactTrieIVIterator: public Iterator{
             cout<<"it esta en: "<<it<<endl;
         }
 
-        uint64_t getTuple(){
+        uint32_t getTuple(){
             return tuple;
         }
 };

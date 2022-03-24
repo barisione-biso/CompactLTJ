@@ -21,7 +21,7 @@ bool onlySpaces(string &s){
     Returns vector with all the parts of the parsed string 
 */
 vector<string> parse(string line, char delimiter){
-    uint64_t first = 0;
+    uint32_t first = 0;
     vector<string> results;
 
     for(int i=0; i<line.size(); i++){
@@ -43,7 +43,7 @@ vector<string> parse(string line, char delimiter){
     Removes leading and trailing characters that are equal to to_cut
 */
 string trim(string s, char to_cut){
-    u_int64_t beg=0, end=s.size();
+    uint32_t beg=0, end=s.size();
     for(int i=0; i<s.size(); i++){
         if(s[i]==to_cut)beg++;
         else break;
@@ -103,10 +103,10 @@ bool is_number(string & s)
     Returns a tuple consisting of the Terms that are found in s. 
     Also adds the new variables to the variables mapping
 */
-Tuple get_tuple(string &s, map<string, set<uint64_t>> & variable_tuple_mapping, uint64_t &i){
+Tuple get_tuple(string &s, map<string, set<uint32_t>> & variable_tuple_mapping, uint32_t &i){
     vector<string> terms_string = parse(trim(s, ' '), ' ');
     vector<Term> new_terms;
-    u_int64_t value;
+    uint32_t value;
 
     for(auto s: terms_string){
         // cout<<"term "<<terms_string[i]<<endl;

@@ -14,7 +14,7 @@ namespace fs = std::experimental::filesystem;
 class Index{
     public:
     // private:
-        u_int64_t dim;
+        uint32_t dim;
         vector<string> orders;
         map<string, CTrie*> orders_tries;
         // vector<Iterator*> iterators;
@@ -28,7 +28,7 @@ class Index{
         }
 
     // public:
-        Index(u_int64_t d, vector<string> ord, vector<CTrie*> tries, string file_name){
+        Index(uint32_t d, vector<string> ord, vector<CTrie*> tries, string file_name){
             //SE ASUME QUE EL PRIMER ORDEN DEL INDICE SIEMPRE ES EL ORDEN EN EL QUE VIENE LA TABLA 
             dim = d;
             orders = ord;
@@ -36,7 +36,7 @@ class Index{
             set_orders_tries(tries);
             /* The folder where the index file will be saved will be in the data folder 
             with the name of the file that was indexed */
-            uint64_t s = file_name.size();
+            uint32_t s = file_name.size();
             folder = file_name.substr(0, s-4) + "/";
         }
 
@@ -92,7 +92,7 @@ class Index{
             }
             stream.close();
 
-            u_int64_t i = 0;
+            uint32_t i = 0;
             for(auto p: orders_tries){
                 p.second->storeToFile(folder+"order"+to_string(i));
                 // it->storeToFile(folder+"order"+to_string(i)+".txt");
@@ -139,7 +139,7 @@ class Index{
         /*
             Returns dimension of the table that is stored in the index
         */
-        u_int64_t getDim(){
+        uint32_t getDim(){
             return dim;
         }
 
