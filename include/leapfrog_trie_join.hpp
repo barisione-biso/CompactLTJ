@@ -642,8 +642,6 @@ class LTJ{
             }
             if(debug){cout<<"Constants handled"<<endl;}
 
-            cout<<"despues de constantes"<<endl;
-
             // leapfrog_init();
 
             //Donde nos encontramos en cada iterador?
@@ -674,6 +672,7 @@ class LTJ{
                         }
                     }
                     else{
+                        cout<<"gao index es "<<gao_index<<endl;
                         result[gao_index] = lj->get_key();
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
                         if(gao_index == gao->size()-1){
