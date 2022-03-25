@@ -230,6 +230,7 @@ class LeapfrogJoin{
 
         void check_depths(map<uint32_t,uint32_t> &goal_depths){
             if(debug){cout<<"se hizo check_depths"<<endl;}
+            cout<<"se hizo check_depths"<<endl;
             for(auto it: iterators){
                 uint32_t index_tuple = it->getTuple();
                 while(it->get_depth()>goal_depths[index_tuple]){
@@ -237,6 +238,7 @@ class LeapfrogJoin{
                     it->up();
                 }
                 if(debug){cout<<"la tupla "<<index_tuple<<" subio al nivel "<<it->get_depth();}
+                cout<<"la tupla "<<index_tuple<<" subio al nivel "<<it->get_depth();
             }
         }
 };
