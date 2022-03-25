@@ -127,6 +127,7 @@ class LeapfrogJoin{
                 if(debug){cout<<"p es "<<p<<endl;}
                 // cout<<"obteniendo x en search"<<endl;
                 x = iterators[p]->key();
+                cout<<"x: "<<x<<endl;
                 // cout<<"obtuve x en search"<<endl;
                 if(debug){cout<<"x es "<<x<<endl;}
                 if(x==xp){
