@@ -25,7 +25,7 @@ class LeapfrogJoin{
         uint32_t k;
         uint32_t key;
         uint32_t dim;
-        bool debug=false;
+        bool debug=true;
         
         LeapfrogJoin(vector<Iterator*> its, uint32_t d, string &var){
             this->iterators = its;
@@ -246,13 +246,13 @@ class LTJ{
     public:
     // private:
         //BORRAR
-        bool debug = false;
+        bool debug = true;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> *indexes;
         vector<Tuple> *query;
         vector<Tuple*> modified_query;
-        int tuple_index = 0;
+        // int tuple_index = 0;
         map<string, set<uint32_t>> *variable_tuple_mapping;
         map<string, LeapfrogJoin> variable_lj_mapping;
         bool at_end;
@@ -651,6 +651,11 @@ class LTJ{
                     cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
                 }
             }
+
+            // cout<<"Iterators positions and keys:"<<endl;
+            // for(auto it: iterators){
+            //     cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
+            // }
 
 
             //Resolvemos las variables en el órden en el que aparecen en gao
