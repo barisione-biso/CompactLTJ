@@ -265,6 +265,12 @@ class LTJ{
         bool show_results=false;
         map<string, int> gao_map;
 
+        void clear(){
+            gao_map.clear();
+            variable_lj_mapping.clear();
+            modified_query.clear();
+            iterators.clear();
+        }
         /*
             Return module a%b, supports negative numbers
         */
@@ -403,8 +409,6 @@ class LTJ{
 
     // public:
         LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
-            // cout<<"Calling LTJ constructor"<<endl;
-            // De moemento ind tiene sólo uno
             this->indexes = ind;
             this->query = q;
             this->gao = gao_vector;
@@ -412,10 +416,6 @@ class LTJ{
             dim = indexes->at(0)->getDim();
             
             setIterators();
-            // Elige el orden
-            // chooseOrder();
-            // Agrega todos los iteradores al vector de iteradores. Uno por cada tupla de la query
-            // addIterators();
             this->variable_tuple_mapping = variables_to_index;
             createLeapfrogJoins();
             //k es la cantidad de iteradores que se recorrerán que para la nueva solución son la cantidad de 
@@ -423,12 +423,8 @@ class LTJ{
             // k = q.size();
             k = iterators.size();
             depth = 0;
-            
-            // resetIndexes();
-            //para triejoin_tentativo
             limit = lmt;
             setGaoMap();
-            // checkIterators();
         }
 
         ~LTJ(){

@@ -85,15 +85,11 @@ int main(int argc, char* argv[]){
                 total_time = time_span.count();
                 cout << query_number <<  ";" << number_of_results << ";" << (unsigned long long)(total_time*1000000000ULL) << endl;
                 query_number++; 
-                // cout<<endl<<endl<<endl;
 
-                // for(auto tuple: query){
-                //     delete tuple;
-                // }
-
-                // for(auto term: terms_created){
-                //     delete term;
-                // }
+                variable_tuple_mapping.clear();
+                query.clear();
+                tokens_query.clear();
+                ltj.clear();
             }
         }  
         // for(auto index: indexes){
