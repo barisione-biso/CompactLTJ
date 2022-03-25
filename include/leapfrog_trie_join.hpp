@@ -644,7 +644,7 @@ class LTJ{
 
             cout<<"despues de constantes"<<endl;
 
-            leapfrog_init();
+            // leapfrog_init();
 
             //Donde nos encontramos en cada iterador?
             if(debug){
