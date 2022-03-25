@@ -42,6 +42,7 @@ class CompactTrieIterator: public Iterator{
             at_end = false;
             depth = -1;
             tuple = tup;
+            key_flag = true;
         }
 
         /*
