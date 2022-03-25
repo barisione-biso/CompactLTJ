@@ -116,6 +116,10 @@ class LeapfrogJoin{
         }
 
         void leapfrog_search(){
+            cout<<"checking depths"<<endl;
+            for(auto it: iterators){
+                cout<<it->get_depth()<<endl;
+            }
             // leapfrog_init();
             //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
             if(debug){cout<<"Entrando a leapfrog_search"<<endl;}
