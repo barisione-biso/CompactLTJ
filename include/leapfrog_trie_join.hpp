@@ -255,10 +255,7 @@ class LTJ{
         int tuple_index = 0;
         map<string, set<uint32_t>> *variable_tuple_mapping;
         map<string, LeapfrogJoin> variable_lj_mapping;
-        bool at_end = false;
-        uint32_t p = 0;
-        uint32_t xp,x;
-        uint32_t k;
+        bool at_end;
         uint32_t key;
         uint32_t depth;
         uint32_t dim;
@@ -399,39 +396,34 @@ class LTJ{
             }
         }
 
-        void checkIterators(){
-            cout<<"checking iterators"<<endl;
+        // void checkIterators(){
+        //     cout<<"checking iterators"<<endl;
 
-            for(auto it: iterators){
-                cout<<"Checking it"<<endl;
-                it->open();
-                while(!it->atEnd()){
-                    cout<<it->key()<<" ";
-                    it->next();
-                }
-                cout<<endl;
-                it->up();
-            }
-        }
+        //     for(auto it: iterators){
+        //         cout<<"Checking it"<<endl;
+        //         it->open();
+        //         while(!it->atEnd()){
+        //             cout<<it->key()<<" ";
+        //             it->next();
+        //         }
+        //         cout<<endl;
+        //         it->up();
+        //     }
+        // }
 
     // public:
         LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
             this->indexes = ind;
             this->query = q;
             this->gao = gao_vector;
-            /*De momento se asume que todas las tablas tienen la misma dimensión*/
             dim = indexes->at(0)->getDim();
-            
             setIterators();
             this->variable_tuple_mapping = variables_to_index;
             createLeapfrogJoins();
-            //k es la cantidad de iteradores que se recorrerán que para la nueva solución son la cantidad de 
-            //tuplas en q
-            // k = q.size();
-            k = iterators.size();
             depth = 0;
             limit = lmt;
             setGaoMap();
+            at_end = false;
         }
 
         ~LTJ(){
@@ -649,6 +641,8 @@ class LTJ{
                 }
             }
             if(debug){cout<<"Constants handled"<<endl;}
+
+            cout<<"despues de constantes"<<endl;
 
             leapfrog_init();
 
