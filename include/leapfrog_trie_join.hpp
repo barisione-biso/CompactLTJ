@@ -671,6 +671,11 @@ class LTJ{
             //Resolvemos las variables en el órden en el que aparecen en gao
             int gao_index = 0;
             while(gao_index < gao->size() && !finished){
+                cout<<"depths before search"<<endl;
+                for(auto it: iterators){
+                    cout<<it->get_depth()<<" ";
+                }
+                cout<<endl;
                 string var = gao->at(gao_index);
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
