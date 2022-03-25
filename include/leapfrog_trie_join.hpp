@@ -38,6 +38,10 @@ class LeapfrogJoin{
 
         LeapfrogJoin(){ }
 
+        void clear(){
+            iterators.clear();
+        }
+
         /*
             Return module a%b, supports negative numbers
         */
@@ -267,6 +271,9 @@ class LTJ{
 
         void clear(){
             gao_map.clear();
+            for(auto p: variable_lj_mapping){
+                p.second.clear();
+            }
             variable_lj_mapping.clear();
             modified_query.clear();
             iterators.clear();
@@ -433,11 +440,11 @@ class LTJ{
             // }
 
             for(auto tuple: modified_query){
-                delete tuple;
+                delete []tuple;
             }
 
             for(auto it: iterators){
-                delete it;
+                delete []it;
             }
         }
 
