@@ -32,6 +32,7 @@ class LeapfrogJoin{
             this->at_end = false;
             this->k = iterators.size();
             this->dim = d;
+            this->p = 0;
             // depth = 0;
             // traverse();
         }
@@ -110,7 +111,7 @@ class LeapfrogJoin{
             }
             if(!at_end){
                 sort(iterators.begin(), iterators.end());
-                p = 0;
+                
             }   
         }
 
@@ -118,7 +119,9 @@ class LeapfrogJoin{
             leapfrog_init();
             //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
             if(debug){cout<<"Entrando a leapfrog_search"<<endl;}
+            cout<<"p: "<<p<<endl;
             xp = iterators[modulo(int(p)-1,k)]->key();
+            cout<<"xp: "<<xp<<endl;
             if(debug){cout<<"xp es "<<xp<<endl;}
             while(true){
                 if(debug){cout<<"p es "<<p<<endl;}
