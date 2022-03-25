@@ -246,7 +246,7 @@ class LTJ{
     public:
     // private:
         //BORRAR
-        bool debug = true;
+        bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> *indexes;
