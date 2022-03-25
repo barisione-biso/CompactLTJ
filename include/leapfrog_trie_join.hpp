@@ -440,11 +440,11 @@ class LTJ{
             // }
 
             for(auto tuple: modified_query){
-                delete []tuple;
+                delete tuple;
             }
 
             for(auto it: iterators){
-                delete []it;
+                delete it;
             }
         }
 
