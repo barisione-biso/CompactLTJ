@@ -182,12 +182,9 @@ class LeapfrogJoin{
             It doesn't move values horizontaly in the new level, it only sets them up so that it 
             the next LeapfrogJoin can use them
         */
-        void up(vector<bool> &up_indicator){
-            for(int i=0; i<iterators.size(); i++){
-                auto it = iterators[i];
-                cout<<"este es el it de la tupla "<<it->getTuple();
-                if(debug){cout<<"up indicator es "<<up_indicator[i]<<endl;}
-                if(up_indicator[i]){
+        void up(vector<bool> &up_indicator, map<uint32_t, bool> &tuple_should_go_up){
+            for(auto it: iterators){
+                if(tuple_should_go_up[it->getTuple()]){
                     if(debug){cout<<"solo subi"<<endl;}
                     it->up();
                 }
@@ -198,6 +195,25 @@ class LeapfrogJoin{
                 }
             }
             at_end = false;
+
+
+
+
+            // for(int i=0; i<iterators.size(); i++){
+            //     auto it = iterators[i];
+            //     cout<<"este es el it de la tupla "<<it->getTuple();
+            //     if(debug){cout<<"up indicator es "<<up_indicator[i]<<endl;}
+            //     if(up_indicator[i]){
+            //         if(debug){cout<<"solo subi"<<endl;}
+            //         it->up();
+            //     }
+            //     else{
+            //         if(debug){cout<<"subi y bajo"<<endl;}
+            //         it->up();
+            //         it->open();
+            //     }
+            // }
+            // at_end = false;
         }
 
         /*
@@ -499,28 +515,34 @@ class LTJ{
             Returns a vector indicating if each of the iterators associated with the variable should, 
             or can go up a level
         */
-        void check_for_prev_value(string &var, int &gao_score, vector<bool> &should_go_up){
+        void check_for_prev_value(string &var, int &gao_score, vector<bool> &should_go_up, map<uint32_t, bool> &tuple_should_go_up){
             if(debug){cout<<"cheching for prev value "<<var<<" "<<gao_score<<endl;}
+
+            
             // vector<bool> should_go_up;
             for(auto tuple_index : variable_tuple_mapping->at(var)){
                 Tuple *tuple = modified_query[tuple_index];
                 int term_index = get_var_index_in_tuple(tuple, var);
                 if(debug){cout<<"term_index es "<<term_index<<endl;}
                 if(term_index == 0){
+                    tuple_should_go_up[tuple_index] = false;
                     should_go_up.push_back(false);
                 }
                 else{
                     Term *prev_term = tuple->get_term(term_index-1);
                     if(!prev_term->isVariable()){
+                        tuple_should_go_up[tuple_index] = false;
                         should_go_up.push_back(false);
                     }
                     else{
                         //Si el termino previo es una variable con < gao score que el que buscamos
                         string prev_var = prev_term->getVariable();
                         if(get_gao_score(prev_var) < gao_score){
+                            tuple_should_go_up[tuple_index] = false;
                             should_go_up.push_back(false);
                         }
                         else{
+                            tuple_should_go_up[tuple_index] = true;
                             should_go_up.push_back(true);
                         }
                     }
@@ -555,8 +577,9 @@ class LTJ{
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 vector<bool> should_go_up;
+                map<uint32_t, bool> tuple_should_go_up;
                 // vector<bool> should_go_up = check_for_prev_value(var, gao_score);
-                check_for_prev_value(var, gao_score,should_go_up);
+                check_for_prev_value(var, gao_score,should_go_up,tuple_should_go_up);
                 if(debug){cout<<"cheching should go up"<<endl;}
                 if(debug){
                     for(auto v: should_go_up){
@@ -565,7 +588,7 @@ class LTJ{
                     cout<<endl;
                 }
                 if(debug){cout<<"en el up de goUpUntil "<<endl;}
-                lj->up(should_go_up);
+                lj->up(should_go_up, tuple_should_go_up);
                 // lj->up();
                 gao_index--;
             }
