@@ -25,7 +25,7 @@ class LeapfrogJoin{
         uint32_t k;
         uint32_t key;
         uint32_t dim;
-        bool debug=false;
+        bool debug=true;
         
         LeapfrogJoin(vector<Iterator*> its, uint32_t d, string &var){
             this->iterators = its;
@@ -569,7 +569,7 @@ class LTJ{
                 gao_index--;
             }
 
-            cout<<"depths before search"<<endl;
+            cout<<"depths after going up for"<<endl;
             for(auto it: iterators){
                 cout<<it->get_depth()<<" ";
             }
