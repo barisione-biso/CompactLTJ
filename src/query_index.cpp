@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
 
         // vector<Index*> indexes = {&index1, &index2};
         vector<Index*> indexes = {&index1};
-        uint32_t query_number = 1;
+        uint32_t query_number = 0;
         if(have_queries){
             for(string query_string : queries){  
                 // cout<<"Query "<<query_number<<":"<<endl;
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
                 int number_of_results = 0;
                 //En vez de tener terms created, en variable_mapping vamos a guardar las variables y los indices
                 start = high_resolution_clock::now();
-                LTJ ltj(&indexes, &query, &gaos[query_number-1], &variable_tuple_mapping, limit);
+                LTJ ltj(&indexes, &query, &gaos[query_number], &variable_tuple_mapping, limit);
                 // cout<<"Constructor works"<<endl;
                 ltj.triejoin_definitivo(number_of_results);
                 stop = high_resolution_clock::now();
