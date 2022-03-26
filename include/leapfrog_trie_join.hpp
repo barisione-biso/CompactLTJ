@@ -185,6 +185,7 @@ class LeapfrogJoin{
         void up(vector<bool> &up_indicator){
             for(int i=0; i<iterators.size(); i++){
                 auto it = iterators[i];
+                cout<<"este es el it de la tupla "<<it->getTuple();
                 if(debug){cout<<"up indicator es "<<up_indicator[i]<<endl;}
                 if(up_indicator[i]){
                     if(debug){cout<<"solo subi"<<endl;}
