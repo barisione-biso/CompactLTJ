@@ -568,6 +568,12 @@ class LTJ{
                 // lj->up();
                 gao_index--;
             }
+
+            cout<<"depths before search"<<endl;
+            for(auto it: iterators){
+                cout<<it->get_depth()<<" ";
+            }
+            cout<<endl;
             // if(debug){
             //     cout<<"Iterators positions and keys:"<<endl;
             //     for(auto it: iterators){
