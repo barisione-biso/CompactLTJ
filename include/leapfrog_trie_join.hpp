@@ -25,7 +25,7 @@ class LeapfrogJoin{
         uint32_t k;
         uint32_t key;
         uint32_t dim;
-        bool debug=true;
+        bool debug=false;
         
         LeapfrogJoin(vector<Iterator*> its, uint32_t d, string &var){
             this->iterators = its;
@@ -116,22 +116,22 @@ class LeapfrogJoin{
         }
 
         void leapfrog_search(){
-            cout<<"checking depths"<<endl;
-            for(auto it: iterators){
-                cout<<it->get_depth()<<endl;
-            }
+            // cout<<"checking depths"<<endl;
+            // for(auto it: iterators){
+            //     cout<<it->get_depth()<<endl;
+            // }
             // leapfrog_init();
             //TODO: averiguar si ese int(p) puede causar problemas con número más grandes, hasta donde debería llegar?
             if(debug){cout<<"Entrando a leapfrog_search"<<endl;}
-            cout<<"p: "<<p<<endl;
+            // cout<<"p: "<<p<<endl;
             xp = iterators[modulo(int(p)-1,k)]->key();
-            cout<<"xp: "<<xp<<endl;
+            // cout<<"xp: "<<xp<<endl;
             if(debug){cout<<"xp es "<<xp<<endl;}
             while(true){
                 if(debug){cout<<"p es "<<p<<endl;}
                 // cout<<"obteniendo x en search"<<endl;
                 x = iterators[p]->key();
-                cout<<"x: "<<x<<endl;
+                // cout<<"x: "<<x<<endl;
                 // cout<<"obtuve x en search"<<endl;
                 if(debug){cout<<"x es "<<x<<endl;}
                 if(x==xp){
@@ -182,7 +182,7 @@ class LeapfrogJoin{
             It doesn't move values horizontaly in the new level, it only sets them up so that it 
             the next LeapfrogJoin can use them
         */
-        void up(vector<bool> &up_indicator, map<uint32_t, bool> &tuple_should_go_up){
+        void up(map<uint32_t, bool> &tuple_should_go_up){
             for(auto it: iterators){
                 if(tuple_should_go_up[it->getTuple()]){
                     if(debug){cout<<"solo subi"<<endl;}
@@ -255,7 +255,7 @@ class LeapfrogJoin{
 
         void check_depths(map<uint32_t,uint32_t> &goal_depths){
             if(debug){cout<<"se hizo check_depths"<<endl;}
-            cout<<"se hizo check_depths"<<endl;
+            // cout<<"se hizo check_depths"<<endl;
             for(auto it: iterators){
                 uint32_t index_tuple = it->getTuple();
                 while(it->get_depth()>goal_depths[index_tuple]){
@@ -263,7 +263,7 @@ class LeapfrogJoin{
                     it->up();
                 }
                 if(debug){cout<<"la tupla "<<index_tuple<<" subio al nivel "<<it->get_depth();}
-                cout<<"la tupla "<<index_tuple<<" subio al nivel "<<it->get_depth()<<endl;
+                // cout<<"la tupla "<<index_tuple<<" subio al nivel "<<it->get_depth()<<endl;
             }
         }
 };
@@ -273,7 +273,7 @@ class LTJ{
     public:
     // private:
         //BORRAR
-        bool debug = true;
+        bool debug = false;
         //HASTA AQUI
         vector<Iterator*> iterators;
         vector<Index*> *indexes;
@@ -515,7 +515,7 @@ class LTJ{
             Returns a vector indicating if each of the iterators associated with the variable should, 
             or can go up a level
         */
-        void check_for_prev_value(string &var, int &gao_score, vector<bool> &should_go_up, map<uint32_t, bool> &tuple_should_go_up){
+        void check_for_prev_value(string &var, int &gao_score, map<uint32_t, bool> &tuple_should_go_up){
             if(debug){cout<<"cheching for prev value "<<var<<" "<<gao_score<<endl;}
 
             
@@ -526,24 +526,24 @@ class LTJ{
                 if(debug){cout<<"term_index es "<<term_index<<endl;}
                 if(term_index == 0){
                     tuple_should_go_up[tuple_index] = false;
-                    should_go_up.push_back(false);
+                    // should_go_up.push_back(false);
                 }
                 else{
                     Term *prev_term = tuple->get_term(term_index-1);
                     if(!prev_term->isVariable()){
                         tuple_should_go_up[tuple_index] = false;
-                        should_go_up.push_back(false);
+                        // should_go_up.push_back(false);
                     }
                     else{
                         //Si el termino previo es una variable con < gao score que el que buscamos
                         string prev_var = prev_term->getVariable();
                         if(get_gao_score(prev_var) < gao_score){
                             tuple_should_go_up[tuple_index] = false;
-                            should_go_up.push_back(false);
+                            // should_go_up.push_back(false);
                         }
                         else{
                             tuple_should_go_up[tuple_index] = true;
-                            should_go_up.push_back(true);
+                            // should_go_up.push_back(true);
                         }
                     }
                 }
@@ -576,28 +576,28 @@ class LTJ{
                 string var = gao->at(i);
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
-                vector<bool> should_go_up;
+                // vector<bool> should_go_up;
                 map<uint32_t, bool> tuple_should_go_up;
                 // vector<bool> should_go_up = check_for_prev_value(var, gao_score);
-                check_for_prev_value(var, gao_score,should_go_up,tuple_should_go_up);
+                check_for_prev_value(var, gao_score,tuple_should_go_up);
                 if(debug){cout<<"cheching should go up"<<endl;}
-                if(debug){
-                    for(auto v: should_go_up){
-                        cout<<v<<" ";
-                    }
-                    cout<<endl;
-                }
+                // if(debug){
+                //     for(auto v: should_go_up){
+                //         cout<<v<<" ";
+                //     }
+                //     cout<<endl;
+                // }
                 if(debug){cout<<"en el up de goUpUntil "<<endl;}
-                lj->up(should_go_up, tuple_should_go_up);
+                lj->up(tuple_should_go_up);
                 // lj->up();
                 gao_index--;
             }
 
-            cout<<"depths after going up for"<<endl;
-            for(auto it: iterators){
-                cout<<it->get_depth()<<" ";
-            }
-            cout<<endl;
+            // cout<<"depths after going up for"<<endl;
+            // for(auto it: iterators){
+            //     cout<<it->get_depth()<<" ";
+            // }
+            // cout<<endl;
             // if(debug){
             //     cout<<"Iterators positions and keys:"<<endl;
             //     for(auto it: iterators){
@@ -701,11 +701,11 @@ class LTJ{
             //Resolvemos las variables en el órden en el que aparecen en gao
             int gao_index = 0;
             while(gao_index < gao->size() && !finished){
-                cout<<"depths before search"<<endl;
-                for(auto it: iterators){
-                    cout<<it->get_depth()<<" ";
-                }
-                cout<<endl;
+                // cout<<"depths before search"<<endl;
+                // for(auto it: iterators){
+                //     cout<<it->get_depth()<<" ";
+                // }
+                // cout<<endl;
                 string var = gao->at(gao_index);
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
@@ -722,7 +722,7 @@ class LTJ{
                         }
                     }
                     else{
-                        cout<<"gao index es "<<gao_index<<endl;
+                        // cout<<"gao index es "<<gao_index<<endl;
                         result[gao_index] = lj->get_key();
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
                         if(gao_index == gao->size()-1){
