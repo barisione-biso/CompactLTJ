@@ -47,7 +47,9 @@ class LeapfrogJoin{
             Return module a%b, supports negative numbers
         */
         uint32_t modulo(int a, uint32_t b){
-            return (b + (a%b)) % b;
+            //return (b + (a%b)) % b;
+	   if(a < 0){return b-1;}
+	   else{return a%b;}
         }
 
         void traverse(){
