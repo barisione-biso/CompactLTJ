@@ -26,7 +26,7 @@ class LeapfrogJoin{
         uint32_t key;
         uint32_t dim;
         bool debug=false;
-        
+
         LeapfrogJoin(vector<Iterator*> its, uint32_t d, string &var){
             this->iterators = its;
             this->at_end = false;
@@ -290,10 +290,13 @@ class LTJ{
         uint32_t dim;
         vector<string> *gao;
         uint32_t limit;
-
+        
         // Cosas para triejoin_tentativo
         bool show_results=false;
         map<string, int> gao_map;
+
+        std::unordered_map<std::string, std::vector<std::string>> var_to_vars;//related variables.
+        std::unordered_map<std::string, std::vector<Iterator*>> var_to_iters;
 
         void clear(){
             gao_map.clear();
@@ -385,6 +388,52 @@ class LTJ{
             return order.str();
         }
 
+        bool is_var_subject(std::string var, Tuple &tuple){
+            Term* term = tuple.get_term(0);
+            if(term->isVariable()){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        
+        bool is_var_predicate(std::string var, Tuple &tuple){
+            Term* term = tuple.get_term(1);
+            if(term->isVariable()){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        bool is_var_object(std::string var, Tuple &tuple){
+            Term* term = tuple.get_term(0);
+            if(term->isVariable()){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        std::string get_order(Tuple& tuple, std::string& var, int index_to_exclude){
+            stringstream order,variable_orders;
+            for(int i=0; i<dim; i++){
+                Term* term = tuple.get_term(i);
+                if(!term->isVariable()){
+                    order<<i<<" ";
+                }else{
+                    if(i != index_to_exclude){
+                        variable_orders << i;
+                        if(i < dim - 1){
+                             variable_orders << " ";
+                        }
+                        var_to_vars[var].push_back(term->varname);
+                    }
+                }
+            }
+            order << index_to_exclude << " " << variable_orders.rdbuf();
+            return order.str();
+        }
         /*
             Adds iterators to the iteratos vector creating a CompactTrieIterator using the order 
             that is required by gao. It also stores in modified query, the updated version of the query that follows the gao order.
@@ -393,12 +442,124 @@ class LTJ{
             vector<string> required_orders;
             
             // for(auto tuple: &query)
+            //***************************************************GAO
+            /*Algoritmo:
+            a. Separamos las variables en regulares y lonely.
+            b. Obtengo el orden parcial con las constantes (si es que hay).
+                
+                Supongamos que estamos trabajando con el triple ?X1 100 ?X2, entonces:
+                order<<getConstantsOrder(tuple, added_items, terms);
+
+                deja order = "1 "
+
+            c. Completamos el orden parcial como sigue:
+                Si estamos evaluando X1, entonces tenemos que usar el iterator POS, es decir 1 2 0.
+                Para x2 usamos la otra permutación de las variables dada por el iterador PSO, es decir 1 0 2.
+
+            d. Creamos un iterador por cada variable en una tupla, utilizando el orden calculado en (c.).
+            e. Calculamos el gao como sigue:
+                Sea Xj una variable del BGP. bajamos por cada uno de los iteradores de Xj, procesando las constantes tal como sale en el código actual, bajo el comentario:
+                //Resolvemos las constantes para todas las tuplas") en triejoin_definitivo()
+
+                Calculo el número de hijos para ese nodo del iterador, y me quedo con el mínimo.
+                Adicionalmente, la instanciación de variables tiene que generar un grafo conexo.
+            */
+           //***************************************************GAO
+            std::vector<std::string> calc_gao;
+            vector<Iterator*> gao_iterators;
+            std::unordered_map<int, Iterator*> tuple_index_to_iter;
+            //a.
+            std::vector<std::string> regular_vars; 
+            std::vector<std::string> lonely_vars; 
+            for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
+                auto &p = *it;
+                string var = p.first;
+                if(p.second.size() > 1){
+                    regular_vars.push_back(var);
+                    
+                    //b.
+                    for(auto& tuple_index : p.second){
+                        //try{ //TODO: COMENTE ESTO PARA QUE NO CREE SOLO 1 ITERADOR POR TUPLA. SI NO QUE UNO POR VARIABLE EN CADA TUPLA.
+                        //    Iterator* it = tuple_index_to_iter.at(tuple_index);
+                        //}catch (std::out_of_range e){                        
+                            std::string order;
+                            auto& tuple = query->at(tuple_index);
+                            //c.
+                            if(is_var_subject(var, tuple)){
+                                //order << getConstants() << 0 << getVars(0)
+                                order = get_order(tuple, var, 0);
+                            }else if(is_var_predicate(var, tuple)){
+                                //order << getConstants() << 1 << getVars(1)
+                                order = get_order(tuple, var, 1);
+                            }else{
+                                //order << getConstants() << 2 << getVars(2)
+                                order = get_order(tuple, var, 2);
+                            }
+                            //d.
+                            auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), 0);
+                            iter->open();
+                            tuple_index_to_iter[tuple_index]=iter;
+                            var_to_iters[var].push_back(iter);
+                            gao_iterators.push_back(iter);//TODO: REMOVE IT. it is the same as the vector above.
+                        //}
+                    }
+                }else{
+                    lonely_vars.push_back(var);
+                }
+            }
+
+            //e.
+
+            //void triejoin_open(){
+            depth++;
+            
+            if(debug){cout<<"Working with constants"<<endl;}
+            int i=0;
+            for(auto it=query->begin(); it!=query->end(); it++, i++){
+                Tuple &tuple = *it;
+                for(int j=0; j<dim; j++){
+                    Term* term = tuple.get_term(j);
+                    if(!term->isVariable()){
+                        if(debug){cout<<"Term no es variable es "<<term->getConstant()<<endl;}
+                        gao_iterators[i]->seek(term->getConstant());//TODO: LOS ITERADORES DE LA VARIABLE.
+                        if(!gao_iterators[i]->atEnd() && gao_iterators[i]->key() == term->getConstant()){
+                            if(debug){cout<<"Se encontró la constante "<<term->getConstant()<<endl;}
+                            gao_iterators[i]->open();
+                        }
+                        else{
+                            // Si es que el valor no es igual a la constante entonces no 
+                            // hay valores que cumplan esta tupla
+                            return;
+                        }
+                    }
+                }
+            }  
+            depth--;
+
+            for(std::string var : regular_vars){
+                auto& tuple_indexes=variable_tuple_mapping->at(var);
+                for(int tuple_index : tuple_indexes){
+                    Iterator* iter = tuple_index_to_iter.at(tuple_index);
+                    std::cout << " Var : " << var << " with iter in tuple : " << tuple_index << " has " << iter->getCompactTrie()->childrenCount(iter->key()) << " children" << std::endl;
+                    //TODO: falta pensar en las variables relacionadas. y en hacer el sort del minimo. :D
+                }
+            }            
+
+            for(std::string var : lonely_vars){
+                calc_gao.push_back(var);
+            }
+            //--
+            for(auto gao_it: gao_iterators){
+                delete gao_it;
+            }
+            //***************************************************GAO
             for(auto it=query->begin(); it!=query->end(); it++){
                 Tuple &tuple = *it;
                 stringstream order;
                 int added_items = 0;
                 vector<Term> terms;
                 order<<getConstantsOrder(tuple, added_items, terms);
+                //TODO: Fabrizio. aqui recien necesito el gao.
                 order<<getVariableOrder(tuple, added_items, terms);
                 order.seekp(-1, std::ios_base::end);
                 required_orders.push_back(order.str());
@@ -446,8 +607,8 @@ class LTJ{
             this->query = q;
             this->gao = gao_vector;
             dim = indexes->at(0)->getDim();
-            setIterators();
             this->variable_tuple_mapping = variables_to_index;
+            setIterators();
             createLeapfrogJoins();
             depth = 0;
             limit = lmt;
