@@ -11,6 +11,9 @@
 #include "iterator.hpp"
 #include "config.hpp"
 
+#include <unordered_map>
+#include <unordered_set>
+
 using namespace std;
 
 class LeapfrogJoin{
@@ -298,7 +301,14 @@ class LTJ{
         std::unordered_map<std::string, std::vector<std::string>> var_to_vars;//related variables.
         std::unordered_map<std::string, std::vector<Iterator*>> var_to_iters;
         std::unordered_map<int, std::vector<Iterator*>> tuple_index_to_iters;
-
+        typedef struct {
+            std::string name;
+            uint64_t weight;
+            uint64_t n_triples;
+            std::unordered_set<std::string> related;
+        } info_var_type;
+        std::vector<info_var_type> m_var_info;
+        std::unordered_map<std::string, uint64_t> m_hash_table_position;
         void clear(){
             gao_map.clear();
             for(auto p: variable_lj_mapping){
@@ -440,6 +450,32 @@ class LTJ{
             order << index_to_exclude << " " << orders_str;
             return order.str();
         }
+
+        struct compare_var_info
+        {
+            inline bool operator() (const info_var_type& linfo, const info_var_type& rinfo)
+            {
+                if(linfo.n_triples>1 && rinfo.n_triples==1){
+                    return true;
+                }
+                if(linfo.n_triples==1 && rinfo.n_triples>1){
+                    return false;
+                }
+                return linfo.weight < rinfo.weight;
+            }
+        };
+
+        void var_to_related(std::string var, std::string rel){
+            {
+                info_var_type& info = m_var_info[m_hash_table_position.at(var)];
+                info.related.insert(rel);
+            }
+            
+            {
+                info_var_type& info = m_var_info[m_hash_table_position.at(rel)];
+                info.related.insert(var);
+            }
+        }
         /*
             Adds iterators to the iteratos vector creating a CompactTrieIterator using the order 
             that is required by gao. It also stores in modified query, the updated version of the query that follows the gao order.
@@ -480,6 +516,12 @@ class LTJ{
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &p = *it;
                 string var = p.first;
+
+                info_var_type info;
+                info.name = var;
+                m_var_info.emplace_back(info);
+                m_hash_table_position.insert({var, m_var_info.size()-1});
+
                 if(p.second.size() > 1){
                     regular_vars.push_back(var);
                     
@@ -515,11 +557,15 @@ class LTJ{
 
             //void triejoin_open(){
             depth++;
-            
-            if(debug){cout<<"Working with constants"<<endl;}//TODO: It seems the following code can be executed within the above loop.
+            //  e1.
+            if(debug){cout<<"Working with constants"<<endl;}
             int tuple_index=0;
-            for(auto it=query->begin(); it!=query->end(); it++, tuple_index++){
+            for(auto it=query->begin(); it!=query->end(); it++, tuple_index++){//Per each triple pattern
                 Tuple &tuple = *it;
+
+                bool s = false, p = false, o = false;
+                std::string var_s, var_p, var_o;
+
                 for(int j=0; j<dim; j++){
                     Term* term = tuple.get_term(j);
                     if(!term->isVariable()){
@@ -537,11 +583,36 @@ class LTJ{
                                 return;
                             }
                         }
+                    }else{
+                        //if 'j' entry is variable then we'll mark it.
+                        if(j == 0){
+                            s = true;
+                            var_s = term->varname;
+                        }
+                        else if(j == 1){
+                            p = true;
+                            var_p = term->varname;   
+                        }
+                        else{
+                            o = true;
+                            var_o = term->varname;   
+                        }
                     }
+                }
+                //rel variables.
+                if(s && p){
+                    var_to_related(var_s, var_p);
+                }
+                if(s && o){
+                    var_to_related(var_s, var_o);
+                }
+                if(p && o){
+                    var_to_related(var_p, var_o);
                 }
             }  
             depth--;
 
+            //  e2.
             for(std::string var : regular_vars){
                 auto& iters_vector = var_to_iters[var];
                 uint64_t min_children_count = -1UL;
@@ -551,15 +622,29 @@ class LTJ{
                     if(min_children_count > children_count){
                         min_children_count = children_count;
                     }
-                    //TODO: para ordenar necesito hacer una estructura como var_info! ver código del ring.
-                    //TODO: falta pensar en las variables relacionadas. 
+                    //TODO: integrar lo de las related vars!
                 }
                 std::cout << " Var : " << var << " min_children_count: "  << min_children_count << std::endl;
+
+                info_var_type& info = m_var_info[m_hash_table_position.at(var)];
+                info.weight = min_children_count;
+                info.n_triples = var_to_iters[var].size();
             }            
+
+            std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
+
+            std::cout << " GAO : ";
+            for(auto& info : m_var_info){
+                std::cout << info.name << " ";
+                calc_gao.push_back(info.name);
+            }
+            std::cout << "" << std::endl;
+
 
             for(std::string var : lonely_vars){
                 calc_gao.push_back(var);
             }
+
             //--
             for(auto gao_it: gao_iterators){
                 delete gao_it;
