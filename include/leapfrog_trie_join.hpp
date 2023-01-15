@@ -296,7 +296,6 @@ class LTJ{
         map<string, int> gao_map;
 
         std::unordered_map<std::string, std::vector<std::string>> var_to_vars;//related variables.
-        std::unordered_map<std::string, std::vector<Iterator*>> var_to_iters;
 
         void clear(){
             gao_map.clear();
@@ -453,14 +452,15 @@ class LTJ{
                 deja order = "1 "
 
             c. Completamos el orden parcial como sigue:
-                Si estamos evaluando X1, entonces tenemos que usar el iterator POS, es decir 1 2 0.
-                Para x2 usamos la otra permutación de las variables dada por el iterador PSO, es decir 1 0 2.
+                Si estamos evaluando X1, entonces tenemos que usar el iterator POS.
+                Para x2 usamos la otra permutación de las variables dada por el iterador PSO.
 
-            d. Creamos un iterador por cada variable en una tupla, utilizando el orden calculado en (c.).
-            e. Calculamos el gao como sigue:
-                Sea Xj una variable del BGP. bajamos por cada uno de los iteradores de Xj, procesando las constantes tal como sale en el código actual, bajo el comentario:
-                //Resolvemos las constantes para todas las tuplas") en triejoin_definitivo()
-
+            d. Creamos un iterador por cada tupla con orden calculado.
+            e. Por cada iterador creado en el paso previo, bajamos por todas sus constantes 
+                (ver codigo bajo comentario : "//Resolvemos las constantes para todas las tuplas") en triejoin_definitivo()
+            f. Calculamos el gao como sigue:
+                Por cada iterador (O bien tupla) que en el que aparezca cada una de las variables regulares debemos:
+                Bajar por todas las constantes. (previamente hecho)
                 Calculo el número de hijos para ese nodo del iterador, y me quedo con el mínimo.
                 Adicionalmente, la instanciación de variables tiene que generar un grafo conexo.
             */
@@ -479,9 +479,9 @@ class LTJ{
                     
                     //b.
                     for(auto& tuple_index : p.second){
-                        //try{ //TODO: COMENTE ESTO PARA QUE NO CREE SOLO 1 ITERADOR POR TUPLA. SI NO QUE UNO POR VARIABLE EN CADA TUPLA.
-                        //    Iterator* it = tuple_index_to_iter.at(tuple_index);
-                        //}catch (std::out_of_range e){                        
+                        try{ //TODO: COMENTE ESTO PARA QUE NO CREE SOLO 1 ITERADOR POR TUPLA. SI NO QUE UNO POR VARIABLE EN CADA TUPLA.
+                            Iterator* it = tuple_index_to_iter.at(tuple_index);
+                        }catch (std::out_of_range e){                        
                             std::string order;
                             auto& tuple = query->at(tuple_index);
                             //c.
@@ -499,9 +499,8 @@ class LTJ{
                             auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), 0);
                             iter->open();
                             tuple_index_to_iter[tuple_index]=iter;
-                            var_to_iters[var].push_back(iter);
                             gao_iterators.push_back(iter);//TODO: REMOVE IT. it is the same as the vector above.
-                        //}
+                        }
                     }
                 }else{
                     lonely_vars.push_back(var);
@@ -535,7 +534,7 @@ class LTJ{
                 }
             }  
             depth--;
-
+            //f.
             for(std::string var : regular_vars){
                 auto& tuple_indexes=variable_tuple_mapping->at(var);
                 for(int tuple_index : tuple_indexes){
