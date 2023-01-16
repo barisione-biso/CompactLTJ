@@ -276,6 +276,9 @@ class LeapfrogJoin{
 
 class LTJ{
     public:
+        typedef std::pair<uint64_t, std::string> pair_type;
+        typedef std::priority_queue<pair_type, std::vector<pair_type>, greater<pair_type>> min_heap_type;
+        
     // private:
         //BORRAR
         bool debug = false;
@@ -291,16 +294,15 @@ class LTJ{
         uint32_t key;
         uint32_t depth;
         uint32_t dim;
-        vector<string> *gao;
+        std::vector<std::string> gao;
         uint32_t limit;
         
         // Cosas para triejoin_tentativo
         bool show_results=false;
         map<string, int> gao_map;
 
-        std::unordered_map<std::string, std::vector<std::string>> var_to_vars;//related variables.
-        std::unordered_map<std::string, std::vector<Iterator*>> var_to_iters;
-        std::unordered_map<int, std::vector<Iterator*>> tuple_index_to_iters;
+        std::unordered_map<std::string, std::vector<Iterator*>> m_var_to_iters;
+        std::unordered_map<int, std::vector<Iterator*>> m_tuple_index_to_iters;
         typedef struct {
             std::string name;
             uint64_t weight;
@@ -382,7 +384,7 @@ class LTJ{
         string getVariableOrder(Tuple &tuple, int &added_items, vector<Term> &terms){
             stringstream order;
 
-            for(auto it=gao->begin(); it!=gao->end(); it++){
+            for(auto it=gao.begin(); it!=gao.end(); it++){
                 string &var = *it;
             // for(auto var: gao){
                 for(int i=0; i<dim; i++){
@@ -432,7 +434,7 @@ class LTJ{
                     std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
         }
 
-        std::string get_order(Tuple& tuple, std::string& var, int index_to_exclude){
+        std::string get_order(Tuple& tuple, int index_to_exclude){
             std::stringstream order,variable_orders;
             for(int i=0; i<dim; i++){
                 Term* term = tuple.get_term(i);
@@ -441,7 +443,6 @@ class LTJ{
                 }else{
                     if(i != index_to_exclude){
                         variable_orders << i << " ";
-                        var_to_vars[var].push_back(term->varname);
                     }
                 }
             }
@@ -449,6 +450,22 @@ class LTJ{
             rtrim(orders_str);
             order << index_to_exclude << " " << orders_str;
             return order.str();
+        }
+
+        void fill_heap(const std::string var,
+                        std::unordered_map<std::string, uint64_t> &hash_table,
+                        std::vector<info_var_type> &vec,
+                        std::vector<bool> &checked,
+                        min_heap_type &heap){
+
+            auto pos_var = hash_table[var];
+            for(const auto &e : vec[pos_var].related){
+                auto pos_rel = hash_table[e];
+                if(!checked[pos_rel] && vec[pos_rel].n_triples > 1){
+                    heap.push({vec[pos_rel].weight, e});
+                    checked[pos_rel] = true;
+                }
+            }
         }
 
         struct compare_var_info
@@ -508,6 +525,10 @@ class LTJ{
                 * Adicionalmente, la instanciación de variables tiene que generar un grafo conexo.
             */
            //***************************************************GAO
+            m_var_info.clear();
+            m_hash_table_position.clear();
+            m_var_to_iters.clear();
+            m_tuple_index_to_iters.clear();
             std::vector<std::string> calc_gao;
             vector<Iterator*> gao_iterators;
             //a.
@@ -516,9 +537,10 @@ class LTJ{
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &p = *it;
                 string var = p.first;
-
+                
                 info_var_type info;
                 info.name = var;
+                info.n_triples = 1;
                 m_var_info.emplace_back(info);
                 m_hash_table_position.insert({var, m_var_info.size()-1});
 
@@ -526,27 +548,27 @@ class LTJ{
                     regular_vars.push_back(var);
                     
                     //b.
-                    for(auto& tuple_index : p.second){                       
+                    for(auto& tuple_index : p.second){
                         std::string order;
                         auto& tuple = query->at(tuple_index);
                         //c.
                         if(is_var_subject(var, tuple)){
                             //order << getConstants() << 0 << getVars(0)
-                            order = get_order(tuple, var, 0);
+                            order = get_order(tuple, 0);
                         }else if(is_var_predicate(var, tuple)){
                             //order << getConstants() << 1 << getVars(1)
-                            order = get_order(tuple, var, 1);
+                            order = get_order(tuple, 1);
                         }else{
                             //order << getConstants() << 2 << getVars(2)
-                            order = get_order(tuple, var, 2);
+                            order = get_order(tuple, 2);
                         }
                         //d.
                         auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), 0);
                         std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
                         iter->open();
                         gao_iterators.push_back(iter);
-                        var_to_iters[var].push_back(iter);
-                        tuple_index_to_iters[tuple_index].push_back(iter);
+                        m_var_to_iters[var].push_back(iter);
+                        m_tuple_index_to_iters[tuple_index].push_back(iter);
                     }
                 }else{
                     lonely_vars.push_back(var);
@@ -570,7 +592,7 @@ class LTJ{
                     Term* term = tuple.get_term(j);
                     if(!term->isVariable()){
                         if(debug){cout<<"Term no es variable es "<<term->getConstant()<<endl;}
-                        auto& iters_vector = tuple_index_to_iters[tuple_index];
+                        auto& iters_vector = m_tuple_index_to_iters[tuple_index];
                         for(auto* tuple_iters : iters_vector){
                             tuple_iters->seek(term->getConstant());
                             if(!tuple_iters->atEnd() && tuple_iters->key() == term->getConstant()){
@@ -614,7 +636,7 @@ class LTJ{
 
             //  e2.
             for(std::string var : regular_vars){
-                auto& iters_vector = var_to_iters[var];
+                auto& iters_vector = m_var_to_iters[var];
                 uint64_t min_children_count = -1UL;
                 for(Iterator* iter : iters_vector){
                     uint64_t children_count = iter->getCompactTrie()->childrenCount(iter->key());
@@ -622,27 +644,39 @@ class LTJ{
                     if(min_children_count > children_count){
                         min_children_count = children_count;
                     }
-                    //TODO: integrar lo de las related vars!
                 }
                 std::cout << " Var : " << var << " min_children_count: "  << min_children_count << std::endl;
 
                 info_var_type& info = m_var_info[m_hash_table_position.at(var)];
                 info.weight = min_children_count;
-                info.n_triples = var_to_iters[var].size();
+                info.n_triples = m_var_to_iters[var].size();
             }            
-
+            //Sorting by compare_var_info()
             std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
-
-            std::cout << " GAO : ";
-            for(auto& info : m_var_info){
-                std::cout << info.name << " ";
-                calc_gao.push_back(info.name);
+            for(uint64_t i = 0; i < m_var_info.size(); ++i){
+                m_hash_table_position[m_var_info[i].name] = i;
             }
-            std::cout << "" << std::endl;
-
+            //Calculate the GAO based upon the sorted variables.
+            std::vector<bool> checked(m_var_info.size(), false);
+            
+            for(uint64_t i = 0; i < regular_vars.size(); i++){
+                if(!checked[i]){
+                    gao.push_back(m_var_info[i].name); //Adding var to gao
+                    checked[i] = true;
+                    min_heap_type heap; //Stores the related variables that are related with the chosen ones
+                    auto var_name = m_var_info[i].name;
+                    fill_heap(var_name, m_hash_table_position, m_var_info, checked,heap);
+                    while(!heap.empty()){
+                        var_name = heap.top().second;
+                        heap.pop();
+                        gao.push_back(var_name);
+                        fill_heap(var_name, m_hash_table_position, m_var_info, checked, heap);
+                    }
+                }
+            }
 
             for(std::string var : lonely_vars){
-                calc_gao.push_back(var);
+                gao.push_back(var);
             }
 
             //--
@@ -678,8 +712,8 @@ class LTJ{
         }
 
         void setGaoMap(){
-            for(int i=0; i<gao->size(); i++){
-                gao_map[gao->at(i)] = i;
+            for(int i=0; i<gao.size(); i++){
+                gao_map[gao.at(i)] = i;
             }
         }
 
@@ -699,10 +733,9 @@ class LTJ{
         // }
 
     // public:
-        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> *q, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
             this->indexes = ind;
             this->query = q;
-            this->gao = gao_vector;
             dim = indexes->at(0)->getDim();
             this->variable_tuple_mapping = variables_to_index;
             setIterators();
@@ -765,8 +798,8 @@ class LTJ{
             Returns gao score for the given variable 
         */
         int get_gao_score(string &var){
-            for(int i=0; i<gao->size(); i++){
-                if(gao->at(i)==var)return i;
+            for(int i=0; i<gao.size(); i++){
+                if(gao.at(i)==var)return i;
             }
             return -1;
         }
@@ -833,7 +866,7 @@ class LTJ{
         bool goUpUntil(int gao_score, int &gao_index){
             int beg = gao_index;
             for(int i=beg; i>gao_score; i--){
-                string var = gao->at(i);
+                string var = gao.at(i);
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 // vector<bool> should_go_up;
@@ -864,13 +897,13 @@ class LTJ{
             //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
             //     }
             // }
-            if(debug){cout<<"gao score is "<<gao_score<<" "<<gao->at(gao_score)<<endl;}
-            LeapfrogJoin* lj = &variable_lj_mapping[gao->at(gao_score)];
+            if(debug){cout<<"gao score is "<<gao_score<<" "<<gao.at(gao_score)<<endl;}
+            LeapfrogJoin* lj = &variable_lj_mapping[gao.at(gao_score)];
             if(debug && lj->is_at_end()){
                 cout<<"el iterador ya estaba en at end"<<endl;
             }
-            check_iterators_position(lj, gao->at(gao_score));
-            if(debug)cout<<"se hace next para "<<gao->at(gao_score)<<endl;
+            check_iterators_position(lj, gao.at(gao_score));
+            if(debug)cout<<"se hace next para "<<gao.at(gao_score)<<endl;
             lj->leapfrog_next();
             if(lj->is_at_end()){
                 if(debug){cout<<"el iterador esta at en en goUpUntil"<<endl;}
@@ -878,7 +911,7 @@ class LTJ{
                     if(debug){cout<<"Cant go up"<<endl;}
                     return true;
                 }
-                if(debug){cout<<"going up again on "<<gao->at(gao_index)<<" index "<<gao_index<<endl;}
+                if(debug){cout<<"going up again on "<<gao.at(gao_index)<<" index "<<gao_index<<endl;}
                 return goUp(gao_index);
             }
             else{
@@ -903,7 +936,7 @@ class LTJ{
         void triejoin_definitivo(int &number_of_results){
             //I: Para mostrar tabla de resultados
             vector<vector<int>> results;
-            vector<int> result(gao->size());
+            vector<int> result(gao.size());
             //F: Para mostrar tabla de resultados
             uint32_t count=0;
             if(debug){cout<<"Starting Triejoin"<<endl;}
@@ -960,13 +993,13 @@ class LTJ{
 
             //Resolvemos las variables en el órden en el que aparecen en gao
             int gao_index = 0;
-            while(gao_index < gao->size() && !finished){
+            while(gao_index < gao.size() && !finished){
                 // cout<<"depths before search"<<endl;
                 // for(auto it: iterators){
                 //     cout<<it->get_depth()<<" ";
                 // }
                 // cout<<endl;
-                string var = gao->at(gao_index);
+                string var = gao.at(gao_index);
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 if(debug){cout<<"Se encontró LJ para "<<var<<endl;}
@@ -985,7 +1018,7 @@ class LTJ{
                         // cout<<"gao index es "<<gao_index<<endl;
                         result[gao_index] = lj->get_key();
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
-                        if(gao_index == gao->size()-1){
+                        if(gao_index == gao.size()-1){
                             if(show_results){results.push_back(result);}
                             count++;
                             if(count == limit){
@@ -1006,7 +1039,7 @@ class LTJ{
 
             number_of_results = count;
             if(show_results){
-                for(auto it=gao->begin(); it!=gao->end(); it++){
+                for(auto it=gao.begin(); it!=gao.end(); it++){
                     string &var = *it;
                 // for(auto var : gao){
                     cout<<var<<"|";
