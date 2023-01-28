@@ -97,12 +97,15 @@ class CompactTrieIVIterator: public Iterator{
                     it = compactTrie->child(it, 1);
                     pos_in_parent = 1;
                     depth++;
-                    // cout<<"printing key in open "<<compactTrie->key_at(it)<<endl;
+                    //cout<<"printing key in open "<<compactTrie->key_at(it)<<endl;
                 }
                 else throw "Node has no children";
             }
         }
 
+        uint32_t getChildrenCount() const{
+            return compactTrie->childrenCount(it);
+        }
         /*
             Moves the iterator to the next key
         */

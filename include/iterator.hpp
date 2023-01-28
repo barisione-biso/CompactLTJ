@@ -21,6 +21,7 @@ class Iterator{
         virtual void open() = 0;
         virtual void up() = 0;
         virtual int get_depth() = 0;
+        virtual uint32_t getChildrenCount() const = 0;
         // virtual void storeToFile(string file_name) = 0;
         // virtual void loadFromFile(string file_name) = 0;
         virtual void backToStart() = 0;

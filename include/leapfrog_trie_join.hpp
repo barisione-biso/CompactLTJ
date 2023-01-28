@@ -563,8 +563,8 @@ class LTJ{
                             order = get_order(tuple, 2);
                         }
                         //d.
-                        auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), 0);
-                        std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
+                        auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
+                        //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
                         iter->open();
                         gao_iterators.push_back(iter);
                         m_var_to_iters[var].push_back(iter);
@@ -593,13 +593,25 @@ class LTJ{
                     if(!term->isVariable()){
                         if(debug){cout<<"Term no es variable es "<<term->getConstant()<<endl;}
                         auto& iters_vector = m_tuple_index_to_iters[tuple_index];
-                        for(auto* tuple_iters : iters_vector){
-                            tuple_iters->seek(term->getConstant());
-                            if(!tuple_iters->atEnd() && tuple_iters->key() == term->getConstant()){
-                                if(debug){cout<<"Se encontró la constante "<<term->getConstant()<<endl;}
-                                tuple_iters->open();
-                            }
-                            else{
+                        for(auto* tuple_iter : iters_vector){
+                            tuple_iter->seek(term->getConstant());
+                            //if(!tuple_iter->atEnd() && tuple_iter->key() == term->getConstant()){
+                                //if(debug){cout<<"Se encontró la constante "<<term->getConstant()<<endl;}
+                                //tuple_iter->open();
+                                //Aqui hay que hacer el child count y agregarlo en la estructura var_info como sigue.
+                                /*
+                                ESTE ES EL LUGAR DE E2. y no abajo.
+                                info_var_type& info = m_var_info[m_hash_table_position.at(var)];
+                                info.weight = min_children_count;
+                                info.n_triples = m_var_to_iters[var].size();
+                                
+                                O bien no hay que hacer OPEN.
+                                */
+                            //}
+                            //else 
+                            auto children_count = tuple_iter->getChildrenCount();
+                            std::cout <<  children_count << " children." << std::endl;            
+                            if(tuple_iter->atEnd() || tuple_iter->key() != term->getConstant()){
                                 // Si es que el valor no es igual a la constante entonces no 
                                 // hay valores que cumplan esta tupla
                                 return;
@@ -645,7 +657,7 @@ class LTJ{
                         min_children_count = children_count;
                     }
                 }
-                std::cout << " Var : " << var << " min_children_count: "  << min_children_count << std::endl;
+                //std::cout << " Var : " << var << " min_children_count: "  << min_children_count << std::endl;
 
                 info_var_type& info = m_var_info[m_hash_table_position.at(var)];
                 info.weight = min_children_count;
