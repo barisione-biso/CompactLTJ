@@ -83,7 +83,7 @@ int main(int argc, char* argv[]){
                 stop = high_resolution_clock::now();
                 time_span = duration_cast<microseconds>(stop - start);
                 total_time = time_span.count();
-                cout << query_number <<  ";" << number_of_results << ";" << (unsigned long long)(total_time*1000000000ULL) << endl;
+                cout << query_number <<  ";" << number_of_results << ";" << (unsigned long long)(total_time*1000000000ULL) << ";" << ltj.get_gao() << endl;
                 query_number++; 
 
                 variable_tuple_mapping.clear();

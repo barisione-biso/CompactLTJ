@@ -313,6 +313,14 @@ class LTJ{
         } info_var_type;
         std::vector<info_var_type> m_var_info;
         std::unordered_map<std::string, uint64_t> m_hash_table_position;
+        
+        std::string get_gao() const{
+            std::string ret = "";
+            for(auto& var : gao){
+                ret += var +" ";
+            }
+            return ret;
+        }
         void clear(){
             gao_map.clear();
             for(auto p: variable_lj_mapping){
@@ -583,7 +591,7 @@ class LTJ{
             //e.
 
             //  e1.
-            std::cout << "Per each regular variable finding its relative."<< std::endl;
+            //std::cout << "Per each regular variable finding its relative."<< std::endl;
             //>> test
             for(std::string var : regular_vars){
                 for(auto tuple_index : variable_tuple_mapping->at(var)){
@@ -600,11 +608,10 @@ class LTJ{
                             iter->seek(term->getConstant());
                             //e2.
                             auto children_count = iter->getChildrenCount();
-                            std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;  
+                            //std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;  
                             if(info.weight > children_count)
                                 info.weight = children_count;          
                             if(iter->atEnd() || iter->key() != term->getConstant()){
-                                //TODO: validar este caso. no esta del todo claro si funcionaria.
                                 // Si es que el valor no es igual a la constante entonces no 
                                 // hay valores que cumplan esta tupla
                                 break;
@@ -758,7 +765,7 @@ class LTJ{
                 int added_items = 0;
                 vector<Term> terms;
                 order<<getConstantsOrder(tuple, added_items, terms);
-                //TODO: Fabrizio. aqui recien necesito el gao.
+                //aqui recien necesito el gao.
                 order<<getVariableOrder(tuple, added_items, terms);
                 order.seekp(-1, std::ios_base::end);
                 required_orders.push_back(order.str());
