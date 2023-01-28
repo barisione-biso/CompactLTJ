@@ -305,9 +305,11 @@ class LTJ{
         std::unordered_map<int, std::vector<Iterator*>> m_tuple_index_to_iters;
         typedef struct {
             std::string name;
-            uint64_t weight;
+            uint64_t weight = -1UL;
             uint64_t n_triples;
             std::unordered_set<std::string> related;
+            //Supports only variables with one occurence in a certain tuple.
+            std::unordered_map<uint32_t, Iterator*> tuple_to_iter;
         } info_var_type;
         std::vector<info_var_type> m_var_info;
         std::unordered_map<std::string, uint64_t> m_hash_table_position;
@@ -541,8 +543,6 @@ class LTJ{
                 info_var_type info;
                 info.name = var;
                 info.n_triples = 1;
-                m_var_info.emplace_back(info);
-                m_hash_table_position.insert({var, m_var_info.size()-1});
 
                 if(p.second.size() > 1){
                     regular_vars.push_back(var);
@@ -569,18 +569,76 @@ class LTJ{
                         gao_iterators.push_back(iter);
                         m_var_to_iters[var].push_back(iter);
                         m_tuple_index_to_iters[tuple_index].push_back(iter);
+                        info.tuple_to_iter[tuple_index] = iter;
+                        info.n_triples = p.second.size();
                     }
                 }else{
                     lonely_vars.push_back(var);
                 }
+
+                m_var_info.emplace_back(info);
+                m_hash_table_position.insert({var, m_var_info.size()-1});
             }
 
             //e.
 
-            //void triejoin_open(){
-            depth++;
             //  e1.
-            if(debug){cout<<"Working with constants"<<endl;}
+            std::cout << "Per each regular variable finding its relative."<< std::endl;
+            //>> test
+            for(std::string var : regular_vars){
+                for(auto tuple_index : variable_tuple_mapping->at(var)){
+                    info_var_type& info = m_var_info[m_hash_table_position.at(var)];
+                    Iterator* iter = info.tuple_to_iter[tuple_index];
+                    Tuple &tuple = query->at(tuple_index);
+
+                    bool s = false, p = false, o = false;
+                    std::string var_s, var_p, var_o;
+
+                    for(int j=0; j<dim; j++){
+                        Term* term = tuple.get_term(j);
+                        if(!term->isVariable()){
+                            iter->seek(term->getConstant());
+                            //e2.
+                            auto children_count = iter->getChildrenCount();
+                            std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;  
+                            if(info.weight > children_count)
+                                info.weight = children_count;          
+                            if(iter->atEnd() || iter->key() != term->getConstant()){
+                                //TODO: validar este caso. no esta del todo claro si funcionaria.
+                                // Si es que el valor no es igual a la constante entonces no 
+                                // hay valores que cumplan esta tupla
+                                break;
+                            }
+                        }else{
+                            //if 'j' entry is variable then we'll mark it.
+                            if(j == 0){
+                                s = true;
+                                var_s = term->varname;
+                            }
+                            else if(j == 1){
+                                p = true;
+                                var_p = term->varname;   
+                            }
+                            else{
+                                o = true;
+                                var_o = term->varname;   
+                            }
+                        }
+                    }
+                    //rel variables.
+                    if(s && p){
+                        var_to_related(var_s, var_p);
+                    }
+                    if(s && o){
+                        var_to_related(var_s, var_o);
+                    }
+                    if(p && o){
+                        var_to_related(var_p, var_o);
+                    }
+                }
+            }
+            //<< test
+            /*
             int tuple_index=0;
             for(auto it=query->begin(); it!=query->end(); it++, tuple_index++){//Per each triple pattern
                 Tuple &tuple = *it;
@@ -591,7 +649,7 @@ class LTJ{
                 for(int j=0; j<dim; j++){
                     Term* term = tuple.get_term(j);
                     if(!term->isVariable()){
-                        if(debug){cout<<"Term no es variable es "<<term->getConstant()<<endl;}
+                        //¿Cómo asocio el valor del childrenCount con una variable?
                         auto& iters_vector = m_tuple_index_to_iters[tuple_index];
                         for(auto* tuple_iter : iters_vector){
                             tuple_iter->seek(term->getConstant());
@@ -599,14 +657,14 @@ class LTJ{
                                 //if(debug){cout<<"Se encontró la constante "<<term->getConstant()<<endl;}
                                 //tuple_iter->open();
                                 //Aqui hay que hacer el child count y agregarlo en la estructura var_info como sigue.
-                                /*
+                                
                                 ESTE ES EL LUGAR DE E2. y no abajo.
                                 info_var_type& info = m_var_info[m_hash_table_position.at(var)];
                                 info.weight = min_children_count;
                                 info.n_triples = m_var_to_iters[var].size();
                                 
                                 O bien no hay que hacer OPEN.
-                                */
+                                
                             //}
                             //else 
                             auto children_count = tuple_iter->getChildrenCount();
@@ -614,7 +672,7 @@ class LTJ{
                             if(tuple_iter->atEnd() || tuple_iter->key() != term->getConstant()){
                                 // Si es que el valor no es igual a la constante entonces no 
                                 // hay valores que cumplan esta tupla
-                                return;
+                                break;
                             }
                         }
                     }else{
@@ -644,7 +702,6 @@ class LTJ{
                     var_to_related(var_p, var_o);
                 }
             }  
-            depth--;
 
             //  e2.
             for(std::string var : regular_vars){
@@ -661,8 +718,7 @@ class LTJ{
 
                 info_var_type& info = m_var_info[m_hash_table_position.at(var)];
                 info.weight = min_children_count;
-                info.n_triples = m_var_to_iters[var].size();
-            }            
+            }*/            
             //Sorting by compare_var_info()
             std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
             for(uint64_t i = 0; i < m_var_info.size(); ++i){
