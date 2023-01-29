@@ -1,0 +1,11 @@
+building index
+Index built 8504707944 bytes.
+--0 1 2--
+--0 2 1--
+--1 0 2--
+--1 2 0--
+--2 0 1--
+--2 1 0--
+Index saved
+5976 seconds.
+11293593888 bytes.
