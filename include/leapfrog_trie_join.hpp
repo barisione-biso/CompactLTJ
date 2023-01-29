@@ -534,7 +534,7 @@ class LTJ{
                 
                 * Adicionalmente, la instanciación de variables tiene que generar un grafo conexo.
             */
-           //***************************************************GAO
+           //>>*************************************************GAO
             m_var_info.clear();
             m_hash_table_position.clear();
             m_var_to_iters.clear();
@@ -592,7 +592,6 @@ class LTJ{
 
             //  e1.
             //std::cout << "Per each regular variable finding its relative."<< std::endl;
-            //>> test
             for(std::string var : regular_vars){
                 for(auto tuple_index : variable_tuple_mapping->at(var)){
                     info_var_type& info = m_var_info[m_hash_table_position.at(var)];
@@ -644,88 +643,7 @@ class LTJ{
                     }
                 }
             }
-            //<< test
-            /*
-            int tuple_index=0;
-            for(auto it=query->begin(); it!=query->end(); it++, tuple_index++){//Per each triple pattern
-                Tuple &tuple = *it;
-
-                bool s = false, p = false, o = false;
-                std::string var_s, var_p, var_o;
-
-                for(int j=0; j<dim; j++){
-                    Term* term = tuple.get_term(j);
-                    if(!term->isVariable()){
-                        //¿Cómo asocio el valor del childrenCount con una variable?
-                        auto& iters_vector = m_tuple_index_to_iters[tuple_index];
-                        for(auto* tuple_iter : iters_vector){
-                            tuple_iter->seek(term->getConstant());
-                            //if(!tuple_iter->atEnd() && tuple_iter->key() == term->getConstant()){
-                                //if(debug){cout<<"Se encontró la constante "<<term->getConstant()<<endl;}
-                                //tuple_iter->open();
-                                //Aqui hay que hacer el child count y agregarlo en la estructura var_info como sigue.
-                                
-                                ESTE ES EL LUGAR DE E2. y no abajo.
-                                info_var_type& info = m_var_info[m_hash_table_position.at(var)];
-                                info.weight = min_children_count;
-                                info.n_triples = m_var_to_iters[var].size();
-                                
-                                O bien no hay que hacer OPEN.
-                                
-                            //}
-                            //else 
-                            auto children_count = tuple_iter->getChildrenCount();
-                            std::cout <<  children_count << " children." << std::endl;            
-                            if(tuple_iter->atEnd() || tuple_iter->key() != term->getConstant()){
-                                // Si es que el valor no es igual a la constante entonces no 
-                                // hay valores que cumplan esta tupla
-                                break;
-                            }
-                        }
-                    }else{
-                        //if 'j' entry is variable then we'll mark it.
-                        if(j == 0){
-                            s = true;
-                            var_s = term->varname;
-                        }
-                        else if(j == 1){
-                            p = true;
-                            var_p = term->varname;   
-                        }
-                        else{
-                            o = true;
-                            var_o = term->varname;   
-                        }
-                    }
-                }
-                //rel variables.
-                if(s && p){
-                    var_to_related(var_s, var_p);
-                }
-                if(s && o){
-                    var_to_related(var_s, var_o);
-                }
-                if(p && o){
-                    var_to_related(var_p, var_o);
-                }
-            }  
-
-            //  e2.
-            for(std::string var : regular_vars){
-                auto& iters_vector = m_var_to_iters[var];
-                uint64_t min_children_count = -1UL;
-                for(Iterator* iter : iters_vector){
-                    uint64_t children_count = iter->getCompactTrie()->childrenCount(iter->key());
-                    std::cout << " Var : " << var << " has " << children_count << " children. (Current iter key = "<< iter->key() << ")" << std::endl;
-                    if(min_children_count > children_count){
-                        min_children_count = children_count;
-                    }
-                }
-                //std::cout << " Var : " << var << " min_children_count: "  << min_children_count << std::endl;
-
-                info_var_type& info = m_var_info[m_hash_table_position.at(var)];
-                info.weight = min_children_count;
-            }*/            
+            
             //Sorting by compare_var_info()
             std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
             for(uint64_t i = 0; i < m_var_info.size(); ++i){
@@ -758,7 +676,7 @@ class LTJ{
             for(auto gao_it: gao_iterators){
                 delete gao_it;
             }
-            //***************************************************GAO
+            //<<***************************************************GAO
             for(auto it=query->begin(); it!=query->end(); it++){
                 Tuple &tuple = *it;
                 stringstream order;
