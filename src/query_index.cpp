@@ -30,8 +30,7 @@ Index loadIndex(string file_name){
 int main(int argc, char* argv[]){
     try{
         vector<string> queries;
-        vector<vector<string>> gaos;
-        bool have_queries =  get_file_content(argv[1], queries, gaos);
+        bool have_queries =  get_file_content(argv[1], queries);
         // string query1 = "?x1 ?x2 ?x3";
         // Debería hacerse un index por argc sin contar a las queries
         // TableIndexer ti = TableIndexer();
