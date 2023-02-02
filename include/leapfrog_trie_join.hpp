@@ -458,7 +458,12 @@ class LTJ{
             }
             std::string orders_str = variable_orders.str();
             rtrim(orders_str);
-            order << index_to_exclude << " " << orders_str;
+            if(orders_str.length() > 0){
+                order << index_to_exclude << " " << orders_str;
+            }else{
+                order << index_to_exclude;
+            }
+            
             return order.str();
         }
 
