@@ -1,0 +1,1 @@
+/data/graphs/wikidata-whole-dump/wikidata.nt.enumerated
