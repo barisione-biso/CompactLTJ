@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
                 // }cout<<endl;
                 // vector<Term*> terms_created;
                 // Guarda en que tuplas se encuentra cada variable
-                map<string, set<uint32_t>> variable_tuple_mapping;
+                unordered_map<string, set<uint32_t>> variable_tuple_mapping;
                 vector<Tuple> query;
 
                 vector<string> tokens_query = parse(query_string, '.');

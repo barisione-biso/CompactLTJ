@@ -288,8 +288,8 @@ class LTJ{
         vector<Tuple> *query;
         vector<Tuple*> modified_query;
         // int tuple_index = 0;
-        map<string, set<uint32_t>> *variable_tuple_mapping;
-        map<string, LeapfrogJoin> variable_lj_mapping;
+        unordered_map<string, set<uint32_t>> *variable_tuple_mapping;
+        unordered_map<string, LeapfrogJoin> variable_lj_mapping;
         bool at_end;
         uint32_t key;
         uint32_t depth;
@@ -731,7 +731,7 @@ class LTJ{
         // }
 
     // public:
-        LTJ(vector<Index*> *ind, vector<Tuple> *q, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> *q, unordered_map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
             this->indexes = ind;
             this->query = q;
             dim = indexes->at(0)->getDim();

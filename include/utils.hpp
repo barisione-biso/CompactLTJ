@@ -5,6 +5,7 @@
 #include <sstream> 
 #include <set>
 #include <map>
+#include <unordered_map>
 #include "term.hpp"
 #include "tuple.hpp"
 
@@ -95,7 +96,7 @@ bool is_number(string & s)
     Returns a tuple consisting of the Terms that are found in s. 
     Also adds the new variables to the variables mapping
 */
-Tuple get_tuple(string &s, map<string, set<uint32_t>> & variable_tuple_mapping, uint32_t &i){
+Tuple get_tuple(string &s, unordered_map<string, set<uint32_t>> & variable_tuple_mapping, uint32_t &i){
     vector<string> terms_string = parse(trim(s, ' '), ' ');
     vector<Term> new_terms;
     uint32_t value;
