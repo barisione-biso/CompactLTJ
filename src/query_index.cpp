@@ -63,6 +63,7 @@ int main(int argc, char* argv[]){
                 // vector<Term*> terms_created;
                 // Guarda en que tuplas se encuentra cada variable
                 map<string, set<uint32_t>> variable_tuple_mapping;
+                std::vector<std::string> processed_vars;
                 vector<Tuple> query;
 
                 vector<string> tokens_query = parse(query_string, '.');
@@ -70,19 +71,20 @@ int main(int argc, char* argv[]){
                 
                 uint32_t term_index = 0;
                 for(string token : tokens_query){
-                    query.push_back(get_tuple(token, variable_tuple_mapping, term_index));
+                    query.push_back(get_tuple(token, variable_tuple_mapping, term_index, processed_vars));
                     term_index++;
                 }
                 int number_of_results = 0;
                 //En vez de tener terms created, en variable_mapping vamos a guardar las variables y los indices
                 start = high_resolution_clock::now();
-                LTJ ltj(&indexes, &query, &variable_tuple_mapping, limit);
+                LTJ ltj(&indexes, &query, &variable_tuple_mapping, limit, &processed_vars);
                 // cout<<"Constructor works"<<endl;
                 ltj.triejoin_definitivo(number_of_results);
                 stop = high_resolution_clock::now();
                 time_span = duration_cast<microseconds>(stop - start);
                 total_time = time_span.count();
                 cout << query_number <<  ";" << number_of_results << ";" << (unsigned long long)(total_time*1000000000ULL) << ";" << ltj.get_gao() << endl;
+                //cout << query_number <<  ";" << number_of_results << ";" << (unsigned long long)(total_time*1000000000ULL) << endl;
                 query_number++; 
 
                 variable_tuple_mapping.clear();

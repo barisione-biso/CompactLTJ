@@ -95,7 +95,7 @@ bool is_number(string & s)
     Returns a tuple consisting of the Terms that are found in s. 
     Also adds the new variables to the variables mapping
 */
-Tuple get_tuple(string &s, map<string, set<uint32_t>> & variable_tuple_mapping, uint32_t &i){
+Tuple get_tuple(string &s, map<string, set<uint32_t>> & variable_tuple_mapping, uint32_t &i, std::vector<std::string> &processed_vars){
     vector<string> terms_string = parse(trim(s, ' '), ' ');
     vector<Term> new_terms;
     uint32_t value;
@@ -108,6 +108,9 @@ Tuple get_tuple(string &s, map<string, set<uint32_t>> & variable_tuple_mapping, 
             new_terms.push_back(Term(value));
         }
         else{
+            if(variable_tuple_mapping.find(s) == variable_tuple_mapping.end()){
+                processed_vars.emplace_back(s);
+            }
             variable_tuple_mapping[s].insert(i);
             new_terms.push_back(Term(s));
         }
