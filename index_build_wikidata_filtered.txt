@@ -1,0 +1,16 @@
+export CLTJ_INDEX_SOURCE_FILE=/data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated-cltj
+fbarisio@dijkstra:/data/CompactLTJ$ ./build/build_index ${CLTJ_INDEX_SOURCE_FILE}          
+building index
+Index built 8583527596 bytes.
+--0 1 2--
+--0 2 1--
+--1 0 2--
+--1 2 0--
+--2 0 1--
+--2 1 0--
+Index saved
+4846 seconds.
+11447292240 bytes.
+
+Index created at: /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated-
+
