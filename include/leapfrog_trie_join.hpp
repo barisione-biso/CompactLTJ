@@ -550,19 +550,24 @@ class LTJ{
             //a.
             std::vector<std::string> regular_vars; 
             std::vector<std::string> lonely_vars; 
-            for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
+            //for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
+            for(auto it=processed_vars->begin(); it != processed_vars->end(); it++){
                 auto &p = *it;
-                string var = p.first;
+                //string var = p.first;
+                string var = p;
                 
                 info_var_type info;
                 info.name = var;
                 info.n_triples = 1;
 
-                if(p.second.size() > 1){
+                auto var_in_tuples = variable_tuple_mapping->find(var);
+                //if(p.second.size() > 1){
+                if(var_in_tuples->second.size() > 1){
                     regular_vars.push_back(var);
                     
                     //b.
-                    for(auto& tuple_index : p.second){
+                    //for(auto& tuple_index : p.second){
+                    for(auto& tuple_index : var_in_tuples->second){    
                         std::string order;
                         auto& tuple = query->at(tuple_index);
                         //c.
@@ -584,7 +589,7 @@ class LTJ{
                         m_var_to_iters[var].push_back(iter);
                         m_tuple_index_to_iters[tuple_index].push_back(iter);
                         info.tuple_to_iter[tuple_index] = iter;
-                        info.n_triples = p.second.size();
+                        info.n_triples = var_in_tuples->second.size();
                     }
                 }else{
                     lonely_vars.push_back(var);
