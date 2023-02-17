@@ -21,10 +21,13 @@ project(LTJ-CompactTries VERSION 0.0.0 LANGUAGES C CXX)
 include_directories( 
     # ~/libs/sdsl-lite/external/libdivsufsort/include/
     # ~/libs/sdsl-lite/include
-    # ./libs/sdsl-lite/lib
+    # ./libs/sdsl-lite/lib 
     ~/include
     ./include
     )
+
+
+
 
 # link_directories(
 #     ./libs/sdsl-lite/external/libdivsufsort/include/

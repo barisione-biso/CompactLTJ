@@ -28,6 +28,7 @@ class LeapfrogJoin{
         uint32_t k;
         uint32_t key;
         uint32_t dim;
+        uint32_t count; //NEW DIEGO
         bool debug=false;
 
         LeapfrogJoin(vector<Iterator*> its, uint32_t d, string &var){
@@ -36,6 +37,7 @@ class LeapfrogJoin{
             this->k = iterators.size();
             this->dim = d;
             this->p = 0;
+            this->count = 0; //NEW DIEGO
             // depth = 0;
             // traverse();
         }
@@ -157,6 +159,31 @@ class LeapfrogJoin{
             }
         }
 
+        void leapfrog_search_new(){
+            xp = iterators[modulo(int(p)-1,k)]->key();
+            while(true){
+                iterators[p]->seek(xp);  //NEW DIEGO
+                if(iterators[p]->atEnd()){   //NEW DIEGO
+                        at_end = true;
+                        return;
+                }
+                x = iterators[p]->key();
+                if(debug){cout<<"x es "<<x<<endl;}
+                if(x==xp){
+                    count++; //NEW DIEGO
+                    if (count == k+1) { //NEW DIEGO
+                        key = x;
+                        count = 1; //NEW DIEGO
+                        return;
+                    }
+                }
+                else count = 1; //NEW DIEGO
+                
+                xp = iterators[p]->key();
+                p = modulo(p+1,k);
+            }
+        }
+
         /*
             Moves all iterators to the next instance of the variable their are standing in
         */
@@ -165,7 +192,7 @@ class LeapfrogJoin{
             if(iterators[p]->atEnd()) at_end = true;
             else{
                 p = modulo(p+1,k);
-                leapfrog_search();
+                leapfrog_search_new(); //NEW DIEGO
             }
         }
 
@@ -177,10 +204,19 @@ class LeapfrogJoin{
             if(iterators[p]->atEnd()) at_end = true;
             else{
                 p = modulo(p+1,k);
-                leapfrog_search();
+                leapfrog_search_new(); //NEW DIEGO
             }
         }
         
+        void leapfrog_seek_new(uint32_t seekKey){
+            iterators[p]->seek(seekKey);
+            if(iterators[p]->atEnd()) at_end = true;
+            /*else{
+                p = modulo(p+1,k);
+                leapfrog_search_new(); //NEW DIEGO
+            }*/
+        }
+
         /*
             Moves iterators whos index in up_indicator is true. Used when only some of the iterators
             associated with this variable should go up.
@@ -1003,7 +1039,7 @@ class LTJ{
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 if(debug){cout<<"Se encontró LJ para "<<var<<endl;}
-                lj->leapfrog_search();
+                lj->leapfrog_search_new();  //NEW DIEGO
                 if(debug){cout<<"Se hizo search"<<endl;}
                 int current_level = gao_index;
                 while(current_level == gao_index){
