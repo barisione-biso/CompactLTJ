@@ -1044,7 +1044,10 @@ class LTJ{
                 int current_level = gao_index;
                 while(current_level == gao_index){
                     if(lj->is_at_end()){
-                        if(gao_index == 0)return;
+                        if(gao_index == 0){
+                            number_of_results = count;
+                            return;
+                        }
                         else {
                             if(debug){cout<<"going up"<<endl;}
                             finished = goUp(gao_index);
