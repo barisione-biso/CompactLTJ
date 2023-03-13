@@ -19,23 +19,18 @@ include_directories(
     # ~/libs/sdsl-lite/external/libdivsufsort/include/
     # ~/libs/sdsl-lite/include
     # ./libs/sdsl-lite/lib 
+    ~/include
     ./include
     )
 
 
-include_directories(
-        # ${CMAKE_HOME_DIRECTORY}/include
-        ${CMAKE_BINARY_DIR}/libs/sdsl-lite/include
-        ${CMAKE_BINARY_DIR}/libs/sdsl-lite/external/libdivsufsort/include/
-        # ${CMAKE_HOME_DIRECTORY}/external/googletest/include
-        # ${CMAKE_HOME_DIRECTORY}/external/sdsl-lite/external/FastPFor/headers/
-        # ${CMAKE_HOME_DIRECTORY}/external/repair_gn
-        # ${STXXL_INCLUDE_DIRS}
-        )
+
 
 # link_directories(
 #     ./libs/sdsl-lite/external/libdivsufsort/include/
 #     ./libs/sdsl-lite/lib)
+
+link_directories(~/lib)
 
 # link_libraries(sdsl divsufsort divsufsort64)
 
@@ -44,6 +39,6 @@ add_executable(build_index src/build_index.cpp)
 add_executable(query_index src/query_index.cpp)
 
 # 3rd party libs
-add_subdirectory(./libs/sdsl-lite)
+#add_subdirectory(./libs/sdsl-lite)
 target_link_libraries( build_index PUBLIC stdc++fs sdsl divsufsort divsufsort64)
 target_link_libraries( query_index PUBLIC stdc++fs sdsl divsufsort divsufsort64)
