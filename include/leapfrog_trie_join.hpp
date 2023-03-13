@@ -584,57 +584,57 @@ class LTJ{
             std::vector<std::string> calc_gao;
             vector<Iterator*> gao_iterators;
             //a.
-            std::vector<std::string> regular_vars; 
-            std::vector<std::string> lonely_vars; 
+            //std::vector<std::string> regular_vars; 
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &p = *it;
                 string var = p.first;
                 
                 info_var_type info;
                 info.name = var;
-                info.n_triples = 1;
-
+                info.n_triples = 0;
+                /*
                 if(p.second.size() > 1){
                     regular_vars.push_back(var);
-                    
-                    //b.
-                    for(auto& tuple_index : p.second){
-                        std::string order;
-                        auto& tuple = query->at(tuple_index);
-                        //c.
-                        if(is_var_subject(var, tuple)){
-                            //order << getConstants() << 0 << getVars(0)
-                            order = get_order(tuple, 0);
-                        }else if(is_var_predicate(var, tuple)){
-                            //order << getConstants() << 1 << getVars(1)
-                            order = get_order(tuple, 1);
-                        }else{
-                            //order << getConstants() << 2 << getVars(2)
-                            order = get_order(tuple, 2);
-                        }
-                        //d.
-                        auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
-                        //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
-                        iter->open();
-                        gao_iterators.push_back(iter);
-                        m_var_to_iters[var].push_back(iter);
-                        m_tuple_index_to_iters[tuple_index].push_back(iter);
-                        info.tuple_to_iter[tuple_index] = iter;
-                        info.n_triples = p.second.size();
+                } */   
+                //b.
+                for(auto& tuple_index : p.second){
+                    std::string order;
+                    auto& tuple = query->at(tuple_index);
+                    //c.
+                    if(is_var_subject(var, tuple)){
+                        //order << getConstants() << 0 << getVars(0)
+                        order = get_order(tuple, 0);
+                    }else if(is_var_predicate(var, tuple)){
+                        //order << getConstants() << 1 << getVars(1)
+                        order = get_order(tuple, 1);
+                    }else{
+                        //order << getConstants() << 2 << getVars(2)
+                        order = get_order(tuple, 2);
                     }
-                }else{
-                    lonely_vars.push_back(var);
+                    //d.
+                    auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
+                    //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
+                    iter->open();
+                    gao_iterators.push_back(iter);
+                    m_var_to_iters[var].push_back(iter);
+                    m_tuple_index_to_iters[tuple_index].push_back(iter);
+                    info.tuple_to_iter[tuple_index] = iter;
+                    info.n_triples = p.second.size();
                 }
+                /*}else{//TODO: ELIMINAR, calcular info.weight!
+                    lonely_vars.push_back(var);
+                }*/
 
                 m_var_info.emplace_back(info);
                 m_hash_table_position.insert({var, m_var_info.size()-1});
             }
-
             //e.
-
-            //  e1.
-            //std::cout << "Per each regular variable finding its relative."<< std::endl;
-            for(std::string var : regular_vars){
+            for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
+                auto &aux = *it;
+                string var = aux.first;
+                //  e1.
+                //std::cout << "Calculating variable's length and also, per each regular variable finding its relative."<< std::endl;
+                //for(std::string var : regular_vars){
                 for(auto tuple_index : variable_tuple_mapping->at(var)){
                     info_var_type& info = m_var_info[m_hash_table_position.at(var)];
                     Iterator* iter = info.tuple_to_iter[tuple_index];
@@ -688,13 +688,18 @@ class LTJ{
             
             //Sorting by compare_var_info()
             std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
+            uint64_t lonely_start = m_var_info.size();
             for(uint64_t i = 0; i < m_var_info.size(); ++i){
                 m_hash_table_position[m_var_info[i].name] = i;
+                if(m_var_info[i].n_triples == 1 && i < lonely_start){
+                    lonely_start = i;
+                }
             }
+    
             //Calculate the GAO based upon the sorted variables.
             std::vector<bool> checked(m_var_info.size(), false);
             
-            for(uint64_t i = 0; i < regular_vars.size(); i++){
+            for(uint64_t i = 0; i < lonely_start; i++){
                 if(!checked[i]){
                     gao.push_back(m_var_info[i].name); //Adding var to gao
                     checked[i] = true;
@@ -709,9 +714,8 @@ class LTJ{
                     }
                 }
             }
-
-            for(std::string var : lonely_vars){
-                gao.push_back(var);
+            for(uint64_t i = lonely_start; i < m_var_info.size(); i++){
+                gao.push_back(m_var_info[i].name);
             }
 
             //--
