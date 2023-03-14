@@ -108,6 +108,7 @@ Tuple get_tuple(string &s, map<string, set<uint32_t>> & variable_tuple_mapping, 
             new_terms.push_back(Term(value));
         }
         else{
+            s = s.substr(1);
             if(variable_tuple_mapping.find(s) == variable_tuple_mapping.end()){
                 processed_vars.emplace_back(s);
             }

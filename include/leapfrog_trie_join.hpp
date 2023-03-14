@@ -312,7 +312,7 @@ class LeapfrogJoin{
 
 class LTJ{
     public:
-        typedef std::pair<uint64_t, std::string> pair_type;
+        typedef std::pair<uint64_t, uint8_t> pair_type;
         typedef std::priority_queue<pair_type, std::vector<pair_type>, greater<pair_type>> min_heap_type;
         
     // private:
@@ -332,6 +332,7 @@ class LTJ{
         uint32_t depth;
         uint32_t dim;
         std::vector<std::string> gao;
+        std::vector<uint8_t> tmp_gao;
         uint32_t limit;
         
         // Cosas para triejoin_tentativo
@@ -341,20 +342,21 @@ class LTJ{
         std::unordered_map<std::string, std::vector<Iterator*>> m_var_to_iters;
         std::unordered_map<int, std::vector<Iterator*>> m_tuple_index_to_iters;
         typedef struct {
-            std::string name;
+            uint8_t name;
             uint64_t weight = -1UL;
             uint64_t n_triples;
-            std::unordered_set<std::string> related;
+            std::unordered_set<uint8_t> related;
             //Supports only variables with one occurence in a certain tuple.
             std::unordered_map<uint32_t, Iterator*> tuple_to_iter;
         } info_var_type;
         std::vector<info_var_type> m_var_info;
-        std::unordered_map<std::string, uint64_t> m_hash_table_position;
+        std::unordered_map<uint8_t, uint64_t> m_hash_table_position;
+        std::unordered_map<std::string, uint8_t> m_hash_table_vars;
         
         std::string get_gao() const{
             std::string ret = "";
             for(auto& var : gao){
-                ret += var +" ";
+                ret += "?" + var +" ";
             }
             return ret;
         }
@@ -504,8 +506,8 @@ class LTJ{
             return order.str();
         }
 
-        void fill_heap(const std::string var,
-                        std::unordered_map<std::string, uint64_t> &hash_table,
+        void fill_heap(const uint8_t var,
+                        std::unordered_map<uint8_t, uint64_t> &hash_table,
                         std::vector<info_var_type> &vec,
                         std::vector<bool> &checked,
                         min_heap_type &heap){
@@ -533,8 +535,19 @@ class LTJ{
                 return linfo.weight < rinfo.weight;
             }
         };
-
-        void var_to_related(std::string var, std::string rel){
+        void update_hash_var_index(typename std::vector<info_var_type>::iterator it_start, typename std::vector<info_var_type>::iterator it_end, std::unordered_map<uint8_t, uint64_t> &hash_table){
+            int i=0;
+            typename std::vector<info_var_type>::iterator it = it_start;
+            while(it != it_end){
+                auto hash_it = hash_table.find(it->name);
+                if(hash_it != hash_table.end()){
+                    hash_it->second = i;
+                    i++;
+                }
+                it = std::next(it);
+            }
+        }
+        void var_to_related(uint8_t var, uint8_t rel){
             {
                 info_var_type& info = m_var_info[m_hash_table_position.at(var)];
                 info.related.insert(rel);
@@ -555,7 +568,6 @@ class LTJ{
             // for(auto tuple: &query)
             //***************************************************GAO
             /*Algoritmo:
-            a. Separamos las variables en regulares y lonely.
             b. Obtengo el orden parcial con las constantes (si es que hay).
                 
                 Supongamos que estamos trabajando con el triple ?X1 100 ?X2, entonces:
@@ -581,21 +593,50 @@ class LTJ{
             m_hash_table_position.clear();
             m_var_to_iters.clear();
             m_tuple_index_to_iters.clear();
+            m_hash_table_vars.clear();
             std::vector<std::string> calc_gao;
             vector<Iterator*> gao_iterators;
             //a.
-            //std::vector<std::string> regular_vars; 
+            for(auto it=query->begin(); it!=query->end(); it++){
+                Tuple &tuple = *it;
+                for(int i=0; i<dim; i++){
+                    Term* term = tuple.get_term(i);
+                    if(term->isVariable()){
+
+                        auto var = term->varname;
+                        auto it = m_hash_table_vars.find(var);
+                        if(it == m_hash_table_vars.end()){
+                            uint8_t id = m_hash_table_vars.size();
+                            m_hash_table_vars.insert({var, id });
+                            info_var_type info;
+                            info.name = id;
+                            info.n_triples = 0;
+                            m_var_info.emplace_back(info);
+                            m_hash_table_position.insert({info.name, m_var_info.size()-1}); 
+                        }
+                        /*
+                        if(m_hash_table_position.find(term->varname) == m_hash_table_position.end()){ 
+                            info_var_type info;
+                            info.name = term->varname;
+                            info.n_triples = 0;
+                            m_var_info.emplace_back(info);
+                            m_hash_table_position.insert({info.name, m_var_info.size()-1});      
+                        }*/
+                    }
+                }
+            }
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &p = *it;
-                string var = p.first;
-                
+                std::string var = p.first;
+
+                auto id_it = m_hash_table_vars.find(var);
+                uint8_t var_id = id_it->second;
+                info_var_type& info = m_var_info[m_hash_table_position.at(var_id)];
+                /*
                 info_var_type info;
                 info.name = var;
                 info.n_triples = 0;
-                /*
-                if(p.second.size() > 1){
-                    regular_vars.push_back(var);
-                } */   
+                */
                 //b.
                 for(auto& tuple_index : p.second){
                     std::string order;
@@ -621,27 +662,24 @@ class LTJ{
                     info.tuple_to_iter[tuple_index] = iter;
                     info.n_triples = p.second.size();
                 }
-                /*}else{//TODO: ELIMINAR, calcular info.weight!
-                    lonely_vars.push_back(var);
-                }*/
 
-                m_var_info.emplace_back(info);
-                m_hash_table_position.insert({var, m_var_info.size()-1});
+                //m_var_info.emplace_back(info);
+                //m_hash_table_position.insert({var, m_var_info.size()-1});
             }
             //e.
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &aux = *it;
-                string var = aux.first;
+                std::string var = aux.first;
                 //  e1.
                 //std::cout << "Calculating variable's length and also, per each regular variable finding its relative."<< std::endl;
-                //for(std::string var : regular_vars){
                 for(auto tuple_index : variable_tuple_mapping->at(var)){
-                    info_var_type& info = m_var_info[m_hash_table_position.at(var)];
+                    uint8_t var_id = m_hash_table_vars[var];
+                    info_var_type& info = m_var_info[m_hash_table_position.at(var_id)];
                     Iterator* iter = info.tuple_to_iter[tuple_index];
                     Tuple &tuple = query->at(tuple_index);
 
                     bool s = false, p = false, o = false;
-                    std::string var_s, var_p, var_o;
+                    uint8_t var_s, var_p, var_o;
 
                     for(int j=0; j<dim; j++){
                         Term* term = tuple.get_term(j);
@@ -661,15 +699,15 @@ class LTJ{
                             //if 'j' entry is variable then we'll mark it.
                             if(j == 0){
                                 s = true;
-                                var_s = term->varname;
+                                var_s = m_hash_table_vars[term->varname];
                             }
                             else if(j == 1){
                                 p = true;
-                                var_p = term->varname;   
+                                var_p = m_hash_table_vars[term->varname]; 
                             }
                             else{
                                 o = true;
-                                var_o = term->varname;   
+                                var_o = m_hash_table_vars[term->varname];  
                             }
                         }
                     }
@@ -688,6 +726,7 @@ class LTJ{
             
             //Sorting by compare_var_info()
             std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
+            update_hash_var_index(m_var_info.begin(), m_var_info.end(), m_hash_table_position);
             uint64_t lonely_start = m_var_info.size();
             for(uint64_t i = 0; i < m_var_info.size(); ++i){
                 m_hash_table_position[m_var_info[i].name] = i;
@@ -698,10 +737,9 @@ class LTJ{
     
             //Calculate the GAO based upon the sorted variables.
             std::vector<bool> checked(m_var_info.size(), false);
-            
             for(uint64_t i = 0; i < lonely_start; i++){
                 if(!checked[i]){
-                    gao.push_back(m_var_info[i].name); //Adding var to gao
+                    tmp_gao.push_back(m_var_info[i].name); //Adding var to gao
                     checked[i] = true;
                     min_heap_type heap; //Stores the related variables that are related with the chosen ones
                     auto var_name = m_var_info[i].name;
@@ -709,18 +747,28 @@ class LTJ{
                     while(!heap.empty()){
                         var_name = heap.top().second;
                         heap.pop();
-                        gao.push_back(var_name);
+                        tmp_gao.push_back(var_name);
                         fill_heap(var_name, m_hash_table_position, m_var_info, checked, heap);
                     }
                 }
             }
             for(uint64_t i = lonely_start; i < m_var_info.size(); i++){
-                gao.push_back(m_var_info[i].name);
+                tmp_gao.push_back(m_var_info[i].name);
             }
 
             //--
             for(auto gao_it: gao_iterators){
                 delete gao_it;
+            }
+            //Finally we transform from the internal (temp) gao which uses uint8_t required to use the min_heap properly (test with strings, it wont work fine, lexicographical sorting is not the same for int8_t and strings).
+            std::unordered_map<uint8_t, std::string> ht;
+            for(const auto &p : m_hash_table_vars){
+                ht.insert({p.second, p.first});
+            }
+            
+            for(uint8_t var_id : tmp_gao){
+                auto str = ht[var_id];
+                gao.emplace_back(str);
             }
             //<<***************************************************GAO
             for(auto it=query->begin(); it!=query->end(); it++){
