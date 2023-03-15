@@ -614,14 +614,6 @@ class LTJ{
                             m_var_info.emplace_back(info);
                             m_hash_table_position.insert({info.name, m_var_info.size()-1}); 
                         }
-                        /*
-                        if(m_hash_table_position.find(term->varname) == m_hash_table_position.end()){ 
-                            info_var_type info;
-                            info.name = term->varname;
-                            info.n_triples = 0;
-                            m_var_info.emplace_back(info);
-                            m_hash_table_position.insert({info.name, m_var_info.size()-1});      
-                        }*/
                     }
                 }
             }
@@ -632,11 +624,7 @@ class LTJ{
                 auto id_it = m_hash_table_vars.find(var);
                 uint8_t var_id = id_it->second;
                 info_var_type& info = m_var_info[m_hash_table_position.at(var_id)];
-                /*
-                info_var_type info;
-                info.name = var;
-                info.n_triples = 0;
-                */
+                
                 //b.
                 for(auto& tuple_index : p.second){
                     std::string order;
@@ -654,11 +642,11 @@ class LTJ{
                     }
                     //d.
                     auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
-                    //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
+                    std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
                     iter->open();
                     gao_iterators.push_back(iter);
                     m_var_to_iters[var].push_back(iter);
-                    m_tuple_index_to_iters[tuple_index].push_back(iter);
+                    //m_tuple_index_to_iters[tuple_index].push_back(iter);
                     info.tuple_to_iter[tuple_index] = iter;
                     info.n_triples = p.second.size();
                 }
@@ -671,7 +659,7 @@ class LTJ{
                 auto &aux = *it;
                 std::string var = aux.first;
                 //  e1.
-                //std::cout << "Calculating variable's length and also, per each regular variable finding its relative."<< std::endl;
+                //std::cout << "Calculating variable's weight and also, per each regular variable finding its relative."<< std::endl;
                 for(auto tuple_index : variable_tuple_mapping->at(var)){
                     uint8_t var_id = m_hash_table_vars[var];
                     info_var_type& info = m_var_info[m_hash_table_position.at(var_id)];
@@ -760,6 +748,9 @@ class LTJ{
             for(auto gao_it: gao_iterators){
                 delete gao_it;
             }
+
+            //tmp_gao = {'\000', '\003', '\004', '\002', '\001'};//RING
+            //tmp_gao = {'\001', '\000', '\003', '\002', '\004'};//RING MUTHU
             //Finally we transform from the internal (temp) gao which uses uint8_t required to use the min_heap properly (test with strings, it wont work fine, lexicographical sorting is not the same for int8_t and strings).
             std::unordered_map<uint8_t, std::string> ht;
             for(const auto &p : m_hash_table_vars){
