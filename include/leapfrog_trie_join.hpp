@@ -340,7 +340,6 @@ class LTJ{
         map<string, int> gao_map;
 
         std::unordered_map<std::string, std::vector<Iterator*>> m_var_to_iters;
-        std::unordered_map<int, std::vector<Iterator*>> m_tuple_index_to_iters;
         typedef struct {
             uint8_t name;
             uint64_t weight = -1UL;
@@ -592,11 +591,10 @@ class LTJ{
             m_var_info.clear();
             m_hash_table_position.clear();
             m_var_to_iters.clear();
-            m_tuple_index_to_iters.clear();
             m_hash_table_vars.clear();
             std::vector<std::string> calc_gao;
             vector<Iterator*> gao_iterators;
-            //a.
+            
             for(auto it=query->begin(); it!=query->end(); it++){
                 Tuple &tuple = *it;
                 for(int i=0; i<dim; i++){
@@ -642,17 +640,14 @@ class LTJ{
                     }
                     //d.
                     auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
-                    std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
+                    //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
                     iter->open();
                     gao_iterators.push_back(iter);
                     m_var_to_iters[var].push_back(iter);
-                    //m_tuple_index_to_iters[tuple_index].push_back(iter);
                     info.tuple_to_iter[tuple_index] = iter;
                     info.n_triples = p.second.size();
                 }
 
-                //m_var_info.emplace_back(info);
-                //m_hash_table_position.insert({var, m_var_info.size()-1});
             }
             //e.
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
@@ -675,6 +670,8 @@ class LTJ{
                             iter->seek(term->getConstant());
                             //e2.
                             auto children_count = iter->getChildrenCount();
+                            if(m_var_to_iters[var].size() > 0)
+                                children_count *= m_var_to_iters[var].size();
                             //std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;  
                             if(info.weight > children_count)
                                 info.weight = children_count;          
