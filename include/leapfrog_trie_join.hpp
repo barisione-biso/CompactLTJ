@@ -557,14 +557,8 @@ class LTJ{
                 info.related.insert(var);
             }
         }
-        /*
-            Adds iterators to the iteratos vector creating a CompactTrieIterator using the order 
-            that is required by gao. It also stores in modified query, the updated version of the query that follows the gao order.
-        */
-        void setIterators(){
-            vector<string> required_orders;
-            
-            // for(auto tuple: &query)
+
+        std::vector<std::string> calculate_gao(){
             //***************************************************GAO
             /*Algoritmo:
             b. Obtengo el orden parcial con las constantes (si es que hay).
@@ -592,7 +586,6 @@ class LTJ{
             m_hash_table_position.clear();
             m_var_to_iters.clear();
             m_hash_table_vars.clear();
-            std::vector<std::string> calc_gao;
             vector<Iterator*> gao_iterators;
             
             for(auto it=query->begin(); it!=query->end(); it++){
@@ -672,9 +665,7 @@ class LTJ{
                             auto children_count = iter->getChildrenCount();
                             if(m_var_to_iters[var].size() > 0)
                                 children_count *= m_var_to_iters[var].size();
-                            //std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;  
-                            if(info.weight > children_count)
-                                info.weight = children_count;          
+                            //std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;        
                             if(iter->atEnd() || iter->key() != term->getConstant()){
                                 // Si es que el valor no es igual a la constante entonces no 
                                 // hay valores que cumplan esta tupla
@@ -759,6 +750,17 @@ class LTJ{
                 gao.emplace_back(str);
             }
             //<<***************************************************GAO
+            return gao;
+        }
+        /*
+            Adds iterators to the iteratos vector creating a CompactTrieIterator using the order 
+            that is required by gao. It also stores in modified query, the updated version of the query that follows the gao order.
+        */
+        void setIterators(){
+            vector<string> required_orders;
+            
+            // for(auto tuple: &query)
+            gao = calculate_gao();
             for(auto it=query->begin(); it!=query->end(); it++){
                 Tuple &tuple = *it;
                 stringstream order;
