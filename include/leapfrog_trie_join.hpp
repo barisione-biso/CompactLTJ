@@ -341,7 +341,7 @@ class LTJ{
 
         std::unordered_map<std::string, std::vector<Iterator*>> m_var_to_iters;
         typedef struct {
-            uint8_t name;
+            uint8_t id;
             uint64_t weight = -1UL;
             uint64_t n_triples;
             std::unordered_set<uint8_t> related;
@@ -538,7 +538,7 @@ class LTJ{
             int i=0;
             typename std::vector<info_var_type>::iterator it = it_start;
             while(it != it_end){
-                auto hash_it = hash_table.find(it->name);
+                auto hash_it = hash_table.find(it->id);
                 if(hash_it != hash_table.end()){
                     hash_it->second = i;
                     i++;
@@ -546,16 +546,13 @@ class LTJ{
                 it = std::next(it);
             }
         }
-        void var_to_related(uint8_t var, uint8_t rel){
-            {
-                info_var_type& info = m_var_info[m_hash_table_position.at(var)];
-                info.related.insert(rel);
-            }
-            
-            {
-                info_var_type& info = m_var_info[m_hash_table_position.at(rel)];
-                info.related.insert(var);
-            }
+        void var_to_related(uint8_t var, uint8_t rel,
+                            std::unordered_map<uint8_t, uint64_t> &hash_table,
+                            std::vector<info_var_type> &vec){
+            auto pos_var = hash_table[var];
+            vec[pos_var].related.insert(rel);
+            auto pos_rel = hash_table[rel];
+            vec[pos_rel].related.insert(var);
         }
 
         std::vector<std::string> calculate_gao(){
@@ -570,7 +567,7 @@ class LTJ{
 
             c. Completamos el orden parcial como sigue:
                 Si estamos evaluando X1, entonces tenemos que usar el iterator 1 0 2 (como trie primero parto por P, sigo por S y termino con O) .
-                Para x2 usamos la otra permutación de las variables dada por el iterador 1 2 0.
+                Para x2 usamos la permutación 1 2 0.
 
             d. Creamos un iterador por cada variable en una tupla, utilizando el orden calculado en (c.).
             e. Calculamos el gao como sigue:
@@ -579,7 +576,7 @@ class LTJ{
 
                 e2. Calculo el número de hijos para todos los nodos de los iteradores de Xj, y me quedo con el mínimo.
                 
-                * Adicionalmente, la instanciación de variables tiene que generar un grafo conexo.
+                * Adicionalmente, la instanciación de variables tiene que generar un grafo conexo (en  la medida de lo posible).
             */
            //>>*************************************************GAO
             m_var_info.clear();
@@ -587,7 +584,7 @@ class LTJ{
             m_var_to_iters.clear();
             m_hash_table_vars.clear();
             vector<Iterator*> gao_iterators;
-            
+            //Creating the m_var_info entries.
             for(auto it=query->begin(); it!=query->end(); it++){
                 Tuple &tuple = *it;
                 for(int i=0; i<dim; i++){
@@ -600,22 +597,22 @@ class LTJ{
                             uint8_t id = m_hash_table_vars.size();
                             m_hash_table_vars.insert({var, id });
                             info_var_type info;
-                            info.name = id;
+                            info.id = id;
                             info.n_triples = 0;
                             m_var_info.emplace_back(info);
-                            m_hash_table_position.insert({info.name, m_var_info.size()-1}); 
+                            m_hash_table_position.insert({info.id, m_var_info.size()-1}); 
                         }
                     }
                 }
-            }
+            }//Se crean los iteradores por cada tupla t_{X_i} de cada variable Xi.
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &p = *it;
                 std::string var = p.first;
 
                 auto id_it = m_hash_table_vars.find(var);
-                uint8_t var_id = id_it->second;
-                info_var_type& info = m_var_info[m_hash_table_position.at(var_id)];
-                
+                uint8_t tuple_id = id_it->second;
+                info_var_type& info = m_var_info[m_hash_table_position.at(tuple_id)];
+                info.n_triples = p.second.size();
                 //b.
                 for(auto& tuple_index : p.second){
                     std::string order;
@@ -633,22 +630,21 @@ class LTJ{
                     }
                     //d.
                     auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
-                    //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
+                    std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
                     iter->open();
                     gao_iterators.push_back(iter);
                     m_var_to_iters[var].push_back(iter);
                     info.tuple_to_iter[tuple_index] = iter;
-                    info.n_triples = p.second.size();
                 }
 
             }
-            //e.
+            //e. Por cada variable x_i, procesamos las constantes de cada uno de sus iteradores que corresponden a las tuplas t_{x_i}.
             for(auto it=variable_tuple_mapping->begin(); it!=variable_tuple_mapping->end(); it++){
                 auto &aux = *it;
-                std::string var = aux.first;
+                std::string var = aux.first;//the variable
                 //  e1.
                 //std::cout << "Calculating variable's weight and also, per each regular variable finding its relative."<< std::endl;
-                for(auto tuple_index : variable_tuple_mapping->at(var)){
+                for(auto tuple_index : variable_tuple_mapping->at(var)){//all the tuples in which the variable participates.
                     uint8_t var_id = m_hash_table_vars[var];
                     info_var_type& info = m_var_info[m_hash_table_position.at(var_id)];
                     Iterator* iter = info.tuple_to_iter[tuple_index];
@@ -663,9 +659,9 @@ class LTJ{
                             iter->seek(term->getConstant());
                             //e2.
                             auto children_count = iter->getChildrenCount();
-                            if(m_var_to_iters[var].size() > 0)
-                                children_count *= m_var_to_iters[var].size();
-                            //std::cout <<  "Var : " << info.name << " num of children : " << children_count << "." << std::endl;        
+                            if(info.weight > children_count)
+                                info.weight = children_count;  
+                            std::cout <<  "Var : " << int(info.id) << " num of children : " << children_count << " on tuple " << tuple_index << std::endl;        
                             if(iter->atEnd() || iter->key() != term->getConstant()){
                                 // Si es que el valor no es igual a la constante entonces no 
                                 // hay valores que cumplan esta tupla
@@ -689,13 +685,13 @@ class LTJ{
                     }
                     //rel variables.
                     if(s && p){
-                        var_to_related(var_s, var_p);
+                        var_to_related(var_s, var_p, m_hash_table_position, m_var_info);
                     }
                     if(s && o){
-                        var_to_related(var_s, var_o);
+                        var_to_related(var_s, var_o, m_hash_table_position, m_var_info);
                     }
                     if(p && o){
-                        var_to_related(var_p, var_o);
+                        var_to_related(var_p, var_o, m_hash_table_position, m_var_info);
                     }
                 }
             }
@@ -705,7 +701,7 @@ class LTJ{
             update_hash_var_index(m_var_info.begin(), m_var_info.end(), m_hash_table_position);
             uint64_t lonely_start = m_var_info.size();
             for(uint64_t i = 0; i < m_var_info.size(); ++i){
-                m_hash_table_position[m_var_info[i].name] = i;
+                m_hash_table_position[m_var_info[i].id] = i;
                 if(m_var_info[i].n_triples == 1 && i < lonely_start){
                     lonely_start = i;
                 }
@@ -715,21 +711,21 @@ class LTJ{
             std::vector<bool> checked(m_var_info.size(), false);
             for(uint64_t i = 0; i < lonely_start; i++){
                 if(!checked[i]){
-                    tmp_gao.push_back(m_var_info[i].name); //Adding var to gao
+                    tmp_gao.push_back(m_var_info[i].id); //Adding var to gao
                     checked[i] = true;
                     min_heap_type heap; //Stores the related variables that are related with the chosen ones
-                    auto var_name = m_var_info[i].name;
-                    fill_heap(var_name, m_hash_table_position, m_var_info, checked,heap);
+                    auto var_id = m_var_info[i].id;
+                    fill_heap(var_id, m_hash_table_position, m_var_info, checked,heap);
                     while(!heap.empty()){
-                        var_name = heap.top().second;
+                        var_id = heap.top().second;
                         heap.pop();
-                        tmp_gao.push_back(var_name);
-                        fill_heap(var_name, m_hash_table_position, m_var_info, checked, heap);
+                        tmp_gao.push_back(var_id);
+                        fill_heap(var_id, m_hash_table_position, m_var_info, checked, heap);
                     }
                 }
             }
             for(uint64_t i = lonely_start; i < m_var_info.size(); i++){
-                tmp_gao.push_back(m_var_info[i].name);
+                tmp_gao.push_back(m_var_info[i].id);
             }
 
             //--
