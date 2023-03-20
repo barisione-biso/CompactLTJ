@@ -351,10 +351,10 @@ class LTJ{
         std::vector<info_var_type> m_var_info;
         std::unordered_map<uint8_t, uint64_t> m_hash_table_position;
         std::unordered_map<std::string, uint8_t> m_hash_table_vars;
-        /*
-        std::string get_next_var(std::string cur_var) const{
-            return m_gao.at();
-        }*/
+        
+        std::string const get_next_var(int index) const{
+            return m_gao.at(index);
+        }
         std::string get_gao() const{
             std::string ret = "";
             for(auto& var : m_gao){
@@ -856,7 +856,7 @@ class LTJ{
         /*
             Returns the index of the variable in the given tuple. -1 if the variable isn't in the tuple
         */
-        int get_var_index_in_tuple(Tuple *tuple, string &var){
+        int get_var_index_in_tuple(Tuple *tuple, const string &var){
             for(int i=0; i<dim; i++){
                 Term *term = tuple->get_term(i);
                 if(term->isVariable() && term->getVariable()==var){
@@ -871,7 +871,7 @@ class LTJ{
         */
         int get_gao_score(string &var){
             for(int i=0; i<number_of_vars; i++){
-                if(m_gao.at(i)==var)return i;
+                if(get_next_var(i)==var)return i;
             }
             return -1;
         }
@@ -916,7 +916,7 @@ class LTJ{
             // return should_go_up;
         }
         
-        void check_iterators_position(LeapfrogJoin* lj, string &var){
+        void check_iterators_position(LeapfrogJoin* lj, const string &var){
             if(debug){cout<<"checking iterators positions"<<endl;}
             //para cada iterador de lj obtener la posición en la query de la variable que se busca
             // y verificar que la altura en la que está calza con la altura que necesita
@@ -938,7 +938,7 @@ class LTJ{
         bool goUpUntil(int gao_score, int &gao_index){
             int beg = gao_index;
             for(int i=beg; i>gao_score; i--){
-                string var = m_gao.at(i);
+                string var = get_next_var(i);
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 // vector<bool> should_go_up;
@@ -969,13 +969,13 @@ class LTJ{
             //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
             //     }
             // }
-            if(debug){cout<<"gao score is "<<gao_score<<" "<<m_gao.at(gao_score)<<endl;}
-            LeapfrogJoin* lj = &variable_lj_mapping[m_gao.at(gao_score)];
+            if(debug){cout<<"gao score is "<<gao_score<<" "<<get_next_var(gao_score)<<endl;}
+            LeapfrogJoin* lj = &variable_lj_mapping[get_next_var(gao_score)];
             if(debug && lj->is_at_end()){
                 cout<<"el iterador ya estaba en at end"<<endl;
             }
-            check_iterators_position(lj, m_gao.at(gao_score));
-            if(debug)cout<<"se hace next para "<<m_gao.at(gao_score)<<endl;
+            check_iterators_position(lj, get_next_var(gao_score));
+            if(debug)cout<<"se hace next para "<<get_next_var(gao_score)<<endl;
             lj->leapfrog_next();
             if(lj->is_at_end()){
                 if(debug){cout<<"el iterador esta at en en goUpUntil"<<endl;}
@@ -983,7 +983,7 @@ class LTJ{
                     if(debug){cout<<"Cant go up"<<endl;}
                     return true;
                 }
-                if(debug){cout<<"going up again on "<<m_gao.at(gao_index)<<" index "<<gao_index<<endl;}
+                if(debug){cout<<"going up again on "<<get_next_var(gao_index)<<" index "<<gao_index<<endl;}
                 return goUp(gao_index);
             }
             else{
@@ -1071,7 +1071,7 @@ class LTJ{
                 //     cout<<it->get_depth()<<" ";
                 // }
                 // cout<<endl;
-                string var = m_gao.at(gao_index);
+                string var = get_next_var(gao_index);
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 if(debug){cout<<"Se encontró LJ para "<<var<<endl;}
