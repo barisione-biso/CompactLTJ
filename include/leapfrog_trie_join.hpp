@@ -331,13 +331,13 @@ class LTJ{
         uint32_t key;
         uint32_t depth;
         uint32_t dim;
-        std::vector<std::string> gao;
+        std::vector<std::string> m_gao;
+        uint64_t number_of_vars;
         std::vector<uint8_t> tmp_gao;
         uint32_t limit;
         
         // Cosas para triejoin_tentativo
         bool show_results=false;
-        map<string, int> gao_map;
 
         std::unordered_map<std::string, std::vector<Iterator*>> m_var_to_iters;
         typedef struct {
@@ -351,16 +351,18 @@ class LTJ{
         std::vector<info_var_type> m_var_info;
         std::unordered_map<uint8_t, uint64_t> m_hash_table_position;
         std::unordered_map<std::string, uint8_t> m_hash_table_vars;
-        
+        /*
+        std::string get_next_var(std::string cur_var) const{
+            return m_gao.at();
+        }*/
         std::string get_gao() const{
             std::string ret = "";
-            for(auto& var : gao){
+            for(auto& var : m_gao){
                 ret += "?" + var +" ";
             }
             return ret;
         }
         void clear(){
-            gao_map.clear();
             for(auto p: variable_lj_mapping){
                 p.second.clear();
             }
@@ -426,13 +428,13 @@ class LTJ{
         }
 
         /*
-            Returns a strign containing the variables that are in tuple, but ordered according to the gao 
+            Returns a string containing the variables that are in tuple, but ordered according to the gao 
             vector, it also adds the terms associated with each variable to the terms vector in the gao order
         */
         string getVariableOrder(Tuple &tuple, int &added_items, vector<Term> &terms){
             stringstream order;
 
-            for(auto it=gao.begin(); it!=gao.end(); it++){
+            for(auto it=m_gao.begin(); it!=m_gao.end(); it++){
                 string &var = *it;
             // for(auto var: gao){
                 for(int i=0; i<dim; i++){
@@ -630,7 +632,7 @@ class LTJ{
                     }
                     //d.
                     auto iter = new CurrentIterator(indexes->at(0)->getTrie(order), tuple_index);
-                    std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
+                    //std::cout << "Variable '" << var << "' : a new iterator using order '" << order << "' for tuple number " << tuple_index << " is created."<<std::endl;
                     iter->open();
                     gao_iterators.push_back(iter);
                     m_var_to_iters[var].push_back(iter);
@@ -661,7 +663,7 @@ class LTJ{
                             auto children_count = iter->getChildrenCount();
                             if(info.weight > children_count)
                                 info.weight = children_count;  
-                            std::cout <<  "Var : " << int(info.id) << " num of children : " << children_count << " on tuple " << tuple_index << std::endl;        
+                            //std::cout <<  "Var : " << int(info.id) << " num of children : " << children_count << " on tuple " << tuple_index << std::endl;        
                             if(iter->atEnd() || iter->key() != term->getConstant()){
                                 // Si es que el valor no es igual a la constante entonces no 
                                 // hay valores que cumplan esta tupla
@@ -741,11 +743,13 @@ class LTJ{
                 ht.insert({p.second, p.first});
             }
             
+            std::vector<std::string> gao;
             for(uint8_t var_id : tmp_gao){
                 auto str = ht[var_id];
                 gao.emplace_back(str);
             }
             //<<***************************************************GAO
+            number_of_vars = gao.size();
             return gao;
         }
         /*
@@ -756,7 +760,6 @@ class LTJ{
             vector<string> required_orders;
             
             // for(auto tuple: &query)
-            gao = calculate_gao();
             for(auto it=query->begin(); it!=query->end(); it++){
                 Tuple &tuple = *it;
                 stringstream order;
@@ -764,7 +767,7 @@ class LTJ{
                 vector<Term> terms;
                 order<<getConstantsOrder(tuple, added_items, terms);
                 //aqui recien necesito el gao.
-                order<<getVariableOrder(tuple, added_items, terms);
+                order<<getVariableOrder(tuple, added_items, terms);//********
                 order.seekp(-1, std::ios_base::end);
                 required_orders.push_back(order.str());
                 modified_query.push_back(new Tuple(terms));
@@ -781,12 +784,6 @@ class LTJ{
                 for(auto order : required_orders){
                     cout<<"-"<<order<<"-"<<endl;
                 }
-            }
-        }
-
-        void setGaoMap(){
-            for(int i=0; i<gao.size(); i++){
-                gao_map[gao.at(i)] = i;
             }
         }
 
@@ -812,11 +809,12 @@ class LTJ{
             dim = indexes->at(0)->getDim();
             this->variable_tuple_mapping = variables_to_index;
             this->processed_vars = processed_vars;
+            m_gao = calculate_gao();
             setIterators();
             createLeapfrogJoins();
             depth = 0;
+            
             limit = lmt;
-            setGaoMap();
             at_end = false;
         }
 
@@ -872,8 +870,8 @@ class LTJ{
             Returns gao score for the given variable 
         */
         int get_gao_score(string &var){
-            for(int i=0; i<gao.size(); i++){
-                if(gao.at(i)==var)return i;
+            for(int i=0; i<number_of_vars; i++){
+                if(m_gao.at(i)==var)return i;
             }
             return -1;
         }
@@ -940,7 +938,7 @@ class LTJ{
         bool goUpUntil(int gao_score, int &gao_index){
             int beg = gao_index;
             for(int i=beg; i>gao_score; i--){
-                string var = gao.at(i);
+                string var = m_gao.at(i);
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 // vector<bool> should_go_up;
@@ -971,13 +969,13 @@ class LTJ{
             //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
             //     }
             // }
-            if(debug){cout<<"gao score is "<<gao_score<<" "<<gao.at(gao_score)<<endl;}
-            LeapfrogJoin* lj = &variable_lj_mapping[gao.at(gao_score)];
+            if(debug){cout<<"gao score is "<<gao_score<<" "<<m_gao.at(gao_score)<<endl;}
+            LeapfrogJoin* lj = &variable_lj_mapping[m_gao.at(gao_score)];
             if(debug && lj->is_at_end()){
                 cout<<"el iterador ya estaba en at end"<<endl;
             }
-            check_iterators_position(lj, gao.at(gao_score));
-            if(debug)cout<<"se hace next para "<<gao.at(gao_score)<<endl;
+            check_iterators_position(lj, m_gao.at(gao_score));
+            if(debug)cout<<"se hace next para "<<m_gao.at(gao_score)<<endl;
             lj->leapfrog_next();
             if(lj->is_at_end()){
                 if(debug){cout<<"el iterador esta at en en goUpUntil"<<endl;}
@@ -985,7 +983,7 @@ class LTJ{
                     if(debug){cout<<"Cant go up"<<endl;}
                     return true;
                 }
-                if(debug){cout<<"going up again on "<<gao.at(gao_index)<<" index "<<gao_index<<endl;}
+                if(debug){cout<<"going up again on "<<m_gao.at(gao_index)<<" index "<<gao_index<<endl;}
                 return goUp(gao_index);
             }
             else{
@@ -1010,7 +1008,7 @@ class LTJ{
         void triejoin_definitivo(int &number_of_results){
             //I: Para mostrar tabla de resultados
             vector<vector<int>> results;
-            vector<int> result(gao.size());
+            vector<int> result(number_of_vars);
             //F: Para mostrar tabla de resultados
             uint32_t count=0;
             if(debug){cout<<"Starting Triejoin"<<endl;}
@@ -1067,13 +1065,13 @@ class LTJ{
 
             //Resolvemos las variables en el órden en el que aparecen en gao
             int gao_index = 0;
-            while(gao_index < gao.size() && !finished){
+            while(gao_index < number_of_vars && !finished){
                 // cout<<"depths before search"<<endl;
                 // for(auto it: iterators){
                 //     cout<<it->get_depth()<<" ";
                 // }
                 // cout<<endl;
-                string var = gao.at(gao_index);
+                string var = m_gao.at(gao_index);
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 if(debug){cout<<"Se encontró LJ para "<<var<<endl;}
@@ -1095,7 +1093,7 @@ class LTJ{
                         // cout<<"gao index es "<<gao_index<<endl;
                         result[gao_index] = lj->get_key();
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
-                        if(gao_index == gao.size()-1){
+                        if(gao_index == number_of_vars-1){
                             if(show_results){results.push_back(result);}
                             count++;
                             if(count == limit){
@@ -1116,7 +1114,7 @@ class LTJ{
 
             number_of_results = count;
             if(show_results){
-                for(auto it=gao.begin(); it!=gao.end(); it++){
+                for(auto it=m_gao.begin(); it!=m_gao.end(); it++){
                     string &var = *it;
                 // for(auto var : gao){
                     cout<<var<<"|";
