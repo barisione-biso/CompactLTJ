@@ -126,7 +126,7 @@ class CompactTrieIVIterator: public Iterator{
                 it = compactTrie->child(parent_it, pos_in_parent);
             }
         }
-        
+
         /*
             Moves the iterator to the parent of the current node
         */

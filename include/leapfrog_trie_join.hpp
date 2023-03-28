@@ -351,10 +351,10 @@ class LTJ{
         std::vector<info_var_type> m_var_info;
         std::unordered_map<uint8_t, uint64_t> m_hash_table_position;
         std::unordered_map<std::string, uint8_t> m_hash_table_vars;
-        /*
-        std::string get_next_var(std::string cur_var) const{
-            return m_gao.at();
-        }*/
+        
+        std::string get_next_var(int i){
+            return m_gao.at(i);
+        }
         std::string get_gao() const{
             std::string ret = "";
             for(auto& var : m_gao){
@@ -871,7 +871,7 @@ class LTJ{
         */
         int get_gao_score(string &var){
             for(int i=0; i<number_of_vars; i++){
-                if(m_gao.at(i)==var)return i;
+                if(get_next_var(i)==var)return i;
             }
             return -1;
         }
@@ -938,7 +938,7 @@ class LTJ{
         bool goUpUntil(int gao_score, int &gao_index){
             int beg = gao_index;
             for(int i=beg; i>gao_score; i--){
-                string var = m_gao.at(i);
+                string var = get_next_var(i);
                 if(debug){cout<<"Going up on var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 // vector<bool> should_go_up;
@@ -969,13 +969,14 @@ class LTJ{
             //         cout<<"depth: "<<it->get_depth()<<"/ key: "<<it->key()<<endl;
             //     }
             // }
-            if(debug){cout<<"gao score is "<<gao_score<<" "<<m_gao.at(gao_score)<<endl;}
-            LeapfrogJoin* lj = &variable_lj_mapping[m_gao.at(gao_score)];
+            if(debug){cout<<"gao score is "<<gao_score<<" "<<get_next_var(gao_score)<<endl;}
+            LeapfrogJoin* lj = &variable_lj_mapping[get_next_var(gao_score)];
             if(debug && lj->is_at_end()){
                 cout<<"el iterador ya estaba en at end"<<endl;
             }
-            check_iterators_position(lj, m_gao.at(gao_score));
-            if(debug)cout<<"se hace next para "<<m_gao.at(gao_score)<<endl;
+            std::string s = get_next_var(gao_score);
+            check_iterators_position(lj, s);
+            if(debug)cout<<"se hace next para "<<get_next_var(gao_score)<<endl;
             lj->leapfrog_next();
             if(lj->is_at_end()){
                 if(debug){cout<<"el iterador esta at en en goUpUntil"<<endl;}
@@ -983,7 +984,7 @@ class LTJ{
                     if(debug){cout<<"Cant go up"<<endl;}
                     return true;
                 }
-                if(debug){cout<<"going up again on "<<m_gao.at(gao_index)<<" index "<<gao_index<<endl;}
+                if(debug){cout<<"going up again on "<<get_next_var(gao_index)<<" index "<<gao_index<<endl;}
                 return goUp(gao_index);
             }
             else{
@@ -1071,7 +1072,7 @@ class LTJ{
                 //     cout<<it->get_depth()<<" ";
                 // }
                 // cout<<endl;
-                string var = m_gao.at(gao_index);
+                string var = get_next_var(gao_index);
                 if(debug){cout<<"buscando para var "<<var<<endl;}
                 LeapfrogJoin* lj = &variable_lj_mapping[var];
                 if(debug){cout<<"Se encontró LJ para "<<var<<endl;}
