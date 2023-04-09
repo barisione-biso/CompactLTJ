@@ -10,6 +10,7 @@
 #include "index.hpp"
 #include "iterator.hpp"
 #include "config.hpp"
+#include <chrono>
 
 using namespace std;
 
@@ -326,6 +327,7 @@ class LTJ{
         uint32_t dim;
         vector<string> *gao;
         uint32_t limit;
+        uint64_t timeout;
 
         // Cosas para triejoin_tentativo
         bool show_results=false;
@@ -477,10 +479,11 @@ class LTJ{
         // }
 
     // public:
-        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt){
+        LTJ(vector<Index*> *ind, vector<Tuple> *q, vector<string> *gao_vector, map<string, set<uint32_t>> *variables_to_index, uint32_t lmt, uint64_t timeout = 0){
             this->indexes = ind;
             this->query = q;
             this->gao = gao_vector;
+            this->timeout = timeout;
             dim = indexes->at(0)->getDim();
             setIterators();
             this->variable_tuple_mapping = variables_to_index;
@@ -678,7 +681,7 @@ class LTJ{
             }
         }
 
-        void triejoin_definitivo(int &number_of_results){
+        void triejoin_definitivo(int &number_of_results, std::chrono::high_resolution_clock::time_point start){
             //I: Para mostrar tabla de resultados
             vector<vector<int>> results;
             vector<int> result(gao->size());
@@ -751,6 +754,16 @@ class LTJ{
                 lj->leapfrog_search_new();  //NEW DIEGO
                 if(debug){cout<<"Se hizo search"<<endl;}
                 int current_level = gao_index;
+
+                if(this->timeout > 0){
+                    std::chrono::high_resolution_clock::time_point stop = std::chrono::high_resolution_clock::now();
+                    uint64_t sec = std::chrono::duration_cast<std::chrono::seconds>(stop-start).count();
+                    if(sec > this->timeout) {
+                        finished = true;
+                        break;
+                    }
+                }
+                
                 while(current_level == gao_index){
                     if(lj->is_at_end()){
                         if(gao_index == 0){
