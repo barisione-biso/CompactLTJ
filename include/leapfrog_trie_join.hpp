@@ -780,7 +780,7 @@ class LTJ{
                         result[gao_index] = lj->get_key();
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
                         if(gao_index == gao->size()-1){
-                            if(show_results){results.push_back(result);}
+                            results.emplace_back(result);
                             count++;
                             if(count == limit){
                                 finished = true;
