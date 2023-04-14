@@ -30,13 +30,8 @@ Index loadIndex(string file_name){
 int main(int argc, char* argv[]){
     try{
         vector<string> queries;
-        bool have_queries =  get_file_content(argv[1], queries);
-        // string query1 = "?x1 ?x2 ?x3";
-        // Debería hacerse un index por argc sin contar a las queries
-        // TableIndexer ti = TableIndexer();
-        // // Index index1 = ti.indexNewTable(argv[2]);
-        // Index index1 = ti.loadIndex(argv[2]);
-        Index index1 = loadIndex(argv[2]);
+        Index index1 = loadIndex(argv[1]);
+        bool have_queries =  get_file_content(argv[2], queries);
 
         cout << "Index loaded " << index1.size() << " bytes" << endl;
 
