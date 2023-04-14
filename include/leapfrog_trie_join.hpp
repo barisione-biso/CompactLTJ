@@ -1095,7 +1095,15 @@ class LTJ{
                         result[gao_index] = lj->get_key();
                         if(debug){cout<<var<<": "<<lj->get_key()<<endl;}
                         if(gao_index == number_of_vars-1){
-                            if(show_results){results.push_back(result);}
+                                results.push_back(result);
+                                //Report results
+                                uint64_t o = 0;
+                                std::cout << "tuple : ";
+                                for(auto& var : result){
+                                    std::cout << get_next_var(o) << " : " << var << std::endl;
+                                    o++;
+                                }
+                                std::cout << " " << std::endl;
                             count++;
                             if(count == limit){
                                 finished = true;
@@ -1112,8 +1120,8 @@ class LTJ{
                     }
                 } 
             }
-
             number_of_results = count;
+            std::cout << "Number of results: " << number_of_results << " res size: " << results.size() << std::endl;
             if(show_results){
                 for(auto it=m_gao.begin(); it!=m_gao.end(); it++){
                     string &var = *it;
